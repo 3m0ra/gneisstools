@@ -1,7 +1,12 @@
 <resources>
-    <style name="Theme.GeoStruct" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">#0E1214</item>
-        <item name="android:navigationBarColor">#161B1E</item>
-        <item name="android:windowBackground">#0E1214</item>
+    <!-- Neutral shell theme. The in-app light/dark switch re-colours the system
+         bars at runtime through MainActivity.setSystemBars(). -->
+    <style name="Theme.GeoStruct" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>
