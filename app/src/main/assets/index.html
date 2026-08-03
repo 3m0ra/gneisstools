@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0E1214">
+<meta name="mobile-web-app-capable" content="yes">
+<title>GeoStruct — Field Inclinometer</title>
+<style>
+:root{
+  --rock:#0E1214; --panel:#161B1E; --panel2:#1D2428; --line:#2C363B;
+  --ink:#E9F0F1; --mute:#8FA3A9; --dim:#5D6E74;
+  --malachite:#3FC8A2; --hematite:#D2603F; --quartz:#E8DCC8; --azurite:#5A9BE6;
+  --s1:#3FC8A2; --s2:#D2603F; --s3:#5A9BE6; --s4:#E0B341; --s5:#B57BD6;
+  --r:14px;
+  --mono:ui-monospace,"SF Mono","Roboto Mono","DejaVu Sans Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+body.sun{
+  --rock:#F2F0EA; --panel:#FFFFFF; --panel2:#EAE7DE; --line:#C9C4B6;
+  --ink:#12171A; --mute:#4E5A5F; --dim:#7C8A8F;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--rock); color:var(--ink); font-family:var(--sans);
+  overscroll-behavior:none; -webkit-user-select:none; user-select:none;
+  display:flex; flex-direction:column;
+}
+#app{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 14px 24px}
+header{
+  padding:calc(env(safe-area-inset-top) + 12px) 14px 10px;
+  display:flex; align-items:baseline; gap:10px; border-bottom:1px solid var(--line);
+  position:sticky; top:0; background:var(--rock); z-index:20;
+}
+h1{
+  font-size:15px; margin:0; letter-spacing:.22em; text-transform:uppercase; font-weight:800;
+}
+h1 span{color:var(--malachite)}
+.hdr-meta{margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--dim); letter-spacing:.1em; text-align:right}
+.eyebrow{
+  font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--dim); margin:22px 0 8px; display:flex; align-items:center; gap:8px;
+}
+.eyebrow:after{content:""; flex:1; height:1px; background:var(--line)}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin-bottom:12px}
+nav{
+  display:flex; border-top:1px solid var(--line); background:var(--panel);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+nav button{
+  flex:1; background:none; border:0; color:var(--dim); padding:10px 2px 12px;
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer;
+  border-top:2px solid transparent; margin-top:-1px;
+}
+nav button.on{color:var(--ink); border-top-color:var(--malachite)}
+nav svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
+.view{display:none} .view.on{display:block}
+
+/* readout */
+.readout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--line); border-radius:var(--r); overflow:hidden; border:1px solid var(--line)}
+.ro{background:var(--panel); padding:12px 8px; text-align:center}
+.ro b{display:block; font-family:var(--mono); font-size:27px; font-weight:600; letter-spacing:-.02em; line-height:1.05}
+.ro i{display:block; font-style:normal; font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--dim); text-transform:uppercase; margin-top:5px}
+.ro.big b{font-size:31px; color:var(--malachite)}
+.notation{text-align:center; font-family:var(--mono); font-size:13px; color:var(--mute); margin-top:10px; letter-spacing:.06em}
+
+/* dial */
+.dialwrap{position:relative; display:flex; justify-content:center; margin:6px 0 2px}
+canvas{display:block; touch-action:manipulation}
+.stab{
+  position:absolute; top:6px; right:6px; font-family:var(--mono); font-size:9.5px;
+  letter-spacing:.12em; padding:4px 8px; border-radius:20px; border:1px solid var(--line);
+  background:var(--panel2); color:var(--dim); text-transform:uppercase;
+}
+.stab.ok{color:var(--malachite); border-color:var(--malachite)}
+.stab.bad{color:var(--hematite); border-color:var(--hematite)}
+
+/* controls */
+.row{display:flex; gap:8px} .row>*{flex:1}
+button.act{
+  background:var(--malachite); color:#07100D; border:0; border-radius:var(--r);
+  padding:17px 12px; font-family:var(--mono); font-size:13px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; cursor:pointer;
+}
+button.act:active{transform:scale(.985)}
+button.act[disabled]{opacity:.35}
+button.ghost{
+  background:transparent; color:var(--mute); border:1px solid var(--line); border-radius:var(--r);
+  padding:12px 10px; font-family:var(--mono); font-size:11px; letter-spacing:.12em;
+  text-transform:uppercase; cursor:pointer;
+}
+button.ghost.on{color:var(--ink); border-color:var(--malachite)}
+button.danger{color:var(--hematite); border-color:var(--hematite)}
+.seg{display:flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:12px}
+.seg button{
+  flex:1; background:transparent; border:0; color:var(--dim); padding:11px 4px; cursor:pointer;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+}
+.seg button.on{background:var(--panel2); color:var(--ink)}
+label.f{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin:0 0 6px}
+input,select,textarea{
+  width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:10px;
+  color:var(--ink); padding:11px; font-family:var(--mono); font-size:14px; -webkit-user-select:text; user-select:text;
+}
+input[type=range]{padding:0; background:none; border:0; accent-color:var(--malachite)}
+.hint{font-size:11.5px; color:var(--mute); line-height:1.55}
+.hint b{color:var(--ink); font-weight:600}
+
+/* table */
+table{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11.5px}
+th{text-align:left; color:var(--dim); font-weight:400; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:6px 4px; border-bottom:1px solid var(--line)}
+td{padding:9px 4px; border-bottom:1px solid var(--line); color:var(--mute)}
+td.k{color:var(--ink)}
+tr.sel td{background:var(--panel2)}
+.swatch{width:9px;height:9px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:6px}
+.empty{text-align:center; padding:34px 14px; color:var(--dim); font-size:12.5px; line-height:1.6}
+.legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-family:var(--mono); font-size:10.5px; color:var(--mute)}
+.chip{display:flex; align-items:center; gap:6px}
+.setcard{border-left:3px solid var(--malachite); padding-left:11px; margin-bottom:14px}
+.setcard h4{margin:0 0 3px; font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase}
+.kv{display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-family:var(--mono); font-size:11.5px; color:var(--mute); margin-top:6px}
+.kv b{color:var(--ink); font-weight:600}
+.toast{
+  position:fixed; left:50%; bottom:82px; transform:translateX(-50%) translateY(14px);
+  background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+  padding:10px 16px; border-radius:22px; font-family:var(--mono); font-size:11.5px;
+  opacity:0; transition:.22s; pointer-events:none; z-index:50; white-space:nowrap;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+.gate{position:fixed; inset:0; background:var(--rock); z-index:99; display:flex; flex-direction:column; justify-content:center; padding:30px; gap:16px}
+.gate h2{font-size:19px; letter-spacing:.05em; margin:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Geo<span>Struct</span></h1>
+  <div class="hdr-meta"><span id="hdrN">0</span> planes<br><span id="hdrSite">—</span></div>
+</header>
+
+<div id="app">
+
+<!-- ══════════ MEASURE ══════════ -->
+<section class="view on" id="v-measure">
+  <div class="seg" id="modeSeg">
+    <button class="on" data-mode="plane">Plane</button>
+    <button data-mode="line">Lineation</button>
+    <button data-mode="manual">Manual</button>
+  </div>
+
+  <div id="sensorUI">
+    <div class="dialwrap">
+      <canvas id="dial" width="340" height="340"></canvas>
+      <div class="stab" id="stab">waiting</div>
+    </div>
+
+    <div class="readout" id="ro">
+      <div class="ro big"><b id="roA">--</b><i id="roAL">dip</i></div>
+      <div class="ro"><b id="roB">--</b><i id="roBL">dip dir</i></div>
+      <div class="ro"><b id="roC">--</b><i id="roCL">strike</i></div>
+    </div>
+    <div class="notation" id="notation">place phone back flat on the fracture plane</div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="act" id="btnCap">Record plane</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="ghost on" id="btnAvg">Average 2 s</button>
+      <button class="ghost" id="btnHold">Freeze</button>
+    </div>
+  </div>
+
+  <div id="manualUI" style="display:none">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <div><label class="f">Dip °</label><input id="mDip" type="number" inputmode="decimal" min="0" max="90" placeholder="0–90"></div>
+        <div><label class="f">Dip direction °</label><input id="mDd" type="number" inputmode="decimal" min="0" max="360" placeholder="0–360"></div>
+      </div>
+      <button class="act" id="btnManual">Add plane</button>
+    </div>
+  </div>
+
+  <div class="eyebrow">Attribution</div>
+  <div class="card">
+    <div class="row" style="margin-bottom:10px">
+      <div><label class="f">Station</label><input id="fSite" placeholder="ST-01"></div>
+      <div><label class="f">Structure</label>
+        <select id="fType">
+          <option>Joint</option><option>Fault</option><option>Bedding</option>
+          <option>Foliation</option><option>Vein</option><option>Shear</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <label class="f">Note</label><input id="fNote" placeholder="roughness, infill, aperture…">
+  </div>
+
+  <div class="eyebrow">Sensor status</div>
+  <div class="card">
+    <div id="diag"></div>
+    <div class="row" style="margin-top:12px"><button class="ghost" id="btnRetry">Retry sensors</button></div>
+  </div>
+
+  <div class="eyebrow">Field method</div>
+  <div class="card hint">
+    <b>Plane:</b> press the phone's back flat against the fracture surface, wait for the stability lock, record. The screen-normal is taken as the pole; the app resolves it to the lower hemisphere.<br><br>
+    <b>Lineation:</b> lay the phone on the surface with the <b>top edge</b> pointing down-plunge along the striae or intersection, then record.<br><br>
+    Keep clear of steel hammers, magnets and vehicles — the compass is magnetic. Recheck the sensor against a known bearing at each new outcrop.
+  </div>
+</section>
+
+<!-- ══════════ STEREONET ══════════ -->
+<section class="view" id="v-net">
+  <div class="dialwrap"><canvas id="net" width="360" height="360"></canvas></div>
+  <div class="legend" id="netLegend"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="ghost on" data-lay="poles">Poles</button>
+    <button class="ghost" data-lay="planes">Great circles</button>
+    <button class="ghost" data-lay="density">Density</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button class="ghost on" data-lay="sets">Set colours</button>
+    <button class="ghost on" data-lay="mean">Set means</button>
+    <button class="ghost" data-lay="wulff">Wulff</button>
+  </div>
+
+  <div class="eyebrow">Counting</div>
+  <div class="card">
+    <label class="f">Counting cone <span id="coneV">10</span>°</label>
+    <input type="range" id="cone" min="4" max="20" step="1" value="10">
+    <div class="hint" style="margin-top:10px">Lower-hemisphere <b>equal-area</b> (Schmidt) projection by default; switch to <b>Wulff</b> for equal-angle work. Density is contoured in multiples of a uniform distribution, so a value of 6 means six times the poles you would expect by chance in that cone.</div>
+  </div>
+
+  <div class="eyebrow">Rose of strikes</div>
+  <div class="dialwrap"><canvas id="rose" width="340" height="200"></canvas></div>
+
+  <div class="eyebrow">Dip distribution</div>
+  <div class="dialwrap"><canvas id="hist" width="340" height="180"></canvas></div>
+</section>
+
+<!-- ══════════ SETS ══════════ -->
+<section class="view" id="v-sets">
+  <div class="card">
+    <label class="f">Fracture families to fit</label>
+    <div class="seg" id="kSeg" style="margin:0">
+      <button class="on" data-k="0">Auto</button>
+      <button data-k="1">1</button><button data-k="2">2</button>
+      <button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button>
+    </div>
+    <div class="hint" style="margin-top:10px">Poles are clustered as axes (a pole and its opposite are the same orientation). Auto picks the number of families with the cleanest separation.</div>
+  </div>
+  <div id="setsOut"></div>
+  <div class="eyebrow">Intersections</div>
+  <div id="interOut" class="card hint">Fit two or more families to get the intersection lines that control wedge and block geometry.</div>
+</section>
+
+<!-- ══════════ DATA ══════════ -->
+<section class="view" id="v-data">
+  <div class="card" style="padding:6px 10px">
+    <table><thead><tr><th>#</th><th>Dip/Dir</th><th>Type</th><th>Stn</th><th>Q</th></tr></thead>
+    <tbody id="tbody"></tbody></table>
+    <div class="empty" id="dataEmpty">No measurements yet.<br>Record a plane to start the log.</div>
+  </div>
+  <div class="row"><button class="ghost" id="btnCsv">Export CSV</button><button class="ghost" id="btnJson">Export JSON</button></div>
+  <div class="row" style="margin-top:8px"><button class="ghost" id="btnImp">Import JSON</button><button class="ghost danger" id="btnDel">Delete selected</button></div>
+  <input type="file" id="fileImp" accept=".json,application/json" style="display:none">
+  <div class="eyebrow">Calibration</div>
+  <div class="card">
+    <label class="f">Magnetic declination ° (E positive)</label>
+    <input id="decl" type="number" inputmode="decimal" step="0.1" value="0">
+    <div class="hint" style="margin-top:10px">Applied to every new reading so bearings are recorded as true north. Look up the declination for your map sheet before the first station.</div>
+    <div class="row" style="margin-top:12px"><button class="ghost" id="btnTheme">Daylight mode</button><button class="ghost danger" id="btnWipe">Clear all data</button></div>
+  </div>
+</section>
+
+</div>
+
+<nav id="nav">
+  <button class="on" data-v="measure"><svg viewBox="0 0 24 24"><path d="M3 17 21 7M3 17v4h18V7"/><path d="M8 15v3M13 12v6M18 9v9"/></svg>Measure</button>
+  <button data-v="net"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>Stereonet</button>
+  <button data-v="sets"><svg viewBox="0 0 24 24"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="15" r="3"/><path d="M4 20h4M16 4h4"/></svg>Families</button>
+  <button data-v="data"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Data</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="gate" id="gate">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase">Field structural toolkit</div>
+  <h2>GeoStruct needs the motion and compass sensors</h2>
+  <div class="hint" id="gateMsg">Grant access to read the phone's orientation. Nothing leaves the device — measurements are stored locally.</div>
+  <button class="act" id="gateBtn">Enable sensors</button>
+  <button class="ghost" id="gateSkip">Continue without sensors</button>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const D2R=Math.PI/180, R2D=180/Math.PI;
+const SETC=['--s1','--s2','--s3','--s4','--s5'];
+const cvar=n=>getComputedStyle(document.body).getPropertyValue(n).trim();
+
+/* ---------- storage (localStorage w/ memory fallback) ---------- */
+const DB={m:{},ok:(()=>{try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}})(),
+  get(k,d){try{const v=this.ok?localStorage.getItem(k):this.m[k];return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{const s=JSON.stringify(v); this.ok?localStorage.setItem(k,s):this.m[k]=s}catch(e){this.m[k]=JSON.stringify(v)}}};
+
+let DATA=DB.get('gs_data',[]), DECL=DB.get('gs_decl',0), SEL=new Set(), K=DB.get('gs_k',0);
+let SETS=[], LAYERS={poles:1,planes:0,density:0,sets:1,mean:1,wulff:0}, CONE=10;
+
+/* ---------- vector / orientation maths ---------- */
+const norm=v=>{const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]};
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+
+// world frame: x=East, y=North, z=Up. Device->world rotation from alpha,beta,gamma (ZXY).
+function axes(al,be,ga){
+  const a=al*D2R,b=be*D2R,g=ga*D2R;
+  const ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),cg=Math.cos(g),sg=Math.sin(g);
+  return {
+    y:[-sa*cb, ca*cb, sb],                                  // device +Y (top edge)
+    z:[ca*sg+sa*sb*cg, sa*sg-ca*sb*cg, cb*cg]               // device +Z (out of screen)
+  };
+}
+// downward-directed unit vector -> {trend, plunge}
+function tp(v){
+  const d = v[2]>0 ? [-v[0],-v[1],-v[2]] : v.slice();
+  const u=norm(d);
+  let t=Math.atan2(u[0],u[1])*R2D; if(t<0)t+=360;
+  return {t, p:Math.asin(Math.min(1,-u[2]))*R2D, v:u};
+}
+const vecFromTP=(t,p)=>{const c=Math.cos(p*D2R);return[c*Math.sin(t*D2R),c*Math.cos(t*D2R),-Math.sin(p*D2R)]};
+// pole (trend,plunge) -> plane (dip, dipdir)
+const poleToPlane=(t,p)=>({dip:90-p, dd:(t+180)%360});
+const planeToPole=(dip,dd)=>vecFromTP((dd+180)%360, 90-dip);
+const strikeOf=dd=>(dd+270)%360;
+const pad=(n,w)=>String(Math.round(n)).padStart(w,'0');
+const fmt=r=>`${pad(r.dip,2)}/${pad(r.dd,3)}`;
+
+/* ---------- sensor: three independent acquisition paths ---------- */
+const S={live:false, z:null, y:null, buf:[], absolute:false, src:'none', n:0, tries:[]};
+function feed(z,y,absolute,src){
+  if(!z||!y||!isFinite(z[0])||!isFinite(y[0]))return;
+  S.live=true; S.z=norm(z); S.y=norm(y); S.absolute=absolute; S.src=src; S.n++;
+  S.buf.push({z:S.z,y:S.y,t:performance.now()});
+  if(S.buf.length>80)S.buf.shift();
+}
+function onOri(e){
+  if(e.alpha==null||e.beta==null||e.gamma==null)return;
+  const al=e.webkitCompassHeading!=null?360-e.webkitCompassHeading:e.alpha;
+  const A=axes(al,e.beta,e.gamma);
+  feed(A.z,A.y, !!(e.absolute||e.webkitCompassHeading!=null), e.type==='deviceorientationabsolute'?'DeviceOrientation (absolute)':'DeviceOrientation'+(e.absolute?' (absolute)':' (relative)'));
+}
+// path 2 — Generic Sensor API, quaternion referenced to ENU
+function tryOrientationSensor(){
+  if(!('AbsoluteOrientationSensor' in window)&&!('RelativeOrientationSensor' in window)){S.tries.push('OrientationSensor: not supported');return}
+  const abs='AbsoluteOrientationSensor' in window;
+  try{
+    const s=new (abs?AbsoluteOrientationSensor:RelativeOrientationSensor)({frequency:30,referenceFrame:'device'});
+    s.onreading=()=>{const[x,y,z,w]=s.quaternion;
+      feed([2*(x*z+y*w), 2*(y*z-x*w), 1-2*(x*x+y*y)],
+           [2*(x*y-z*w), 1-2*(x*x+z*z), 2*(y*z+x*w)], abs, 'OrientationSensor'+(abs?' (absolute)':' (relative)'));};
+    s.onerror=e=>S.tries.push('OrientationSensor: '+(e.error?e.error.name:'error'));
+    s.start(); S.tries.push('OrientationSensor: started');
+  }catch(e){S.tries.push('OrientationSensor: '+e.name)}
+}
+// path 3 — raw accelerometer + magnetometer, frame built by hand
+function tryRawSensors(){
+  if(!('Accelerometer' in window)){S.tries.push('Accelerometer: not supported');return}
+  let a=null,m=null;
+  const build=()=>{ if(!a)return;
+    const up=norm(a);
+    let north=m?norm([m[0]-dot(m,up)*up[0], m[1]-dot(m,up)*up[1], m[2]-dot(m,up)*up[2]]):null;
+    if(!north){ // no compass: fall back to an arbitrary horizontal reference, dip stays valid
+      north=norm(Math.abs(up[2])<0.9?cross([0,0,1],up):cross([0,1,0],up)); }
+    const east=norm(cross(north,up));
+    // device axes expressed in world (E,N,U)
+    feed([east[2],north[2],up[2]],[east[1],north[1],up[1]], !!m, m?'Accelerometer + Magnetometer':'Accelerometer only (no north)');
+  };
+  try{const ac=new Accelerometer({frequency:30});
+    ac.onreading=()=>{a=[ac.x,ac.y,ac.z]; build()};
+    ac.onerror=e=>S.tries.push('Accelerometer: '+(e.error?e.error.name:'error')); ac.start();
+    S.tries.push('Accelerometer: started');
+  }catch(e){S.tries.push('Accelerometer: '+e.name)}
+  try{const mg=new Magnetometer({frequency:20});
+    mg.onreading=()=>{m=[mg.x,mg.y,mg.z]};
+    mg.onerror=e=>S.tries.push('Magnetometer: '+(e.error?e.error.name:'error')); mg.start();
+    S.tries.push('Magnetometer: started');
+  }catch(e){S.tries.push('Magnetometer: '+e.name)}
+}
+function startSensors(){
+  S.tries=[];
+  const attach=()=>{
+    window.addEventListener('deviceorientationabsolute',onOri,true);
+    window.addEventListener('deviceorientation',onOri,true);
+    S.tries.push('DeviceOrientation: listening');
+  };
+  const need=window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function';
+  if(need){DeviceOrientationEvent.requestPermission().then(r=>{S.tries.push('permission: '+r); if(r==='granted')attach()}).catch(e=>S.tries.push('permission: '+e.name));}
+  else attach();
+  setTimeout(()=>{ if(!S.live) tryOrientationSensor(); },900);
+  setTimeout(()=>{ if(!S.live) tryRawSensors(); },1900);
+  setTimeout(()=>{ if(!S.live){ $('#gateMsg').innerHTML='Still nothing from the sensors. Check the diagnostics panel at the bottom of the Measure tab — the usual cause is the page running inside another app\'s viewer, or Chrome\'s Motion sensors permission being off for this site.'; } },3200);
+  if(navigator.wakeLock)navigator.wakeLock.request('screen').catch(()=>{});
+}
+// jitter over the last ~1 s, in degrees
+function jitter(vecKey){
+  const now=performance.now(), w=S.buf.filter(b=>now-b.t<1000);
+  if(w.length<6)return 99;
+  let s=[0,0,0]; w.forEach(b=>{const v=b[vecKey]; const f=dot(v,w[0][vecKey])<0?-1:1; s=[s[0]+f*v[0],s[1]+f*v[1],s[2]+f*v[2]]});
+  const R=Math.hypot(...s)/w.length;
+  return Math.min(99, Math.acos(Math.min(1,R))*R2D*2);
+}
+function currentVec(){ return MODE==='line'?S.y:S.z; }
+function diagnose(){
+  const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+  const opaque=/^(content|file|blob|data)/.test(location.protocol);
+  const rows=[
+    ['Reading from', S.live?S.src:'nothing yet'],
+    ['Samples received', S.n],
+    ['North reference', S.live?(S.absolute?'magnetic compass — bearings valid':'none — dip valid, azimuth arbitrary'):'—'],
+    ['Origin', opaque?'OPAQUE ('+location.protocol+') — sensors cannot be granted':location.origin],
+    ['Embedded in another app', inFrame?'YES — this blocks sensors':'no'],
+  ];
+  $('#diag').innerHTML='<div class="kv">'+rows.map(r=>`<span>${r[0]}</span><b style="${/NO|YES|nothing|OPAQUE/.test(r[1])?'color:var(--hematite)':''}">${r[1]}</b>`).join('')+'</div>'
+    +(S.tries.length?'<div class="hint" style="margin-top:10px;color:var(--dim)">'+S.tries.slice(-6).join('<br>')+'</div>':'')
+    +(S.live?'':(opaque
+      ? '<div class="hint" style="margin-top:10px">This page was opened as a stored file, so it has no web origin. Chrome has nowhere to attach a Motion sensors permission and denies every sensor with <b>NotAllowedError</b> — no phone setting can change that. Serve the file from <b>https://</b> or from <b>http://localhost</b> and the sensors come straight up.</div>'
+      : '<div class="hint" style="margin-top:10px">Allow <b>Motion sensors</b> in Chrome\'s site settings for this origin. On Samsung, check the <b>Sensors off</b> quick-settings tile is not active.</div>'));
+}
+
+/* ---------- projection ---------- */
+function proj(v,R,wulff){ // v = downward unit vector
+  const u=v[2]>0?[-v[0],-v[1],-v[2]]:v;
+  const th=Math.acos(Math.min(1,-u[2]));             // angle from vertical(down)
+  const r=wulff?R*Math.tan(th/2):R*Math.SQRT2*Math.sin(th/2);
+  const az=Math.atan2(u[0],u[1]);
+  return [r*Math.sin(az), -r*Math.cos(az)];
+}
+function unproj(x,y,R,wulff){
+  const rr=Math.hypot(x,y); if(rr>R)return null;
+  const th=wulff?2*Math.atan(rr/R):2*Math.asin(Math.min(1,rr/(R*Math.SQRT2)));
+  const az=Math.atan2(x,-y), s=Math.sin(th);
+  return [s*Math.sin(az),s*Math.cos(az),-Math.cos(th)];
+}
+function greatCircle(pole,n=181){
+  const p=norm(pole);
+  let a=Math.abs(p[2])<0.9?cross(p,[0,0,1]):cross(p,[0,1,0]); a=norm(a);
+  const b=norm(cross(p,a)), out=[];
+  for(let i=0;i<n;i++){const t=i/(n-1)*2*Math.PI, c=Math.cos(t), s=Math.sin(t);
+    out.push([a[0]*c+b[0]*s, a[1]*c+b[1]*s, a[2]*c+b[2]*s]);}
+  return out;
+}
+
+/* ---------- canvas helpers ---------- */
+function setup(cv,w,h){
+  const dpr=Math.min(3,devicePixelRatio||1);
+  cv.width=w*dpr; cv.height=h*dpr; cv.style.width=w+'px'; cv.style.height=h+'px';
+  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h); return c;
+}
+function netFrame(c,cx,cy,R,wulff,small){
+  c.lineWidth=1;
+  if(!small){
+    // grid: great circles dipping E and W, plus small circles about the N–S horizontal axis
+    c.strokeStyle=cvar('--line');
+    for(let d=10;d<=80;d+=10){
+      [90,270].forEach(dd=>{
+        const pts=greatCircle(planeToPole(d,dd)).filter(v=>v[2]<=0.0001);
+        c.beginPath(); pts.forEach((v,i)=>{const q=proj(v,R,wulff); i?c.lineTo(cx+q[0],cy+q[1]):c.moveTo(cx+q[0],cy+q[1])}); c.stroke();
+      });
+      // small circles about the horizontal N–S axis
+      [1,-1].forEach(sg=>{
+        c.beginPath(); let mv=false;
+        for(let i=0;i<=180;i++){
+          const ph=i/180*Math.PI;
+          const v=[sg*Math.sin(d*D2R)*1, Math.cos(d*D2R)*Math.cos(ph), -Math.cos(d*D2R)*Math.sin(ph)];
+          const n2=norm(v); if(n2[2]>0){mv=false;continue}
+          const q=proj(n2,R,wulff); mv?c.lineTo(cx+q[0],cy+q[1]):(c.moveTo(cx+q[0],cy+q[1]),mv=true);
+        }
+        c.stroke();
+      });
+    }
+  }
+  c.strokeStyle=cvar('--dim'); c.lineWidth=1.4;
+  c.beginPath(); c.arc(cx,cy,R,0,7); c.stroke();
+  c.beginPath(); c.moveTo(cx,cy-4); c.lineTo(cx,cy+4); c.moveTo(cx-4,cy); c.lineTo(cx+4,cy); c.stroke();
+  for(let a=0;a<360;a+=10){
+    const L=a%90===0?9:(a%30===0?6:3.5), rad=a*D2R;
+    c.beginPath();
+    c.moveTo(cx+Math.sin(rad)*R, cy-Math.cos(rad)*R);
+    c.lineTo(cx+Math.sin(rad)*(R-L), cy-Math.cos(rad)*(R-L));
+    c.strokeStyle=a%90===0?cvar('--ink'):cvar('--dim'); c.stroke();
+  }
+  c.fillStyle=cvar('--mute'); c.font='600 10px '+cvar('--mono').replace(/"/g,'"'); c.textAlign='center'; c.textBaseline='middle';
+  [['N',0],['E',90],['S',180],['W',270]].forEach(([t,a])=>{
+    c.fillText(t, cx+Math.sin(a*D2R)*(R+13), cy-Math.cos(a*D2R)*(R+13));
+  });
+}
+
+/* ---------- live dial ---------- */
+const dial=$('#dial'); let MODE='plane', FROZEN=null, AVG=true;
+function drawDial(){
+  const W=Math.min(340, innerWidth-28), c=setup(dial,W,W), R=W/2-24, cx=W/2, cy=W/2;
+  netFrame(c,cx,cy,R,false,true);
+  const v=FROZEN||(S.live?currentVec():null);
+  if(!v){c.fillStyle=cvar('--dim');c.textAlign='center';c.fillText('no sensor',cx,cy);return}
+  const o=tp(v), q=proj(o.v,R,false);
+  // trace of recent positions
+  c.fillStyle='rgba(63,200,162,.16)';
+  S.buf.slice(-40).forEach(b=>{const p=proj(tp(MODE==='line'?b.y:b.z).v,R,false);
+    c.beginPath(); c.arc(cx+p[0],cy+p[1],2.2,0,7); c.fill();});
+  // pole marker
+  c.strokeStyle=cvar('--malachite'); c.lineWidth=1.2;
+  c.beginPath(); c.moveTo(cx+q[0]-11,cy+q[1]); c.lineTo(cx+q[0]+11,cy+q[1]);
+  c.moveTo(cx+q[0],cy+q[1]-11); c.lineTo(cx+q[0],cy+q[1]+11); c.stroke();
+  c.fillStyle=cvar('--malachite'); c.beginPath(); c.arc(cx+q[0],cy+q[1],4,0,7); c.fill();
+  if(MODE==='plane'){ // live great circle
+    c.strokeStyle='rgba(232,220,200,.5)'; c.lineWidth=1.3; c.beginPath();
+    let mv=false; greatCircle(o.v).forEach(g=>{ if(g[2]>0.0001){mv=false;return}
+      const p=proj(g,R,false); mv?c.lineTo(cx+p[0],cy+p[1]):(c.moveTo(cx+p[0],cy+p[1]),mv=true);});
+    c.stroke();
+  }
+  // bubble level ring
+  const tilt=S.z?Math.min(1,Math.acos(Math.min(1,Math.abs(S.z[2])))*R2D/90):0;
+  c.strokeStyle='rgba(143,163,169,.25)'; c.lineWidth=3; c.beginPath();
+  c.arc(cx,cy,R+7,-Math.PI/2,-Math.PI/2+tilt*2*Math.PI); c.stroke();
+}
+
+/* ---------- readout ---------- */
+function updateReadout(){
+  const v=FROZEN||(S.live?currentVec():null);
+  const j=jitter(MODE==='line'?'y':'z'), st=$('#stab');
+  if(FROZEN){st.textContent='frozen';st.className='stab ok'}
+  else if(!S.live){st.textContent='waiting';st.className='stab'}
+  else if(j<1.2){st.textContent='steady ±'+j.toFixed(1)+'°';st.className='stab ok'}
+  else {st.textContent='moving ±'+(j>20?'20+':j.toFixed(1))+'°';st.className='stab bad'}
+  if(!v){$('#roA').textContent=$('#roB').textContent=$('#roC').textContent='--';return}
+  const o=tp(v), t=(o.t+DECL+360)%360;
+  if(MODE==='line'){
+    $('#roAL').textContent='plunge'; $('#roBL').textContent='trend'; $('#roCL').textContent='—';
+    $('#roA').textContent=pad(o.p,2); $('#roB').textContent=pad(t,3); $('#roC').textContent='··';
+    $('#notation').textContent=`${pad(o.p,2)} → ${pad(t,3)}   (plunge → trend)`;
+  }else{
+    const pl=poleToPlane(t,o.p);
+    $('#roAL').textContent='dip'; $('#roBL').textContent='dip dir'; $('#roCL').textContent='strike';
+    $('#roA').textContent=pad(pl.dip,2); $('#roB').textContent=pad(pl.dd,3); $('#roC').textContent=pad(strikeOf(pl.dd),3);
+    $('#notation').textContent=`${pad(pl.dip,2)}/${pad(pl.dd,3)}   ·   ${pad(strikeOf(pl.dd),3)}/${pad(pl.dip,2)} right-hand rule`;
+  }
+}
+
+/* ---------- capture ---------- */
+function meanVec(list){
+  let s=[0,0,0];
+  list.forEach(v=>{const f=dot(v,list[0])<0?-1:1; s=[s[0]+f*v[0],s[1]+f*v[1],s[2]+f*v[2]]});
+  return {v:norm(s), R:Math.hypot(...s)/list.length};
+}
+function record(){
+  if(!S.live&&!FROZEN){toast('No sensor data — use Manual');return}
+  const key=MODE==='line'?'y':'z';
+  const doIt=()=>{
+    let v, q;
+    if(FROZEN){v=FROZEN;q=0.5}
+    else{
+      const now=performance.now();
+      const w=(AVG?S.buf.filter(b=>now-b.t<2000):S.buf.slice(-3)).map(b=>b[key]);
+      if(!w.length){toast('No sensor data');return}
+      const m=meanVec(w); v=m.v; q=Math.acos(Math.min(1,m.R))*R2D*2;
+    }
+    const o=tp(v), t=(o.t+DECL+360)%360;
+    const rec={id:Date.now(), mode:MODE, q:+q.toFixed(1),
+      site:$('#fSite').value.trim()||'—', type:$('#fType').value, note:$('#fNote').value.trim(), decl:DECL};
+    if(MODE==='line'){rec.trend=+t.toFixed(1); rec.plunge=+o.p.toFixed(1);}
+    else{const pl=poleToPlane(t,o.p); rec.dip=+pl.dip.toFixed(1); rec.dd=+pl.dd.toFixed(1);}
+    DATA.push(rec); save();
+    toast(MODE==='line'?`Line ${pad(rec.plunge,2)}→${pad(rec.trend,3)} recorded`:`Plane ${fmt(rec)} recorded`);
+    if(navigator.vibrate)navigator.vibrate(28);
+    FROZEN=null; $('#btnHold').classList.remove('on'); $('#btnHold').textContent='Freeze';
+  };
+  if(AVG&&!FROZEN){ $('#btnCap').textContent='Averaging…'; $('#btnCap').disabled=true;
+    setTimeout(()=>{doIt(); $('#btnCap').disabled=false; $('#btnCap').textContent=MODE==='line'?'Record lineation':'Record plane';},2000);
+  } else doIt();
+}
+
+/* ---------- clustering (axial k-means + Fisher stats) ---------- */
+function principal(vs){
+  let T=[[0,0,0],[0,0,0],[0,0,0]];
+  vs.forEach(v=>{for(let i=0;i<3;i++)for(let j=0;j<3;j++)T[i][j]+=v[i]*v[j]});
+  let x=[0.3,0.5,0.81];
+  for(let it=0;it<80;it++){
+    const y=[T[0][0]*x[0]+T[0][1]*x[1]+T[0][2]*x[2], T[1][0]*x[0]+T[1][1]*x[1]+T[1][2]*x[2], T[2][0]*x[0]+T[2][1]*x[1]+T[2][2]*x[2]];
+    const m=Math.hypot(...y); if(m<1e-12)break; x=[y[0]/m,y[1]/m,y[2]/m];
+  }
+  return x[2]>0?[-x[0],-x[1],-x[2]]:x;
+}
+function kmeans(vs,k){
+  if(vs.length<k)return null;
+  let C=[vs[0]];
+  while(C.length<k){ // farthest-point seeding on axial distance
+    let best=null,bd=-1;
+    vs.forEach(v=>{const d=Math.min(...C.map(c=>1-Math.abs(dot(v,c)))); if(d>bd){bd=d;best=v}});
+    C.push(best);
+  }
+  let lab=new Array(vs.length).fill(-1);
+  for(let it=0;it<60;it++){
+    let ch=false;
+    vs.forEach((v,i)=>{let b=0,bs=-2; C.forEach((c,j)=>{const s=Math.abs(dot(v,c)); if(s>bs){bs=s;b=j}});
+      if(lab[i]!==b){lab[i]=b;ch=true}});
+    for(let j=0;j<k;j++){const g=vs.filter((_,i)=>lab[i]===j); if(g.length)C[j]=principal(g);}
+    if(!ch)break;
+  }
+  return {C,lab};
+}
+function silhouette(vs,r){
+  if(!r||new Set(r.lab).size<2)return -1;
+  const ang=(a,b)=>Math.acos(Math.min(1,Math.abs(dot(a,b))))*R2D;
+  let s=0;
+  vs.forEach((v,i)=>{
+    const own=vs.filter((_,j)=>r.lab[j]===r.lab[i]&&j!==i);
+    const a=own.length?own.reduce((t,u)=>t+ang(v,u),0)/own.length:0;
+    let b=Infinity;
+    for(let j=0;j<r.C.length;j++){ if(j===r.lab[i])continue;
+      const o=vs.filter((_,q)=>r.lab[q]===j); if(!o.length)continue;
+      b=Math.min(b,o.reduce((t,u)=>t+ang(v,u),0)/o.length);}
+    if(b<Infinity)s+=(b-a)/Math.max(a,b);
+  });
+  return s/vs.length;
+}
+function computeSets(){
+  const planes=DATA.filter(d=>d.mode!=='line');
+  const vs=planes.map(d=>norm(planeToPole(d.dip,d.dd)));
+  SETS=[]; if(vs.length<3){planes.forEach(p=>p._s=-1);return}
+  let k=K, best=null;
+  if(!k){let bs=-2; for(let t=1;t<=Math.min(5,Math.floor(vs.length/3));t++){
+      const r=kmeans(vs,t), sc=t===1?0:silhouette(vs,r);
+      if(sc>bs){bs=sc;best=r;k=t}} }
+  else best=kmeans(vs,k);
+  if(!best){planes.forEach(p=>p._s=-1);return}
+  planes.forEach((p,i)=>p._s=best.lab[i]);
+  best.C.forEach((c,j)=>{
+    const g=vs.filter((_,i)=>best.lab[i]===j); if(!g.length)return;
+    const al=g.map(v=>dot(v,c)<0?[-v[0],-v[1],-v[2]]:v);
+    let s=[0,0,0]; al.forEach(v=>{s=[s[0]+v[0],s[1]+v[1],s[2]+v[2]]});
+    const Rm=Math.hypot(...s), n=al.length, mean=principal(g);
+    const kf=n>1?(n-1)/Math.max(1e-6,n-Rm):999;
+    let a95=null;
+    if(n>1&&Rm>0){const t=(n-Rm)/Rm*(Math.pow(20,1/(n-1))-1); if(t<1)a95=Math.acos(1-t)*R2D;}
+    const o=tp(mean), pl=poleToPlane(o.t,o.p);
+    const spread=al.reduce((t,v)=>t+Math.acos(Math.min(1,Math.abs(dot(v,mean))))*R2D,0)/n;
+    SETS.push({i:j,n,dip:pl.dip,dd:pl.dd,pole:mean,k:kf,a95,spread,
+      dips:g.map(v=>poleToPlane(tp(v).t,tp(v).p).dip)});
+  });
+  SETS.sort((a,b)=>b.n-a.n);
+  SETS.forEach((s,i)=>s.rank=i);
+  const map={}; SETS.forEach(s=>map[s.i]=s.rank);
+  planes.forEach(p=>p._s=map[p._s]);
+}
+
+/* ---------- stereonet ---------- */
+function density(vs,R,cone,wulff,step){
+  const g=[], ca=Math.cos(cone*D2R), n=vs.length;
+  const expect=n*(1-ca); // expected count in the cone under uniform distribution
+  for(let y=-R;y<=R;y+=step){const row=[];
+    for(let x=-R;x<=R;x+=step){
+      const u=unproj(x,y,R,wulff); if(!u){row.push(null);continue}
+      let c=0; vs.forEach(v=>{if(Math.abs(dot(v,u))>=ca)c++});
+      row.push(expect>0?c/expect:0);
+    } g.push(row);}
+  return g;
+}
+function drawNet(){
+  const W=Math.min(360,innerWidth-28), c=setup($('#net'),W,W), R=W/2-22, cx=W/2, cy=W/2;
+  const wulff=!!LAYERS.wulff;
+  const planes=DATA.filter(d=>d.mode!=='line'), lines=DATA.filter(d=>d.mode==='line');
+  const vs=planes.map(d=>norm(planeToPole(d.dip,d.dd)));
+
+  if(LAYERS.density&&vs.length>2){
+    const step=Math.max(3,Math.round(R/34)), g=density(vs,R,CONE,wulff,step);
+    let mx=0; g.forEach(r=>r.forEach(v=>{if(v!=null&&v>mx)mx=v}));
+    const ramp=v=>{const t=Math.min(1,v/Math.max(2,mx));
+      const stops=[[22,28,32],[30,80,96],[63,200,162],[224,179,65],[210,96,63]];
+      const f=t*(stops.length-1), i=Math.min(stops.length-2,Math.floor(f)), r=f-i;
+      const a=stops[i],b=stops[i+1];
+      return `rgba(${a[0]+(b[0]-a[0])*r|0},${a[1]+(b[1]-a[1])*r|0},${a[2]+(b[2]-a[2])*r|0},${0.25+0.6*t})`};
+    g.forEach((row,yi)=>row.forEach((v,xi)=>{ if(v==null)return;
+      c.fillStyle=ramp(v); c.fillRect(cx-R+xi*step-step/2, cy-R+yi*step-step/2, step+1, step+1);}));
+    // contour lines (marching squares) at multiples of the uniform density
+    c.strokeStyle='rgba(233,240,241,.45)'; c.lineWidth=.8;
+    [2,4,6,8,10,14].filter(L=>L<mx).forEach(L=>{
+      for(let yi=0;yi<g.length-1;yi++)for(let xi=0;xi<g[yi].length-1;xi++){
+        const p=[g[yi][xi],g[yi][xi+1],g[yi+1][xi+1],g[yi+1][xi]]; if(p.some(v=>v==null))continue;
+        const X=cx-R+xi*step, Y=cy-R+yi*step, pts=[];
+        const e=(a,b,ax,ay,bx,by)=>{if((p[a]-L)*(p[b]-L)<0){const t=(L-p[a])/(p[b]-p[a]); pts.push([ax+(bx-ax)*t,ay+(by-ay)*t])}};
+        e(0,1,X,Y,X+step,Y); e(1,2,X+step,Y,X+step,Y+step); e(2,3,X+step,Y+step,X,Y+step); e(3,0,X,Y+step,X,Y);
+        if(pts.length>=2){c.beginPath();c.moveTo(pts[0][0],pts[0][1]);c.lineTo(pts[1][0],pts[1][1]);c.stroke()}
+      }});
+    c.save(); c.globalCompositeOperation='destination-in';
+    c.beginPath(); c.arc(cx,cy,R,0,7); c.fill(); c.restore();
+  }
+
+  netFrame(c,cx,cy,R,wulff,false);
+
+  const col=d=>LAYERS.sets&&d._s>=0?cvar(SETC[d._s%5]):cvar('--quartz');
+  if(LAYERS.planes) planes.forEach(d=>{
+    c.strokeStyle=col(d); c.globalAlpha=.55; c.lineWidth=1.1; c.beginPath(); let mv=false;
+    greatCircle(planeToPole(d.dip,d.dd)).forEach(g=>{ if(g[2]>0.0001){mv=false;return}
+      const q=proj(g,R,wulff); mv?c.lineTo(cx+q[0],cy+q[1]):(c.moveTo(cx+q[0],cy+q[1]),mv=true);});
+    c.stroke(); c.globalAlpha=1;});
+  if(LAYERS.poles) planes.forEach(d=>{
+    const q=proj(norm(planeToPole(d.dip,d.dd)),R,wulff);
+    c.fillStyle=col(d); c.beginPath(); c.arc(cx+q[0],cy+q[1],3.2,0,7); c.fill();
+    if(SEL.has(d.id)){c.strokeStyle=cvar('--ink');c.lineWidth=1.4;c.beginPath();c.arc(cx+q[0],cy+q[1],6.5,0,7);c.stroke()}});
+  lines.forEach(d=>{
+    const q=proj(vecFromTP(d.trend,d.plunge),R,wulff);
+    c.strokeStyle=cvar('--azurite'); c.lineWidth=1.6; c.beginPath();
+    c.moveTo(cx+q[0],cy+q[1]-5); c.lineTo(cx+q[0]+4.5,cy+q[1]+3); c.lineTo(cx+q[0]-4.5,cy+q[1]+3); c.closePath(); c.stroke();});
+  if(LAYERS.mean) SETS.forEach(s=>{
+    const cl=cvar(SETC[s.rank%5]), q=proj(s.pole,R,wulff);
+    c.strokeStyle=cl; c.lineWidth=2; c.beginPath(); let mv=false;
+    greatCircle(s.pole).forEach(g=>{ if(g[2]>0.0001){mv=false;return}
+      const p=proj(g,R,wulff); mv?c.lineTo(cx+p[0],cy+p[1]):(c.moveTo(cx+p[0],cy+p[1]),mv=true);});
+    c.stroke();
+    if(s.a95){ // cone of confidence about the mean pole
+      c.setLineDash([2,3]); c.lineWidth=1; c.beginPath(); mv=false;
+      const a=norm(Math.abs(s.pole[2])<.9?cross(s.pole,[0,0,1]):cross(s.pole,[0,1,0])), b=norm(cross(s.pole,a));
+      const cs=Math.cos(s.a95*D2R), sn=Math.sin(s.a95*D2R);
+      for(let i=0;i<=90;i++){const t=i/90*2*Math.PI;
+        const v=norm([s.pole[0]*cs+sn*(a[0]*Math.cos(t)+b[0]*Math.sin(t)), s.pole[1]*cs+sn*(a[1]*Math.cos(t)+b[1]*Math.sin(t)), s.pole[2]*cs+sn*(a[2]*Math.cos(t)+b[2]*Math.sin(t))]);
+        const p=proj(v,R,wulff); i?c.lineTo(cx+p[0],cy+p[1]):c.moveTo(cx+p[0],cy+p[1]);}
+      c.stroke(); c.setLineDash([]);
+    }
+    c.fillStyle=cl; c.beginPath(); c.arc(cx+q[0],cy+q[1],5.5,0,7); c.fill();
+    c.fillStyle=cvar('--rock'); c.font='700 8px '+cvar('--mono'); c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(String(s.rank+1), cx+q[0], cy+q[1]+.5);});
+
+  // legend
+  $('#netLegend').innerHTML = SETS.length
+    ? SETS.map(s=>`<span class="chip"><i class="swatch" style="background:${cvar(SETC[s.rank%5])}"></i>Set ${s.rank+1} · ${fmt(s)} · n=${s.n}</span>`).join('')
+      + (lines.length?`<span class="chip"><i class="swatch" style="background:${cvar('--azurite')}"></i>Lineations · n=${lines.length}</span>`:'')
+    : `<span class="chip" style="color:var(--dim)">${planes.length} poles · no families fitted yet</span>`;
+  drawRose(); drawHist();
+}
+
+function drawRose(){
+  const W=Math.min(340,innerWidth-28), H=200, c=setup($('#rose'),W,H), cx=W/2, cy=H-14, R=H-34;
+  const bins=new Array(36).fill(0);
+  DATA.filter(d=>d.mode!=='line').forEach(d=>{bins[Math.floor(strikeOf(d.dd)%180/5)%36]++});
+  const mx=Math.max(1,...bins);
+  c.strokeStyle=cvar('--line');
+  [1,.66,.33].forEach(f=>{c.beginPath();c.arc(cx,cy,R*f,Math.PI,2*Math.PI);c.stroke()});
+  c.beginPath(); c.moveTo(cx-R,cy); c.lineTo(cx+R,cy); c.stroke();
+  bins.forEach((v,i)=>{ if(!v)return;
+    const a0=(i*5-90)*D2R, a1=((i+1)*5-90)*D2R, r=R*v/mx;
+    c.fillStyle='rgba(63,200,162,.65)'; c.beginPath(); c.moveTo(cx,cy);
+    c.arc(cx,cy,r,a0,a1); c.closePath(); c.fill();});
+  c.fillStyle=cvar('--dim'); c.font='9px '+cvar('--mono'); c.textAlign='center';
+  c.fillText('N',cx,12); c.fillText('090',cx+R-6,cy-6); c.fillText('270',cx-R+10,cy-6);
+  c.textAlign='left'; c.fillText('strike, 5° bins · max '+mx,6,H-4);
+}
+function drawHist(){
+  const W=Math.min(340,innerWidth-28), H=180, c=setup($('#hist'),W,H), pad=26;
+  const bins=new Array(9).fill(0);
+  DATA.filter(d=>d.mode!=='line').forEach(d=>bins[Math.min(8,Math.floor(d.dip/10))]++);
+  const mx=Math.max(1,...bins), bw=(W-pad-8)/9;
+  c.strokeStyle=cvar('--line'); c.beginPath(); c.moveTo(pad,H-22); c.lineTo(W-4,H-22); c.stroke();
+  bins.forEach((v,i)=>{
+    const h=(H-46)*v/mx, x=pad+i*bw;
+    c.fillStyle=v?'rgba(210,96,63,.75)':'transparent'; c.fillRect(x+2,H-22-h,bw-4,h);
+    c.fillStyle=cvar('--dim'); c.font='8.5px '+cvar('--mono'); c.textAlign='center';
+    c.fillText(i*10+'–'+(i*10+10), x+bw/2, H-9);
+    if(v){c.fillStyle=cvar('--mute'); c.fillText(v, x+bw/2, H-27-h)}});
+  c.save(); c.translate(9,H/2); c.rotate(-Math.PI/2); c.textAlign='center';
+  c.fillStyle=cvar('--dim'); c.fillText('count',0,0); c.restore();
+}
+
+/* ---------- families view ---------- */
+function drawSets(){
+  const o=$('#setsOut');
+  if(!SETS.length){o.innerHTML='<div class="empty">Fewer than three planes logged.<br>Families appear once there is something to cluster.</div>'; $('#interOut').textContent='Fit two or more families to get the intersection lines that control wedge and block geometry.'; return}
+  o.innerHTML=SETS.map(s=>{
+    const cl=cvar(SETC[s.rank%5]);
+    const dmin=Math.min(...s.dips)|0, dmax=Math.max(...s.dips)|0;
+    const qual=s.spread<8?'tight':s.spread<18?'moderate':'diffuse';
+    return `<div class="card"><div class="setcard" style="border-color:${cl}">
+      <h4 style="color:${cl}">Set ${s.rank+1} · ${fmt(s)}</h4>
+      <div class="hint">Mean plane dips ${Math.round(s.dip)}° towards ${pad(s.dd,3)}° · strike ${pad(strikeOf(s.dd),3)}° (RHR)</div>
+      <div class="kv">
+        <span>Members</span><b>${s.n} of ${DATA.filter(d=>d.mode!=='line').length}</b>
+        <span>Fisher k</span><b>${s.k>900?'—':s.k.toFixed(1)} <span style="color:var(--dim);font-weight:400">(${qual})</span></b>
+        <span>Cone α95</span><b>${s.a95?s.a95.toFixed(1)+'°':'—'}</b>
+        <span>Mean scatter</span><b>${s.spread.toFixed(1)}°</b>
+        <span>Dip range</span><b>${dmin}–${dmax}°</b>
+        <span>Pole</span><b>${pad(90-s.dip,2)} → ${pad((s.dd+180)%360,3)}</b>
+      </div></div></div>`}).join('');
+  if(SETS.length<2){$('#interOut').textContent='Fit two or more families to get the intersection lines that control wedge and block geometry.';return}
+  let h='<div class="hint" style="margin-bottom:10px">Line of intersection of each pair of mean planes — the plunge direction of a potential wedge, and the hinge for block release.</div><table><thead><tr><th>Pair</th><th>Plunge → Trend</th><th>Dihedral</th></tr></thead><tbody>';
+  for(let i=0;i<SETS.length;i++)for(let j=i+1;j<SETS.length;j++){
+    const L=tp(norm(cross(SETS[i].pole,SETS[j].pole)));
+    const ang=Math.acos(Math.min(1,Math.abs(dot(SETS[i].pole,SETS[j].pole))))*R2D;
+    h+=`<tr><td class="k"><i class="swatch" style="background:${cvar(SETC[i%5])}"></i><i class="swatch" style="background:${cvar(SETC[j%5])}"></i>${i+1} × ${j+1}</td>
+      <td class="k">${pad(L.p,2)} → ${pad(L.t,3)}</td><td>${ang.toFixed(0)}°</td></tr>`;}
+  $('#interOut').innerHTML=h+'</tbody></table>'; $('#interOut').className='card';
+}
+
+/* ---------- data table ---------- */
+function drawTable(){
+  const b=$('#tbody');
+  b.innerHTML=DATA.slice().reverse().map((d,i)=>{
+    const n=DATA.length-i;
+    const val=d.mode==='line'?`${pad(d.plunge,2)}→${pad(d.trend,3)}`:fmt(d);
+    const sw=d.mode==='line'?cvar('--azurite'):(d._s>=0?cvar(SETC[d._s%5]):cvar('--dim'));
+    return `<tr data-id="${d.id}" class="${SEL.has(d.id)?'sel':''}">
+      <td>${n}</td><td class="k"><i class="swatch" style="background:${sw}"></i>${val}</td>
+      <td>${d.mode==='line'?'Lineation':d.type}</td><td>${d.site}</td><td>${d.q<=2?'●':d.q<=5?'◐':'○'}</td></tr>`}).join('');
+  $('#dataEmpty').style.display=DATA.length?'none':'block';
+  $('#hdrN').textContent=DATA.filter(d=>d.mode!=='line').length;
+  $('#hdrSite').textContent=$('#fSite').value.trim()||'—';
+  $$('#tbody tr').forEach(tr=>tr.onclick=()=>{
+    const id=+tr.dataset.id; SEL.has(id)?SEL.delete(id):SEL.add(id); drawTable(); drawNet();});
+}
+
+/* ---------- plumbing ---------- */
+function save(){DB.set('gs_data',DATA); refresh()}
+function refresh(){computeSets(); drawTable(); drawNet(); drawSets()}
+let tt; function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1900)}
+function dl(name,txt,type){
+  if(window.AndroidExport&&AndroidExport.save){ // native build: write into Downloads
+    try{ AndroidExport.save(name,type,btoa(unescape(encodeURIComponent(txt)))); return; }catch(e){}
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type})); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+$$('#nav button').forEach(b=>b.onclick=()=>{
+  $$('#nav button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  $$('.view').forEach(v=>v.classList.remove('on')); $('#v-'+b.dataset.v).classList.add('on');
+  $('#app').scrollTop=0; refresh();
+});
+$$('#modeSeg button').forEach(b=>b.onclick=()=>{
+  $$('#modeSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  MODE=b.dataset.mode; FROZEN=null;
+  $('#sensorUI').style.display=MODE==='manual'?'none':'block';
+  $('#manualUI').style.display=MODE==='manual'?'block':'none';
+  $('#btnCap').textContent=MODE==='line'?'Record lineation':'Record plane';
+  $('#notation').textContent=MODE==='line'?'point the top edge down-plunge along the lineation':'place phone back flat on the fracture plane';
+});
+$('#btnCap').onclick=record;
+$('#btnAvg').onclick=e=>{AVG=!AVG; e.currentTarget.classList.toggle('on',AVG); toast(AVG?'Averaging 2 s of samples':'Instant capture')};
+$('#btnHold').onclick=e=>{
+  if(FROZEN){FROZEN=null;e.currentTarget.classList.remove('on');e.currentTarget.textContent='Freeze'}
+  else{FROZEN=currentVec();e.currentTarget.classList.add('on');e.currentTarget.textContent='Release'}};
+$('#btnManual').onclick=()=>{
+  const dip=parseFloat($('#mDip').value), dd=parseFloat($('#mDd').value);
+  if(!(dip>=0&&dip<=90)||!(dd>=0&&dd<=360)){toast('Dip 0–90, dip direction 0–360');return}
+  DATA.push({id:Date.now(),mode:'plane',dip,dd:dd%360,q:0,site:$('#fSite').value.trim()||'—',type:$('#fType').value,note:$('#fNote').value.trim(),decl:0});
+  $('#mDip').value=$('#mDd').value=''; save(); toast('Plane added');
+};
+$('#fSite').oninput=()=>$('#hdrSite').textContent=$('#fSite').value.trim()||'—';
+$$('[data-lay]').forEach(b=>b.onclick=()=>{
+  const k=b.dataset.lay; LAYERS[k]=LAYERS[k]?0:1; b.classList.toggle('on',!!LAYERS[k]); drawNet();});
+$('#cone').oninput=e=>{CONE=+e.target.value; $('#coneV').textContent=CONE; if(LAYERS.density)drawNet()};
+$$('#kSeg button').forEach(b=>b.onclick=()=>{
+  $$('#kSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  K=+b.dataset.k; DB.set('gs_k',K); refresh();});
+$('#decl').oninput=e=>{DECL=parseFloat(e.target.value)||0; DB.set('gs_decl',DECL)};
+$('#btnCsv').onclick=()=>{
+  const h='id,mode,dip,dip_direction,strike_rhr,trend,plunge,type,station,quality_deg,declination,note,timestamp\n';
+  const rows=DATA.map(d=>[d.id,d.mode,d.dip??'',d.dd??'',d.dd!=null?Math.round(strikeOf(d.dd)):'',d.trend??'',d.plunge??'',
+    d.type||'',d.site,d.q,d.decl,'"'+(d.note||'').replace(/"/g,'""')+'"',new Date(d.id).toISOString()].join(','));
+  dl('geostruct_'+new Date().toISOString().slice(0,10)+'.csv',h+rows.join('\n'),'text/csv');};
+$('#btnJson').onclick=()=>dl('geostruct_'+new Date().toISOString().slice(0,10)+'.json',
+  JSON.stringify({app:'GeoStruct',version:1,exported:new Date().toISOString(),declination:DECL,measurements:DATA},null,1),'application/json');
+$('#btnImp').onclick=()=>$('#fileImp').click();
+$('#fileImp').onchange=e=>{const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader(); r.onload=()=>{try{
+    const j=JSON.parse(r.result), arr=Array.isArray(j)?j:j.measurements;
+    if(!Array.isArray(arr))throw 0;
+    const ids=new Set(DATA.map(d=>d.id)); let n=0;
+    arr.forEach(d=>{if(d&&!ids.has(d.id)){DATA.push(d);n++}});
+    save(); toast(n+' measurements imported');
+  }catch(x){toast('That file is not a GeoStruct export')} e.target.value='';};
+  r.readAsText(f);};
+$('#btnDel').onclick=()=>{ if(!SEL.size){toast('Tap rows to select them first');return}
+  DATA=DATA.filter(d=>!SEL.has(d.id)); const n=SEL.size; SEL.clear(); save(); toast(n+' deleted');};
+$('#btnWipe').onclick=()=>{ if(!DATA.length){toast('Nothing to clear');return}
+  if(confirm('Delete all '+DATA.length+' measurements? Export first if you need them.')){DATA=[];SEL.clear();save();toast('Log cleared')}};
+$('#btnTheme').onclick=e=>{document.body.classList.toggle('sun');
+  e.currentTarget.textContent=document.body.classList.contains('sun')?'Night mode':'Daylight mode';
+  DB.set('gs_sun',document.body.classList.contains('sun')); drawNet();};
+$('#btnRetry').onclick=()=>{S.tries=[]; startSensors(); tryOrientationSensor(); tryRawSensors(); diagnose(); toast('Re-requesting the sensors')};
+setInterval(diagnose,1000); diagnose();
+$('#gateBtn').onclick=()=>{startSensors(); $('#gate').style.display='none'};
+$('#gateSkip').onclick=()=>{$('#gate').style.display='none'};
+
+if(DB.get('gs_sun',false)){document.body.classList.add('sun'); $('#btnTheme').textContent='Night mode'}
+$('#decl').value=DECL;
+(function loop(){drawDial(); updateReadout(); requestAnimationFrame(loop)})();
+addEventListener('resize',()=>{drawNet()});
+refresh();
+</script>
+</body>
+</html>
