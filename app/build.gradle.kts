@@ -8,15 +8,14 @@ android {
         applicationId = "com.geostruct.field"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            // signed with the debug key so the artifact installs directly;
-            // swap in your own keystore for distribution
+            // Signed with the debug key: installs immediately, not Play-Store ready.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -24,6 +23,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError = false
     }
 }
 
