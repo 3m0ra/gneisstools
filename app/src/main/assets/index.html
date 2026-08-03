@@ -2,902 +2,1817 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#0E1214">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
 <meta name="mobile-web-app-capable" content="yes">
-<title>GeoStruct — Field Inclinometer</title>
+<title>GeoTools</title>
 <style>
-:root{
-  --rock:#0E1214; --panel:#161B1E; --panel2:#1D2428; --line:#2C363B;
-  --ink:#E9F0F1; --mute:#8FA3A9; --dim:#5D6E74;
-  --malachite:#3FC8A2; --hematite:#D2603F; --quartz:#E8DCC8; --azurite:#5A9BE6;
-  --s1:#3FC8A2; --s2:#D2603F; --s3:#5A9BE6; --s4:#E0B341; --s5:#B57BD6;
-  --r:14px;
-  --mono:ui-monospace,"SF Mono","Roboto Mono","DejaVu Sans Mono",monospace;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-}
-body.sun{
-  --rock:#F2F0EA; --panel:#FFFFFF; --panel2:#EAE7DE; --line:#C9C4B6;
-  --ink:#12171A; --mute:#4E5A5F; --dim:#7C8A8F;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+input,textarea,select,.doc p,.doc li{-webkit-user-select:text;user-select:text}
+html,body{height:100%;margin:0}
 body{
-  background:var(--rock); color:var(--ink); font-family:var(--sans);
-  overscroll-behavior:none; -webkit-user-select:none; user-select:none;
-  display:flex; flex-direction:column;
-}
-#app{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 14px 24px}
-header{
-  padding:calc(env(safe-area-inset-top) + 12px) 14px 10px;
-  display:flex; align-items:baseline; gap:10px; border-bottom:1px solid var(--line);
-  position:sticky; top:0; background:var(--rock); z-index:20;
-}
-h1{
-  font-size:15px; margin:0; letter-spacing:.22em; text-transform:uppercase; font-weight:800;
-}
-h1 span{color:var(--malachite)}
-.hdr-meta{margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--dim); letter-spacing:.1em; text-align:right}
-.eyebrow{
-  font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--dim); margin:22px 0 8px; display:flex; align-items:center; gap:8px;
-}
-.eyebrow:after{content:""; flex:1; height:1px; background:var(--line)}
-.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin-bottom:12px}
-nav{
-  display:flex; border-top:1px solid var(--line); background:var(--panel);
-  padding-bottom:env(safe-area-inset-bottom);
-}
-nav button{
-  flex:1; background:none; border:0; color:var(--dim); padding:10px 2px 12px;
-  font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
-  display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer;
-  border-top:2px solid transparent; margin-top:-1px;
-}
-nav button.on{color:var(--ink); border-top-color:var(--malachite)}
-nav svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
-.view{display:none} .view.on{display:block}
+ --paper:#fff;--ink:#000;--g05:#fbfbfb;--g1:#f0f0f0;--g2:#dadada;--g3:#9a9a9a;--g4:#585858;
+ --sans:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
+ --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+ background:var(--paper);color:var(--ink);font:400 15px/1.45 var(--sans);
+ display:flex;flex-direction:column;overflow:hidden}
+body[data-theme=dark]{--paper:#000;--ink:#fff;--g05:#080808;--g1:#141414;--g2:#333;--g3:#7d7d7d;--g4:#b4b4b4}
 
-/* readout */
-.readout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--line); border-radius:var(--r); overflow:hidden; border:1px solid var(--line)}
-.ro{background:var(--panel); padding:12px 8px; text-align:center}
-.ro b{display:block; font-family:var(--mono); font-size:27px; font-weight:600; letter-spacing:-.02em; line-height:1.05}
-.ro i{display:block; font-style:normal; font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--dim); text-transform:uppercase; margin-top:5px}
-.ro.big b{font-size:31px; color:var(--malachite)}
-.notation{text-align:center; font-family:var(--mono); font-size:13px; color:var(--mute); margin-top:10px; letter-spacing:.06em}
+#bar{flex:0 0 auto;display:flex;align-items:center;height:52px;padding:0 6px;border-bottom:1px solid var(--ink)}
+#bar h1{margin:0;font:700 13px/1.2 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+#bar p{margin:0;font:400 11px/1.3 var(--sans);color:var(--g4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#barTitle{flex:1;min-width:0;padding-left:4px}
+.ico{width:40px;height:40px;flex:0 0 auto;border:0;background:none;color:var(--ink);font:400 25px/1 var(--sans)}
+.ico[hidden],[hidden]{display:none!important}
+.ico.sq{width:auto;min-width:40px;padding:0 9px;border:1px solid var(--ink);font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase}
 
-/* dial */
-.dialwrap{position:relative; display:flex; justify-content:center; margin:6px 0 2px}
-canvas{display:block; touch-action:manipulation}
-.stab{
-  position:absolute; top:6px; right:6px; font-family:var(--mono); font-size:9.5px;
-  letter-spacing:.12em; padding:4px 8px; border-radius:20px; border:1px solid var(--line);
-  background:var(--panel2); color:var(--dim); text-transform:uppercase;
-}
-.stab.ok{color:var(--malachite); border-color:var(--malachite)}
-.stab.bad{color:var(--hematite); border-color:var(--hematite)}
+#seg{flex:0 0 auto;display:flex;border-bottom:1px solid var(--ink)}
+#seg button{flex:1;padding:11px 3px;border:0;border-right:1px solid var(--g2);background:var(--paper);color:var(--g4);font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+#seg button:last-child{border-right:0}
+#seg button.on{background:var(--ink);color:var(--paper)}
 
-/* controls */
-.row{display:flex; gap:8px} .row>*{flex:1}
-button.act{
-  background:var(--malachite); color:#07100D; border:0; border-radius:var(--r);
-  padding:17px 12px; font-family:var(--mono); font-size:13px; font-weight:700;
-  letter-spacing:.14em; text-transform:uppercase; cursor:pointer;
-}
-button.act:active{transform:scale(.985)}
-button.act[disabled]{opacity:.35}
-button.ghost{
-  background:transparent; color:var(--mute); border:1px solid var(--line); border-radius:var(--r);
-  padding:12px 10px; font-family:var(--mono); font-size:11px; letter-spacing:.12em;
-  text-transform:uppercase; cursor:pointer;
-}
-button.ghost.on{color:var(--ink); border-color:var(--malachite)}
-button.danger{color:var(--hematite); border-color:var(--hematite)}
-.seg{display:flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:12px}
-.seg button{
-  flex:1; background:transparent; border:0; color:var(--dim); padding:11px 4px; cursor:pointer;
-  font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
-}
-.seg button.on{background:var(--panel2); color:var(--ink)}
-label.f{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin:0 0 6px}
-input,select,textarea{
-  width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:10px;
-  color:var(--ink); padding:11px; font-family:var(--mono); font-size:14px; -webkit-user-select:text; user-select:text;
-}
-input[type=range]{padding:0; background:none; border:0; accent-color:var(--malachite)}
-.hint{font-size:11.5px; color:var(--mute); line-height:1.55}
-.hint b{color:var(--ink); font-weight:600}
+#stage{flex:1;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
+.screen.on{display:block}
+.pad{padding:14px 14px 34px}
+.pane{display:none}
+.pane.on{display:block}
 
-/* table */
-table{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11.5px}
-th{text-align:left; color:var(--dim); font-weight:400; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:6px 4px; border-bottom:1px solid var(--line)}
-td{padding:9px 4px; border-bottom:1px solid var(--line); color:var(--mute)}
-td.k{color:var(--ink)}
-tr.sel td{background:var(--panel2)}
-.swatch{width:9px;height:9px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:6px}
-.empty{text-align:center; padding:34px 14px; color:var(--dim); font-size:12.5px; line-height:1.6}
-.legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-family:var(--mono); font-size:10.5px; color:var(--mute)}
-.chip{display:flex; align-items:center; gap:6px}
-.setcard{border-left:3px solid var(--malachite); padding-left:11px; margin-bottom:14px}
-.setcard h4{margin:0 0 3px; font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase}
-.kv{display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-family:var(--mono); font-size:11.5px; color:var(--mute); margin-top:6px}
-.kv b{color:var(--ink); font-weight:600}
-.toast{
-  position:fixed; left:50%; bottom:82px; transform:translateX(-50%) translateY(14px);
-  background:var(--panel2); border:1px solid var(--line); color:var(--ink);
-  padding:10px 16px; border-radius:22px; font-family:var(--mono); font-size:11.5px;
-  opacity:0; transition:.22s; pointer-events:none; z-index:50; white-space:nowrap;
-}
-.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
-.gate{position:fixed; inset:0; background:var(--rock); z-index:99; display:flex; flex-direction:column; justify-content:center; padding:30px; gap:16px}
-.gate h2{font-size:19px; letter-spacing:.05em; margin:0}
-@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+ol.menu{list-style:none;margin:0;padding:0}
+ol.menu li{display:flex;align-items:flex-start;gap:12px;padding:16px 14px;border-bottom:1px solid var(--g2)}
+ol.menu li:active{background:var(--g1)}
+ol.menu .num{font:400 11px/1.6 var(--mono);color:var(--g3);width:20px;flex:0 0 auto}
+ol.menu .lab{flex:1;min-width:0}
+ol.menu .lab b{display:block;font:600 16px/1.25 var(--sans)}
+ol.menu .lab i{display:block;font-style:normal;font-size:12px;color:var(--g4);margin-top:3px}
+ol.menu .chev{font-size:21px;color:var(--g3);line-height:1.1}
+ol.menu li.off{opacity:.42}
+
+h2.sec{margin:20px 14px 8px;font:700 10px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--g4)}
+p.note{margin:8px 14px;font:400 12px/1.5 var(--sans);color:var(--g4)}
+.row{display:flex;gap:8px;align-items:flex-end;margin:9px 0}
+label.f{flex:1;display:block;min-width:0}
+label.f span{display:block;font:600 10px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--g4);margin-bottom:5px}
+input,select,textarea{width:100%;padding:9px 8px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);font:400 15px/1.2 var(--sans);border-radius:0;-webkit-appearance:none;appearance:none}
+input[type=range]{padding:0;border:0;height:26px;background:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:11px 12px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border-radius:0}
+.btn:active,.btn.on{background:var(--ink);color:var(--paper)}
+.btn.wide{width:100%}
+.btn.big{padding:17px 12px;font-size:14px}
+.btn:disabled{opacity:.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+.readout{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--ink)}
+.readout div{padding:11px 6px;border-right:1px solid var(--g2);text-align:center}
+.readout div:last-child{border-right:0}
+.readout b{display:block;font:400 25px/1 var(--mono)}
+.readout span{display:block;font:600 9px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--g4);margin-top:6px}
+.stab{font:400 11px/1.4 var(--mono);color:var(--g4);text-align:center;margin:7px 0 0}
+
+canvas{display:block;width:100%;background:var(--paper)}
+figure.plate{margin:0 0 14px;border:1px solid var(--ink)}
+figure.plate figcaption{border-top:1px solid var(--g2);padding:6px 8px;font:400 11px/1.4 var(--sans);color:var(--g4)}
+#dialWrap{max-width:330px;margin:0 auto 12px}
+
+table{width:100%;border-collapse:collapse;font:400 12px/1.3 var(--mono)}
+th{font:600 9px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--g4);text-align:left;padding:7px 6px;border-bottom:1px solid var(--ink)}
+td{padding:8px 6px;border-bottom:1px solid var(--g2)}
+tr.sel td{background:var(--ink);color:var(--paper)}
+.empty{padding:28px 14px;text-align:center;color:var(--g3);font-size:13px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--g2);font-size:13px}
+.kv b{font:400 13px/1.35 var(--mono);text-align:right}
+
+#mapCv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;background:var(--g1)}
+#rail{position:absolute;left:8px;top:8px;border:1px solid var(--ink);background:var(--paper)}
+#rail button{display:block;width:42px;height:42px;border:0;border-bottom:1px solid var(--g2);background:var(--paper);color:var(--ink);font:400 16px/1 var(--sans)}
+#rail button:last-child{border-bottom:0}
+#rail button.on{background:var(--ink);color:var(--paper)}
+#mapHud{position:absolute;right:8px;top:8px;border:1px solid var(--ink);background:var(--paper);padding:5px 7px;font:400 10px/1.5 var(--mono);max-width:48%}
+#mapHint{position:absolute;left:58px;right:8px;bottom:8px;border:1px solid var(--ink);background:var(--paper);padding:7px 9px;font:400 11px/1.4 var(--sans)}
+#mapZoom{position:absolute;left:8px;bottom:8px;border:1px solid var(--ink);background:var(--paper)}
+#mapZoom button{display:block;width:42px;height:38px;border:0;border-bottom:1px solid var(--g2);background:var(--paper);color:var(--ink);font:400 18px/1 var(--sans)}
+#mapZoom button:last-child{border-bottom:0}
+
+#sheet{position:absolute;inset:0;z-index:30;display:none}
+#sheet.on{display:block}
+#sheetBg{position:absolute;inset:0;background:rgba(0,0,0,.38)}
+#sheetBody{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--paper);border-top:1px solid var(--ink);padding:12px 14px 22px}
+#sheetBody h3{margin:0 0 10px;font:700 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,18px);opacity:0;pointer-events:none;transition:.18s;background:var(--ink);color:var(--paper);padding:9px 14px;font:500 12px/1.3 var(--sans);max-width:88%;text-align:center;z-index:60}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+.doc{padding:4px 14px 34px}
+.doc h3{margin:20px 0 6px;font:600 15px/1.3 var(--sans)}
+.doc p{margin:7px 0;font-size:14px}
+.doc ol,.doc ul{margin:7px 0 7px 18px;padding:0;font-size:14px}
+.doc li{margin:5px 0}
+.doc .fig{border:1px solid var(--ink);padding:9px;margin:10px 0;font:400 12px/1.5 var(--mono);color:var(--g4)}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.thumbs figure{margin:0;border:1px solid var(--ink)}
+.thumbs img{display:block;width:100%;height:88px;object-fit:cover;filter:grayscale(1)}
+.thumbs figcaption{font:400 9px/1.25 var(--mono);padding:3px 4px;border-top:1px solid var(--g2)}
+.tag{display:inline-block;border:1px solid var(--ink);padding:2px 5px;font:600 9px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-right:4px}
 </style>
 </head>
-<body>
+<body data-theme="light">
 
-<header>
-  <h1>Geo<span>Struct</span></h1>
-  <div class="hdr-meta"><span id="hdrN">0</span> planes<br><span id="hdrSite">—</span></div>
+<header id="bar">
+  <button class="ico" id="btnBack" hidden>&#8249;</button>
+  <div id="barTitle"><h1 id="hTitle">GeoTools</h1><p id="hSub">Field toolkit for structural geology</p></div>
+  <button class="ico sq" id="btnCtx" hidden></button>
 </header>
 
-<div id="app">
+<nav id="seg" hidden></nav>
 
-<!-- ══════════ MEASURE ══════════ -->
-<section class="view on" id="v-measure">
-  <div class="seg" id="modeSeg">
-    <button class="on" data-mode="plane">Plane</button>
-    <button data-mode="line">Lineation</button>
-    <button data-mode="manual">Manual</button>
-  </div>
+<main id="stage">
 
-  <div id="sensorUI">
-    <div class="dialwrap">
-      <canvas id="dial" width="340" height="340"></canvas>
-      <div class="stab" id="stab">waiting</div>
-    </div>
-
-    <div class="readout" id="ro">
-      <div class="ro big"><b id="roA">--</b><i id="roAL">dip</i></div>
-      <div class="ro"><b id="roB">--</b><i id="roBL">dip dir</i></div>
-      <div class="ro"><b id="roC">--</b><i id="roCL">strike</i></div>
-    </div>
-    <div class="notation" id="notation">place phone back flat on the fracture plane</div>
-
-    <div class="row" style="margin-top:12px">
-      <button class="act" id="btnCap">Record plane</button>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <button class="ghost on" id="btnAvg">Average 2 s</button>
-      <button class="ghost" id="btnHold">Freeze</button>
-    </div>
-  </div>
-
-  <div id="manualUI" style="display:none">
-    <div class="card">
-      <div class="row" style="margin-bottom:10px">
-        <div><label class="f">Dip °</label><input id="mDip" type="number" inputmode="decimal" min="0" max="90" placeholder="0–90"></div>
-        <div><label class="f">Dip direction °</label><input id="mDd" type="number" inputmode="decimal" min="0" max="360" placeholder="0–360"></div>
-      </div>
-      <button class="act" id="btnManual">Add plane</button>
-    </div>
-  </div>
-
-  <div class="eyebrow">Attribution</div>
-  <div class="card">
-    <div class="row" style="margin-bottom:10px">
-      <div><label class="f">Station</label><input id="fSite" placeholder="ST-01"></div>
-      <div><label class="f">Structure</label>
-        <select id="fType">
-          <option>Joint</option><option>Fault</option><option>Bedding</option>
-          <option>Foliation</option><option>Vein</option><option>Shear</option><option>Other</option>
-        </select>
-      </div>
-    </div>
-    <label class="f">Note</label><input id="fNote" placeholder="roughness, infill, aperture…">
-  </div>
-
-  <div class="eyebrow">Sensor status</div>
-  <div class="card">
-    <div id="diag"></div>
-    <div class="row" style="margin-top:12px"><button class="ghost" id="btnRetry">Retry sensors</button></div>
-  </div>
-
-  <div class="eyebrow">Field method</div>
-  <div class="card hint">
-    <b>Plane:</b> press the phone's back flat against the fracture surface, wait for the stability lock, record. The screen-normal is taken as the pole; the app resolves it to the lower hemisphere.<br><br>
-    <b>Lineation:</b> lay the phone on the surface with the <b>top edge</b> pointing down-plunge along the striae or intersection, then record.<br><br>
-    Keep clear of steel hammers, magnets and vehicles — the compass is magnetic. Recheck the sensor against a known bearing at each new outcrop.
-  </div>
+<!-- ============ MAIN MENU ============ -->
+<section class="screen" id="sc-home">
+  <ol class="menu">
+    <li data-go="tools"><span class="num">01</span><span class="lab"><b>Tools</b><i>Stereonet &middot; GeoCover field map</i></span><span class="chev">&#8250;</span></li>
+    <li data-go="data"><span class="num">02</span><span class="lab"><b>Data</b><i>Table, import and export</i></span><span class="chev">&#8250;</span></li>
+    <li data-go="settings"><span class="num">03</span><span class="lab"><b>General settings</b><i>Projection, declination, theme, sensors</i></span><span class="chev">&#8250;</span></li>
+    <li data-go="tutorials"><span class="num">04</span><span class="lab"><b>Tutorials</b><i>How to measure, plot and map</i></span><span class="chev">&#8250;</span></li>
+    <li data-go="about"><span class="num">05</span><span class="lab"><b>About</b><i>Version, data sources, licence</i></span><span class="chev">&#8250;</span></li>
+  </ol>
+  <h2 class="sec">Current session</h2>
+  <div class="pad" style="padding-top:0" id="homeStat"></div>
 </section>
 
-<!-- ══════════ STEREONET ══════════ -->
-<section class="view" id="v-net">
-  <div class="dialwrap"><canvas id="net" width="360" height="360"></canvas></div>
-  <div class="legend" id="netLegend"></div>
-  <div class="row" style="margin-top:12px">
-    <button class="ghost on" data-lay="poles">Poles</button>
-    <button class="ghost" data-lay="planes">Great circles</button>
-    <button class="ghost" data-lay="density">Density</button>
-  </div>
-  <div class="row" style="margin-top:8px">
-    <button class="ghost on" data-lay="sets">Set colours</button>
-    <button class="ghost on" data-lay="mean">Set means</button>
-    <button class="ghost" data-lay="wulff">Wulff</button>
-  </div>
-
-  <div class="eyebrow">Counting</div>
-  <div class="card">
-    <label class="f">Counting cone <span id="coneV">10</span>°</label>
-    <input type="range" id="cone" min="4" max="20" step="1" value="10">
-    <div class="hint" style="margin-top:10px">Lower-hemisphere <b>equal-area</b> (Schmidt) projection by default; switch to <b>Wulff</b> for equal-angle work. Density is contoured in multiples of a uniform distribution, so a value of 6 means six times the poles you would expect by chance in that cone.</div>
-  </div>
-
-  <div class="eyebrow">Rose of strikes</div>
-  <div class="dialwrap"><canvas id="rose" width="340" height="200"></canvas></div>
-
-  <div class="eyebrow">Dip distribution</div>
-  <div class="dialwrap"><canvas id="hist" width="340" height="180"></canvas></div>
+<!-- ============ TOOLS SUBMENU ============ -->
+<section class="screen" id="sc-tools">
+  <ol class="menu">
+    <li data-go="stereo"><span class="num">01</span><span class="lab"><b>Stereonet</b><i>Measure planes and lineations, plot poles, contour density, cluster sets</i></span><span class="chev">&#8250;</span></li>
+    <li data-go="map"><span class="num">02</span><span class="lab"><b>Field map &middot; GeoCover</b><i>Dip symbols, fault traces and photo samples on the swisstopo vector geological map</i></span><span class="chev">&#8250;</span></li>
+  </ol>
+  <p class="note">Both tools write into the same dataset: a dip reading taken with the stereonet can be dropped on the map, and a dip annotated on the map is plotted on the stereonet.</p>
 </section>
 
-<!-- ══════════ SETS ══════════ -->
-<section class="view" id="v-sets">
-  <div class="card">
-    <label class="f">Fracture families to fit</label>
-    <div class="seg" id="kSeg" style="margin:0">
-      <button class="on" data-k="0">Auto</button>
-      <button data-k="1">1</button><button data-k="2">2</button>
-      <button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button>
+<!-- ============ TOOL 01 : STEREONET ============ -->
+<section class="screen" id="sc-stereo">
+
+  <div class="pane on" id="pn-measure"><div class="pad">
+    <div class="readout">
+      <div><b id="roA">--</b><span id="roAL">Dip</span></div>
+      <div><b id="roB">--</b><span id="roBL">Dip dir</span></div>
+      <div><b id="roC">--</b><span id="roCL">Strike</span></div>
     </div>
-    <div class="hint" style="margin-top:10px">Poles are clustered as axes (a pole and its opposite are the same orientation). Auto picks the number of families with the cleanest separation.</div>
-  </div>
-  <div id="setsOut"></div>
-  <div class="eyebrow">Intersections</div>
-  <div id="interOut" class="card hint">Fit two or more families to get the intersection lines that control wedge and block geometry.</div>
+    <p class="stab" id="stab">Waiting for sensors&hellip;</p>
+    <div id="dialWrap"><canvas id="dial"></canvas></div>
+
+    <div class="grid2"><button class="btn" id="btnPlane">Plane</button><button class="btn" id="btnLine">Lineation</button></div>
+    <div class="row"><button class="btn wide big" id="btnCap">Record plane</button></div>
+    <div class="grid2"><button class="btn" id="btnHold">Freeze</button><button class="btn" id="btnAvg">Average 2 s</button></div>
+
+    <h2 class="sec" style="margin-left:0">Manual entry</h2>
+    <div class="row">
+      <label class="f"><span id="mDipL">Dip</span><input id="mDip" type="number" inputmode="decimal" min="0" max="90" placeholder="0-90"></label>
+      <label class="f"><span id="mDdL">Dip direction</span><input id="mDd" type="number" inputmode="decimal" min="0" max="360" placeholder="0-360"></label>
+      <button class="btn" id="btnManual" style="flex:0 0 auto">Add</button>
+    </div>
+
+    <h2 class="sec" style="margin-left:0">Attributes</h2>
+    <div class="row">
+      <label class="f"><span>Site / station</span><input id="fSite" placeholder="e.g. VS-14"></label>
+      <label class="f"><span>Structure</span><select id="fType">
+        <option>bedding</option><option>foliation</option><option>joint</option><option>fault plane</option>
+        <option>vein</option><option>shear zone</option><option>fold axial plane</option><option>fold axis</option>
+        <option>slickenline</option><option>intersection lineation</option><option>other</option></select></label>
+    </div>
+    <div class="row"><label class="f"><span>Note</span><input id="fNote" placeholder="free text"></label></div>
+    <div class="row"><button class="btn wide" id="btnGeoTag">Attach GPS position to new readings: off</button></div>
+  </div></div>
+
+  <div class="pane" id="pn-plot"><div class="pad">
+    <figure class="plate"><canvas id="net"></canvas><figcaption id="netCap">Lower hemisphere, equal-area projection.</figcaption></figure>
+    <div class="grid3">
+      <button class="btn on" data-layer="poles">Poles</button>
+      <button class="btn" data-layer="planes">Planes</button>
+      <button class="btn" data-layer="density">Density</button>
+      <button class="btn on" data-layer="sets">Sets</button>
+      <button class="btn on" data-layer="mean">Mean</button>
+      <button class="btn" data-layer="cone">Cone</button>
+    </div>
+    <figure class="plate" style="margin-top:14px"><canvas id="rose"></canvas><figcaption>Strike rose, 10&deg; sectors, frequency scaled to the outer circle.</figcaption></figure>
+    <figure class="plate"><canvas id="hist"></canvas><figcaption>Dip-angle histogram, 10&deg; classes.</figcaption></figure>
+    <button class="btn wide" id="btnPng">Export plate as PNG</button>
+  </div></div>
+
+  <div class="pane" id="pn-sets"><div class="pad">
+    <div class="row"><label class="f"><span>Clustering</span><select id="kSel">
+      <option value="0">Automatic (silhouette)</option><option value="1">1 set</option><option value="2">2 sets</option>
+      <option value="3">3 sets</option><option value="4">4 sets</option><option value="5">5 sets</option></select></label></div>
+    <div id="setsOut"></div>
+    <h2 class="sec" style="margin-left:0">Set intersections</h2>
+    <div id="interOut"></div>
+  </div></div>
 </section>
 
-<!-- ══════════ DATA ══════════ -->
-<section class="view" id="v-data">
-  <div class="card" style="padding:6px 10px">
-    <table><thead><tr><th>#</th><th>Dip/Dir</th><th>Type</th><th>Stn</th><th>Q</th></tr></thead>
-    <tbody id="tbody"></tbody></table>
-    <div class="empty" id="dataEmpty">No measurements yet.<br>Record a plane to start the log.</div>
+<!-- ============ TOOL 02 : GEOCOVER MAP ============ -->
+<section class="screen" id="sc-map">
+  <canvas id="mapCv"></canvas>
+  <div id="rail">
+    <button id="tPan" class="on" title="Pan and inspect">&#10021;</button>
+    <button id="tDip" title="Add dip symbol">&#9679;</button>
+    <button id="tFault" title="Draw fault trace">&#8599;</button>
+    <button id="tPhoto" title="Photo sample">&#9635;</button>
+    <button id="tGps" title="Locate">&#8982;</button>
+    <button id="tLayers" title="Layers">&#9707;</button>
   </div>
-  <div class="row"><button class="ghost" id="btnCsv">Export CSV</button><button class="ghost" id="btnJson">Export JSON</button></div>
-  <div class="row" style="margin-top:8px"><button class="ghost" id="btnImp">Import JSON</button><button class="ghost danger" id="btnDel">Delete selected</button></div>
-  <input type="file" id="fileImp" accept=".json,application/json" style="display:none">
-  <div class="eyebrow">Calibration</div>
-  <div class="card">
-    <label class="f">Magnetic declination ° (E positive)</label>
-    <input id="decl" type="number" inputmode="decimal" step="0.1" value="0">
-    <div class="hint" style="margin-top:10px">Applied to every new reading so bearings are recorded as true north. Look up the declination for your map sheet before the first station.</div>
-    <div class="row" style="margin-top:12px"><button class="ghost" id="btnTheme">Daylight mode</button><button class="ghost danger" id="btnWipe">Clear all data</button></div>
-  </div>
+  <div id="mapHud"></div>
+  <div id="mapZoom"><button id="zIn">+</button><button id="zOut">&minus;</button></div>
+  <div id="mapHint">Pan and pinch to explore. Long-press to identify the GeoCover unit.</div>
 </section>
 
-</div>
+<!-- ============ DATA ============ -->
+<section class="screen" id="sc-data">
+  <div class="pane on" id="pn-table">
+    <div id="dataHead"></div>
+    <table><thead><tr><th>#</th><th>Orientation</th><th>Type</th><th>Site</th><th>Pos</th></tr></thead><tbody id="tbody"></tbody></table>
+    <div class="empty" id="dataEmpty" hidden>No measurements yet. Open Tools &rarr; Stereonet to record the first one.</div>
+    <div class="pad"><div class="grid2">
+      <button class="btn" id="btnCsv">Export CSV</button>
+      <button class="btn" id="btnJson">Export JSON</button>
+      <button class="btn" id="btnGeo">Export GeoJSON</button>
+      <button class="btn" id="btnImp">Import JSON</button>
+      <button class="btn" id="btnDelSel">Delete selected</button>
+      <button class="btn" id="btnClear">Clear selection</button>
+    </div><input type="file" id="fileImp" accept="application/json,.json" hidden></div>
+  </div>
+  <div class="pane" id="pn-photos"><div class="pad"><div class="thumbs" id="thumbs"></div><div class="empty" id="phEmpty" hidden>No photo samples yet.</div></div></div>
+  <div class="pane" id="pn-faults"><div class="pad"><div id="faultsOut"></div></div></div>
+</section>
 
-<nav id="nav">
-  <button class="on" data-v="measure"><svg viewBox="0 0 24 24"><path d="M3 17 21 7M3 17v4h18V7"/><path d="M8 15v3M13 12v6M18 9v9"/></svg>Measure</button>
-  <button data-v="net"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>Stereonet</button>
-  <button data-v="sets"><svg viewBox="0 0 24 24"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="15" r="3"/><path d="M4 20h4M16 4h4"/></svg>Families</button>
-  <button data-v="data"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Data</button>
-</nav>
+<!-- ============ SETTINGS ============ -->
+<section class="screen" id="sc-settings"><div class="pad">
+  <h2 class="sec" style="margin-left:0">Projection</h2>
+  <div class="grid2"><button class="btn on" id="btnSchmidt">Equal area</button><button class="btn" id="btnWulff">Equal angle</button></div>
+  <h2 class="sec" style="margin-left:0">Magnetic declination</h2>
+  <div class="row"><label class="f"><span>East positive, degrees</span><input id="decl" type="number" step="0.1" inputmode="decimal"></label></div>
+  <p class="note" style="margin:0">Added to every measured azimuth. Switzerland is between +2 and +3.5 degrees.</p>
+  <h2 class="sec" style="margin-left:0">Small circle (cone)</h2>
+  <div class="row"><label class="f"><span>Half apical angle, degrees: <b id="coneV">10</b></span><input id="cone" type="range" min="2" max="60" step="1"></label></div>
+  <h2 class="sec" style="margin-left:0">Appearance</h2>
+  <div class="grid2"><button class="btn" id="btnTheme">Theme: paper</button><button class="btn on" id="btnMono">Monochrome map</button></div>
+  <p class="note" style="margin:0">Monochrome map renders swisstopo tiles in greyscale so the plate stays publication ready. Turn it off when you need the GeoCover lithology colours.</p>
+  <h2 class="sec" style="margin-left:0">Session</h2>
+  <div class="grid2"><button class="btn" id="btnAwake">Keep screen on: off</button><button class="btn" id="btnDiag">Sensor report</button></div>
+  <h2 class="sec" style="margin-left:0">Danger zone</h2>
+  <button class="btn wide" id="btnWipe">Erase all measurements, traces and photos</button>
+</div></section>
 
-<div class="toast" id="toast"></div>
+<!-- ============ TUTORIALS ============ -->
+<section class="screen" id="sc-tutorials">
+  <ol class="menu" id="docMenu"></ol>
+</section>
+<section class="screen" id="sc-doc"><div class="doc" id="docBody"></div></section>
 
-<div class="gate" id="gate">
-  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase">Field structural toolkit</div>
-  <h2>GeoStruct needs the motion and compass sensors</h2>
-  <div class="hint" id="gateMsg">Grant access to read the phone's orientation. Nothing leaves the device — measurements are stored locally.</div>
-  <button class="act" id="gateBtn">Enable sensors</button>
-  <button class="ghost" id="gateSkip">Continue without sensors</button>
-</div>
+<!-- ============ ABOUT ============ -->
+<section class="screen" id="sc-about"><div class="pad" id="aboutBody"></div></section>
 
+</main>
+
+<div id="sheet"><div id="sheetBg"></div><div id="sheetBody"></div></div>
+<div id="toast"></div>
 <script>
-"use strict";
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const D2R=Math.PI/180, R2D=180/Math.PI;
-const SETC=['--s1','--s2','--s3','--s4','--s5'];
-const cvar=n=>getComputedStyle(document.body).getPropertyValue(n).trim();
+'use strict';
+/* ================= 0. helpers ================= */
+var D2R=Math.PI/180, R2D=180/Math.PI;
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function clamp(v,a,b){return v<a?a:(v>b?b:v)}
+function pad(n,w){return String(Math.round(n)).padStart(w,'0')}
+function fmtPlane(r){return pad(r.dip,2)+'/'+pad(r.dd,3)}
+function fmtLine(r){return pad(r.plunge,2)+'-'+pad(r.trend,3)}
+function fmtRec(r){return r.mode==='line'?fmtLine(r):fmtPlane(r)}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-/* ---------- storage (localStorage w/ memory fallback) ---------- */
-const DB={m:{},ok:(()=>{try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}})(),
-  get(k,d){try{const v=this.ok?localStorage.getItem(k):this.m[k];return v==null?d:JSON.parse(v)}catch(e){return d}},
-  set(k,v){try{const s=JSON.stringify(v); this.ok?localStorage.setItem(k,s):this.m[k]=s}catch(e){this.m[k]=JSON.stringify(v)}}};
+var DB={m:{},ok:(function(){try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}})(),
+ get:function(k,d){try{var v=this.ok?localStorage.getItem(k):this.m[k];return v==null?d:JSON.parse(v)}catch(e){return d}},
+ set:function(k,v){try{var s=JSON.stringify(v);if(this.ok)localStorage.setItem(k,s);else this.m[k]=s}catch(e){this.m[k]=JSON.stringify(v)}}};
 
-let DATA=DB.get('gs_data',[]), DECL=DB.get('gs_decl',0), SEL=new Set(), K=DB.get('gs_k',0);
-let SETS=[], LAYERS={poles:1,planes:0,density:0,sets:1,mean:1,wulff:0}, CONE=10;
+/* photo blobs live in IndexedDB, metadata in localStorage */
+var IDB=(function(){var dbp=null;
+ function open(){if(dbp)return dbp;dbp=new Promise(function(res,rej){var rq=indexedDB.open('geotools',1);
+  rq.onupgradeneeded=function(){rq.result.createObjectStore('photos')};
+  rq.onsuccess=function(){res(rq.result)};rq.onerror=function(){rej(rq.error)}});return dbp}
+ function st(mode){return open().then(function(db){return db.transaction('photos',mode).objectStore('photos')})}
+ return{
+  put:function(k,v){return st('readwrite').then(function(s){return new Promise(function(res,rej){var r=s.put(v,k);r.onsuccess=function(){res(1)};r.onerror=function(){rej(r.error)}})})},
+  get:function(k){return st('readonly').then(function(s){return new Promise(function(res){var r=s.get(k);r.onsuccess=function(){res(r.result)};r.onerror=function(){res(null)}})}).catch(function(){return null})},
+  del:function(k){return st('readwrite').then(function(s){s.delete(k)}).catch(function(){})},
+  clear:function(){return st('readwrite').then(function(s){s.clear()}).catch(function(){})}};
+})();
 
-/* ---------- vector / orientation maths ---------- */
-const norm=v=>{const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]};
-const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
-const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+/* ================= 1. state ================= */
+var DATA=DB.get('gs_data',[]), FAULTS=DB.get('gs_faults',[]), PHOTOS=DB.get('gs_photos',[]);
+var DECL=DB.get('gs_decl',0), K=DB.get('gs_k',0), CONE=DB.get('gs_cone',10);
+var WULFF=DB.get('gs_wulff',0), MONO=DB.get('gs_mono',1), THEME=DB.get('gs_theme','light');
+var GEOTAG=DB.get('gs_geotag',0);
+var SEL={}, SETS=[], LAYERS={poles:1,planes:0,density:0,sets:1,mean:1,cone:0};
+var MODE='plane', AVG=false, FROZEN=null, AWAKE=false, FIX=null;
 
-// world frame: x=East, y=North, z=Up. Device->world rotation from alpha,beta,gamma (ZXY).
+function saveData(){DB.set('gs_data',DATA);refreshAll()}
+function saveFaults(){DB.set('gs_faults',FAULTS)}
+function savePhotos(){DB.set('gs_photos',PHOTOS)}
+
+var tt; function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},1900)}
+function buzz(ms){if(navigator.vibrate)navigator.vibrate(ms||26)}
+function dl(name,txt,type){
+ if(window.AndroidExport&&AndroidExport.save){try{AndroidExport.save(name,type,btoa(unescape(encodeURIComponent(txt))));toast('Saved to Downloads: '+name);return}catch(e){}}
+ var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:type}));a.download=name;a.click();
+ setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+}
+function dlBase64(name,b64,type){
+ if(window.AndroidExport&&AndroidExport.save){try{AndroidExport.save(name,type,b64);toast('Saved to Downloads: '+name);return}catch(e){}}
+ var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+ var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([u],{type:type}));a.download=name;a.click();
+}
+
+/* ================= 2. vector and orientation maths ================= */
+function norm(v){var m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]}
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+/* world frame is E, N, Up */
 function axes(al,be,ga){
-  const a=al*D2R,b=be*D2R,g=ga*D2R;
-  const ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),cg=Math.cos(g),sg=Math.sin(g);
-  return {
-    y:[-sa*cb, ca*cb, sb],                                  // device +Y (top edge)
-    z:[ca*sg+sa*sb*cg, sa*sg-ca*sb*cg, cb*cg]               // device +Z (out of screen)
-  };
+ var a=al*D2R,b=be*D2R,g=ga*D2R;
+ var ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),cg=Math.cos(g),sg=Math.sin(g);
+ return{y:[-sa*cb,ca*cb,sb],z:[ca*sg+sa*sb*cg,sa*sg-ca*sb*cg,cb*cg]};
 }
-// downward-directed unit vector -> {trend, plunge}
+/* unit vector -> trend and plunge of its downward end */
 function tp(v){
-  const d = v[2]>0 ? [-v[0],-v[1],-v[2]] : v.slice();
-  const u=norm(d);
-  let t=Math.atan2(u[0],u[1])*R2D; if(t<0)t+=360;
-  return {t, p:Math.asin(Math.min(1,-u[2]))*R2D, v:u};
+ var d=v[2]>0?[-v[0],-v[1],-v[2]]:v.slice(), u=norm(d);
+ var t=Math.atan2(u[0],u[1])*R2D; if(t<0)t+=360;
+ return{t:t,p:Math.asin(clamp(-u[2],-1,1))*R2D,v:u};
 }
-const vecFromTP=(t,p)=>{const c=Math.cos(p*D2R);return[c*Math.sin(t*D2R),c*Math.cos(t*D2R),-Math.sin(p*D2R)]};
-// pole (trend,plunge) -> plane (dip, dipdir)
-const poleToPlane=(t,p)=>({dip:90-p, dd:(t+180)%360});
-const planeToPole=(dip,dd)=>vecFromTP((dd+180)%360, 90-dip);
-const strikeOf=dd=>(dd+270)%360;
-const pad=(n,w)=>String(Math.round(n)).padStart(w,'0');
-const fmt=r=>`${pad(r.dip,2)}/${pad(r.dd,3)}`;
+function vecFromTP(t,p){var c=Math.cos(p*D2R);return[c*Math.sin(t*D2R),c*Math.cos(t*D2R),-Math.sin(p*D2R)]}
+function poleToPlane(t,p){return{dip:90-p,dd:(t+180)%360}}
+function planeToPole(dip,dd){return vecFromTP((dd+180)%360,90-dip)}
+function strikeOf(dd){return(dd+270)%360}
+function recVec(r){return r.mode==='line'?vecFromTP(r.trend,r.plunge):planeToPole(r.dip,r.dd)}
+/* axial mean by orientation tensor, returns principal eigenvector */
+function eig3(M){
+ var v=[0.577,0.577,0.577],i,j,nv;
+ for(i=0;i<80;i++){nv=[0,0,0];for(j=0;j<3;j++)nv[j]=M[j][0]*v[0]+M[j][1]*v[1]+M[j][2]*v[2];v=norm(nv)}
+ var lv=[M[0][0]*v[0]+M[0][1]*v[1]+M[0][2]*v[2],M[1][0]*v[0]+M[1][1]*v[1]+M[1][2]*v[2],M[2][0]*v[0]+M[2][1]*v[1]+M[2][2]*v[2]];
+ return{v:v,l:dot(lv,v)};
+}
+function tensor(vs){
+ var M=[[0,0,0],[0,0,0],[0,0,0]],i,a,b;
+ for(i=0;i<vs.length;i++)for(a=0;a<3;a++)for(b=0;b<3;b++)M[a][b]+=vs[i][a]*vs[i][b];
+ for(a=0;a<3;a++)for(b=0;b<3;b++)M[a][b]/=(vs.length||1);
+ return M;
+}
+function meanVec(vs){if(!vs.length)return null;var e=eig3(tensor(vs));return norm(e.v[2]>0?[-e.v[0],-e.v[1],-e.v[2]]:e.v)}
+/* Fisher concentration and 95 per cent cone for axial data */
+function fisher(vs,m){
+ var n=vs.length,i,s=[0,0,0],w;
+ for(i=0;i<n;i++){w=dot(vs[i],m)<0?-1:1;s[0]+=w*vs[i][0];s[1]+=w*vs[i][1];s[2]+=w*vs[i][2]}
+ var R=Math.hypot(s[0],s[1],s[2]);
+ if(n<2||R<=0)return{k:null,a95:null,R:R};
+ var k=(n-1)/Math.max(n-R,1e-9);
+ var a95=Math.acos(clamp(1-(n-R)/R*(Math.pow(20,1/(n-1))-1),-1,1))*R2D;
+ return{k:k,a95:isFinite(a95)?a95:null,R:R};
+}
 
-/* ---------- sensor: three independent acquisition paths ---------- */
-const S={live:false, z:null, y:null, buf:[], absolute:false, src:'none', n:0, tries:[]};
+/* ================= 3. sensors ================= */
+var S={live:false,z:null,y:null,absolute:false,src:'',n:0,buf:[],tries:[]};
 function feed(z,y,absolute,src){
-  if(!z||!y||!isFinite(z[0])||!isFinite(y[0]))return;
-  S.live=true; S.z=norm(z); S.y=norm(y); S.absolute=absolute; S.src=src; S.n++;
-  S.buf.push({z:S.z,y:S.y,t:performance.now()});
-  if(S.buf.length>80)S.buf.shift();
+ if(!z||!y||!isFinite(z[0])||!isFinite(y[0]))return;
+ S.live=true;S.z=norm(z);S.y=norm(y);S.absolute=absolute;S.src=src;S.n++;
+ S.buf.push({z:S.z,y:S.y,t:performance.now()});
+ if(S.buf.length>80)S.buf.shift();
 }
 function onOri(e){
-  if(e.alpha==null||e.beta==null||e.gamma==null)return;
-  const al=e.webkitCompassHeading!=null?360-e.webkitCompassHeading:e.alpha;
-  const A=axes(al,e.beta,e.gamma);
-  feed(A.z,A.y, !!(e.absolute||e.webkitCompassHeading!=null), e.type==='deviceorientationabsolute'?'DeviceOrientation (absolute)':'DeviceOrientation'+(e.absolute?' (absolute)':' (relative)'));
+ if(e.alpha==null||e.beta==null||e.gamma==null)return;
+ var al=e.webkitCompassHeading!=null?360-e.webkitCompassHeading:e.alpha;
+ var A=axes(al,e.beta,e.gamma);
+ feed(A.z,A.y,!!(e.absolute||e.webkitCompassHeading!=null),
+  (e.type==='deviceorientationabsolute'?'DeviceOrientation absolute':'DeviceOrientation '+(e.absolute?'absolute':'relative')));
 }
-// path 2 — Generic Sensor API, quaternion referenced to ENU
 function tryOrientationSensor(){
-  if(!('AbsoluteOrientationSensor' in window)&&!('RelativeOrientationSensor' in window)){S.tries.push('OrientationSensor: not supported');return}
-  const abs='AbsoluteOrientationSensor' in window;
-  try{
-    const s=new (abs?AbsoluteOrientationSensor:RelativeOrientationSensor)({frequency:30,referenceFrame:'device'});
-    s.onreading=()=>{const[x,y,z,w]=s.quaternion;
-      feed([2*(x*z+y*w), 2*(y*z-x*w), 1-2*(x*x+y*y)],
-           [2*(x*y-z*w), 1-2*(x*x+z*z), 2*(y*z+x*w)], abs, 'OrientationSensor'+(abs?' (absolute)':' (relative)'));};
-    s.onerror=e=>S.tries.push('OrientationSensor: '+(e.error?e.error.name:'error'));
-    s.start(); S.tries.push('OrientationSensor: started');
-  }catch(e){S.tries.push('OrientationSensor: '+e.name)}
+ if(!('AbsoluteOrientationSensor' in window)&&!('RelativeOrientationSensor' in window)){S.tries.push('OrientationSensor: not supported');return}
+ var abs='AbsoluteOrientationSensor' in window;
+ try{
+  var s=new (abs?AbsoluteOrientationSensor:RelativeOrientationSensor)({frequency:30,referenceFrame:'device'});
+  s.onreading=function(){var q=s.quaternion,x=q[0],y=q[1],z=q[2],w=q[3];
+   feed([2*(x*z+y*w),2*(y*z-x*w),1-2*(x*x+y*y)],[2*(x*y-z*w),1-2*(x*x+z*z),2*(y*z+x*w)],abs,'OrientationSensor '+(abs?'absolute':'relative'))};
+  s.onerror=function(e){S.tries.push('OrientationSensor: '+(e.error?e.error.name:'error'))};
+  s.start();S.tries.push('OrientationSensor: started');
+ }catch(e){S.tries.push('OrientationSensor: '+e.name)}
 }
-// path 3 — raw accelerometer + magnetometer, frame built by hand
 function tryRawSensors(){
-  if(!('Accelerometer' in window)){S.tries.push('Accelerometer: not supported');return}
-  let a=null,m=null;
-  const build=()=>{ if(!a)return;
-    const up=norm(a);
-    let north=m?norm([m[0]-dot(m,up)*up[0], m[1]-dot(m,up)*up[1], m[2]-dot(m,up)*up[2]]):null;
-    if(!north){ // no compass: fall back to an arbitrary horizontal reference, dip stays valid
-      north=norm(Math.abs(up[2])<0.9?cross([0,0,1],up):cross([0,1,0],up)); }
-    const east=norm(cross(north,up));
-    // device axes expressed in world (E,N,U)
-    feed([east[2],north[2],up[2]],[east[1],north[1],up[1]], !!m, m?'Accelerometer + Magnetometer':'Accelerometer only (no north)');
-  };
-  try{const ac=new Accelerometer({frequency:30});
-    ac.onreading=()=>{a=[ac.x,ac.y,ac.z]; build()};
-    ac.onerror=e=>S.tries.push('Accelerometer: '+(e.error?e.error.name:'error')); ac.start();
-    S.tries.push('Accelerometer: started');
-  }catch(e){S.tries.push('Accelerometer: '+e.name)}
-  try{const mg=new Magnetometer({frequency:20});
-    mg.onreading=()=>{m=[mg.x,mg.y,mg.z]};
-    mg.onerror=e=>S.tries.push('Magnetometer: '+(e.error?e.error.name:'error')); mg.start();
-    S.tries.push('Magnetometer: started');
-  }catch(e){S.tries.push('Magnetometer: '+e.name)}
+ if(!('Accelerometer' in window)){S.tries.push('Accelerometer: not supported');return}
+ var a=null,m=null;
+ function build(){ if(!a)return;
+  var up=norm(a),north=null;
+  if(m){north=norm([m[0]-dot(m,up)*up[0],m[1]-dot(m,up)*up[1],m[2]-dot(m,up)*up[2]])}
+  if(!north)north=norm(Math.abs(up[2])<0.9?cross([0,0,1],up):cross([0,1,0],up));
+  var east=norm(cross(north,up));
+  feed([east[2],north[2],up[2]],[east[1],north[1],up[1]],!!m,m?'Accelerometer and magnetometer':'Accelerometer only, no north');
+ }
+ try{var ac=new Accelerometer({frequency:30});ac.onreading=function(){a=[ac.x,ac.y,ac.z];build()};
+  ac.onerror=function(e){S.tries.push('Accelerometer: '+(e.error?e.error.name:'error'))};ac.start();S.tries.push('Accelerometer: started');
+ }catch(e){S.tries.push('Accelerometer: '+e.name)}
+ try{var mg=new Magnetometer({frequency:20});mg.onreading=function(){m=[mg.x,mg.y,mg.z]};
+  mg.onerror=function(e){S.tries.push('Magnetometer: '+(e.error?e.error.name:'error'))};mg.start();S.tries.push('Magnetometer: started');
+ }catch(e){S.tries.push('Magnetometer: '+e.name)}
 }
 function startSensors(){
-  S.tries=[];
-  const attach=()=>{
-    window.addEventListener('deviceorientationabsolute',onOri,true);
-    window.addEventListener('deviceorientation',onOri,true);
-    S.tries.push('DeviceOrientation: listening');
-  };
-  const need=window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function';
-  if(need){DeviceOrientationEvent.requestPermission().then(r=>{S.tries.push('permission: '+r); if(r==='granted')attach()}).catch(e=>S.tries.push('permission: '+e.name));}
-  else attach();
-  setTimeout(()=>{ if(!S.live) tryOrientationSensor(); },900);
-  setTimeout(()=>{ if(!S.live) tryRawSensors(); },1900);
-  setTimeout(()=>{ if(!S.live){ $('#gateMsg').innerHTML='Still nothing from the sensors. Check the diagnostics panel at the bottom of the Measure tab — the usual cause is the page running inside another app\'s viewer, or Chrome\'s Motion sensors permission being off for this site.'; } },3200);
-  if(navigator.wakeLock)navigator.wakeLock.request('screen').catch(()=>{});
+ S.tries=[];
+ function attach(){window.addEventListener('deviceorientationabsolute',onOri,true);
+  window.addEventListener('deviceorientation',onOri,true);S.tries.push('DeviceOrientation: listening')}
+ var need=window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function';
+ if(need)DeviceOrientationEvent.requestPermission().then(function(r){S.tries.push('permission: '+r);if(r==='granted')attach()}).catch(function(e){S.tries.push('permission: '+e.name)});
+ else attach();
+ setTimeout(function(){if(!S.live)tryOrientationSensor()},900);
+ setTimeout(function(){if(!S.live)tryRawSensors()},1900);
 }
-// jitter over the last ~1 s, in degrees
-function jitter(vecKey){
-  const now=performance.now(), w=S.buf.filter(b=>now-b.t<1000);
-  if(w.length<6)return 99;
-  let s=[0,0,0]; w.forEach(b=>{const v=b[vecKey]; const f=dot(v,w[0][vecKey])<0?-1:1; s=[s[0]+f*v[0],s[1]+f*v[1],s[2]+f*v[2]]});
-  const R=Math.hypot(...s)/w.length;
-  return Math.min(99, Math.acos(Math.min(1,R))*R2D*2);
+function jitter(){
+ var now=performance.now(),w=S.buf.filter(function(b){return now-b.t<1200});
+ if(w.length<4)return null;
+ var vs=w.map(function(b){return MODE==='line'?b.y:b.z}),m=meanVec(vs.map(norm));
+ var mx=0;vs.forEach(function(v){var a=Math.acos(clamp(Math.abs(dot(norm(v),m)),-1,1))*R2D;if(a>mx)mx=a});
+ return mx;
 }
-function currentVec(){ return MODE==='line'?S.y:S.z; }
-function diagnose(){
-  const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
-  const opaque=/^(content|file|blob|data)/.test(location.protocol);
-  const rows=[
-    ['Reading from', S.live?S.src:'nothing yet'],
-    ['Samples received', S.n],
-    ['North reference', S.live?(S.absolute?'magnetic compass — bearings valid':'none — dip valid, azimuth arbitrary'):'—'],
-    ['Origin', opaque?'OPAQUE ('+location.protocol+') — sensors cannot be granted':location.origin],
-    ['Embedded in another app', inFrame?'YES — this blocks sensors':'no'],
-  ];
-  $('#diag').innerHTML='<div class="kv">'+rows.map(r=>`<span>${r[0]}</span><b style="${/NO|YES|nothing|OPAQUE/.test(r[1])?'color:var(--hematite)':''}">${r[1]}</b>`).join('')+'</div>'
-    +(S.tries.length?'<div class="hint" style="margin-top:10px;color:var(--dim)">'+S.tries.slice(-6).join('<br>')+'</div>':'')
-    +(S.live?'':(opaque
-      ? '<div class="hint" style="margin-top:10px">This page was opened as a stored file, so it has no web origin. Chrome has nowhere to attach a Motion sensors permission and denies every sensor with <b>NotAllowedError</b> — no phone setting can change that. Serve the file from <b>https://</b> or from <b>http://localhost</b> and the sensors come straight up.</div>'
-      : '<div class="hint" style="margin-top:10px">Allow <b>Motion sensors</b> in Chrome\'s site settings for this origin. On Samsung, check the <b>Sensors off</b> quick-settings tile is not active.</div>'));
+function currentVec(){return MODE==='line'?S.y:S.z}
+
+/* ================= 4. router ================= */
+var ROUTES={
+ home:{t:'GeoTools',s:'Field toolkit for structural geology',sc:'sc-home',enter:function(){drawHome()}},
+ tools:{t:'Tools',s:'Select an instrument',sc:'sc-tools'},
+ stereo:{t:'Stereonet',s:'Tool 01 / orientation measurement',sc:'sc-stereo',
+   seg:[['pn-measure','Measure'],['pn-plot','Plot'],['pn-sets','Sets']],pane:'pn-measure',enter:function(){refreshAll()}},
+ map:{t:'Field map',s:'Tool 02 / GeoCover annotation',sc:'sc-map',enter:function(){mapEnter()},leave:function(){mapLeave()}},
+ data:{t:'Data',s:'Dataset, photo samples, traces',sc:'sc-data',
+   seg:[['pn-table','Table'],['pn-photos','Photos'],['pn-faults','Traces']],pane:'pn-table',enter:function(){drawTable();drawThumbs();drawFaultList()}},
+ settings:{t:'General settings',s:'Projection, declination, appearance',sc:'sc-settings',enter:function(){syncSettings()}},
+ tutorials:{t:'Tutorials',s:'Guided field workflows',sc:'sc-tutorials',enter:function(){drawDocMenu()}},
+ doc:{t:'Tutorial',s:'',sc:'sc-doc'},
+ about:{t:'About',s:'Version and data sources',sc:'sc-about',enter:function(){drawAbout()}}
+};
+var STACK=['home'];
+function cur(){return STACK[STACK.length-1]}
+function go(r){var p=ROUTES[cur()];if(p&&p.leave)p.leave();STACK.push(r);render()}
+function back(){if(STACK.length<2)return false;var p=ROUTES[cur()];if(p&&p.leave)p.leave();STACK.pop();render();return true}
+function render(){
+ var r=ROUTES[cur()];
+ $('#hTitle').textContent=r.t;
+ $('#hSub').textContent=r.s;
+ $('#btnBack').hidden=STACK.length<2;
+ var seg=$('#seg');seg.hidden=!r.seg;seg.innerHTML='';
+ if(r.seg){r.seg.forEach(function(p){
+   var b=document.createElement('button');b.textContent=p[1];b.className=r.pane===p[0]?'on':'';
+   b.onclick=function(){r.pane=p[0];render()};seg.appendChild(b)})}
+ $$('.screen').forEach(function(s){s.classList.toggle('on',s.id===r.sc)});
+ var scr=$('#'+r.sc);
+ $$('.pane',scr).forEach(function(p){p.classList.toggle('on',!r.seg||p.id===r.pane)});
+ scr.scrollTop=0;
+ if(r.enter)r.enter();
+ sizeCanvases();
+}
+window.GT={onBack:function(){
+ if($('#sheet').classList.contains('on')){closeSheet();return true}
+ if(MAP.draft){MAP.draft=null;MAP.tool='pan';syncRail();drawMap();toast('Trace cancelled');return true}
+ return back();
+}};
+$('#btnBack').onclick=function(){back()};
+$$('[data-go]').forEach(function(li){li.onclick=function(){go(li.getAttribute('data-go'))}});
+
+/* ================= 5. bottom sheet ================= */
+function sheet(title,html,after){
+ $('#sheetBody').innerHTML='<h3>'+title+'</h3>'+html;
+ $('#sheet').classList.add('on');
+ if(after)after();
+}
+function closeSheet(){$('#sheet').classList.remove('on');$('#sheetBody').innerHTML=''}
+$('#sheetBg').onclick=closeSheet;
+
+/* ================= 6. measure screen ================= */
+function setMode(m){
+ MODE=m;FROZEN=null;
+ $('#btnPlane').classList.toggle('on',m==='plane');
+ $('#btnLine').classList.toggle('on',m==='line');
+ $('#btnCap').textContent=m==='line'?'Record lineation':'Record plane';
+ $('#roAL').textContent=m==='line'?'Plunge':'Dip';
+ $('#roBL').textContent=m==='line'?'Trend':'Dip dir';
+ $('#roCL').textContent=m==='line'?'Quality':'Strike';
+ $('#mDipL').textContent=m==='line'?'Plunge':'Dip';
+ $('#mDdL').textContent=m==='line'?'Trend':'Dip direction';
+ $('#btnHold').classList.remove('on');$('#btnHold').textContent='Freeze';
+}
+$('#btnPlane').onclick=function(){setMode('plane')};
+$('#btnLine').onclick=function(){setMode('line')};
+$('#btnAvg').onclick=function(){AVG=!AVG;this.classList.toggle('on',AVG);toast(AVG?'Averaging a 2 s window':'Instant reading')};
+$('#btnHold').onclick=function(){
+ if(FROZEN){FROZEN=null;this.classList.remove('on');this.textContent='Freeze';return}
+ var v=currentVec();if(!v){toast('No sensor data');return}
+ FROZEN=v.slice();this.classList.add('on');this.textContent='Frozen';buzz(18);
+};
+$('#btnGeoTag').onclick=function(){
+ GEOTAG=GEOTAG?0:1;DB.set('gs_geotag',GEOTAG);syncGeoBtn();
+ if(GEOTAG)startGps();
+};
+function syncGeoBtn(){
+ var b=$('#btnGeoTag');b.classList.toggle('on',!!GEOTAG);
+ b.textContent='Attach GPS position to new readings: '+(GEOTAG?(FIX?'on, '+FIX.acc.toFixed(0)+' m':'on, waiting'):'off');
 }
 
-/* ---------- projection ---------- */
-function proj(v,R,wulff){ // v = downward unit vector
-  const u=v[2]>0?[-v[0],-v[1],-v[2]]:v;
-  const th=Math.acos(Math.min(1,-u[2]));             // angle from vertical(down)
-  const r=wulff?R*Math.tan(th/2):R*Math.SQRT2*Math.sin(th/2);
-  const az=Math.atan2(u[0],u[1]);
-  return [r*Math.sin(az), -r*Math.cos(az)];
-}
-function unproj(x,y,R,wulff){
-  const rr=Math.hypot(x,y); if(rr>R)return null;
-  const th=wulff?2*Math.atan(rr/R):2*Math.asin(Math.min(1,rr/(R*Math.SQRT2)));
-  const az=Math.atan2(x,-y), s=Math.sin(th);
-  return [s*Math.sin(az),s*Math.cos(az),-Math.cos(th)];
-}
-function greatCircle(pole,n=181){
-  const p=norm(pole);
-  let a=Math.abs(p[2])<0.9?cross(p,[0,0,1]):cross(p,[0,1,0]); a=norm(a);
-  const b=norm(cross(p,a)), out=[];
-  for(let i=0;i<n;i++){const t=i/(n-1)*2*Math.PI, c=Math.cos(t), s=Math.sin(t);
-    out.push([a[0]*c+b[0]*s, a[1]*c+b[1]*s, a[2]*c+b[2]*s]);}
-  return out;
-}
-
-/* ---------- canvas helpers ---------- */
-function setup(cv,w,h){
-  const dpr=Math.min(3,devicePixelRatio||1);
-  cv.width=w*dpr; cv.height=h*dpr; cv.style.width=w+'px'; cv.style.height=h+'px';
-  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h); return c;
-}
-function netFrame(c,cx,cy,R,wulff,small){
-  c.lineWidth=1;
-  if(!small){
-    // grid: great circles dipping E and W, plus small circles about the N–S horizontal axis
-    c.strokeStyle=cvar('--line');
-    for(let d=10;d<=80;d+=10){
-      [90,270].forEach(dd=>{
-        const pts=greatCircle(planeToPole(d,dd)).filter(v=>v[2]<=0.0001);
-        c.beginPath(); pts.forEach((v,i)=>{const q=proj(v,R,wulff); i?c.lineTo(cx+q[0],cy+q[1]):c.moveTo(cx+q[0],cy+q[1])}); c.stroke();
-      });
-      // small circles about the horizontal N–S axis
-      [1,-1].forEach(sg=>{
-        c.beginPath(); let mv=false;
-        for(let i=0;i<=180;i++){
-          const ph=i/180*Math.PI;
-          const v=[sg*Math.sin(d*D2R)*1, Math.cos(d*D2R)*Math.cos(ph), -Math.cos(d*D2R)*Math.sin(ph)];
-          const n2=norm(v); if(n2[2]>0){mv=false;continue}
-          const q=proj(n2,R,wulff); mv?c.lineTo(cx+q[0],cy+q[1]):(c.moveTo(cx+q[0],cy+q[1]),mv=true);
-        }
-        c.stroke();
-      });
-    }
-  }
-  c.strokeStyle=cvar('--dim'); c.lineWidth=1.4;
-  c.beginPath(); c.arc(cx,cy,R,0,7); c.stroke();
-  c.beginPath(); c.moveTo(cx,cy-4); c.lineTo(cx,cy+4); c.moveTo(cx-4,cy); c.lineTo(cx+4,cy); c.stroke();
-  for(let a=0;a<360;a+=10){
-    const L=a%90===0?9:(a%30===0?6:3.5), rad=a*D2R;
-    c.beginPath();
-    c.moveTo(cx+Math.sin(rad)*R, cy-Math.cos(rad)*R);
-    c.lineTo(cx+Math.sin(rad)*(R-L), cy-Math.cos(rad)*(R-L));
-    c.strokeStyle=a%90===0?cvar('--ink'):cvar('--dim'); c.stroke();
-  }
-  c.fillStyle=cvar('--mute'); c.font='600 10px '+cvar('--mono').replace(/"/g,'"'); c.textAlign='center'; c.textBaseline='middle';
-  [['N',0],['E',90],['S',180],['W',270]].forEach(([t,a])=>{
-    c.fillText(t, cx+Math.sin(a*D2R)*(R+13), cy-Math.cos(a*D2R)*(R+13));
-  });
-}
-
-/* ---------- live dial ---------- */
-const dial=$('#dial'); let MODE='plane', FROZEN=null, AVG=true;
-function drawDial(){
-  const W=Math.min(340, innerWidth-28), c=setup(dial,W,W), R=W/2-24, cx=W/2, cy=W/2;
-  netFrame(c,cx,cy,R,false,true);
-  const v=FROZEN||(S.live?currentVec():null);
-  if(!v){c.fillStyle=cvar('--dim');c.textAlign='center';c.fillText('no sensor',cx,cy);return}
-  const o=tp(v), q=proj(o.v,R,false);
-  // trace of recent positions
-  c.fillStyle='rgba(63,200,162,.16)';
-  S.buf.slice(-40).forEach(b=>{const p=proj(tp(MODE==='line'?b.y:b.z).v,R,false);
-    c.beginPath(); c.arc(cx+p[0],cy+p[1],2.2,0,7); c.fill();});
-  // pole marker
-  c.strokeStyle=cvar('--malachite'); c.lineWidth=1.2;
-  c.beginPath(); c.moveTo(cx+q[0]-11,cy+q[1]); c.lineTo(cx+q[0]+11,cy+q[1]);
-  c.moveTo(cx+q[0],cy+q[1]-11); c.lineTo(cx+q[0],cy+q[1]+11); c.stroke();
-  c.fillStyle=cvar('--malachite'); c.beginPath(); c.arc(cx+q[0],cy+q[1],4,0,7); c.fill();
-  if(MODE==='plane'){ // live great circle
-    c.strokeStyle='rgba(232,220,200,.5)'; c.lineWidth=1.3; c.beginPath();
-    let mv=false; greatCircle(o.v).forEach(g=>{ if(g[2]>0.0001){mv=false;return}
-      const p=proj(g,R,false); mv?c.lineTo(cx+p[0],cy+p[1]):(c.moveTo(cx+p[0],cy+p[1]),mv=true);});
-    c.stroke();
-  }
-  // bubble level ring
-  const tilt=S.z?Math.min(1,Math.acos(Math.min(1,Math.abs(S.z[2])))*R2D/90):0;
-  c.strokeStyle='rgba(143,163,169,.25)'; c.lineWidth=3; c.beginPath();
-  c.arc(cx,cy,R+7,-Math.PI/2,-Math.PI/2+tilt*2*Math.PI); c.stroke();
-}
-
-/* ---------- readout ---------- */
 function updateReadout(){
-  const v=FROZEN||(S.live?currentVec():null);
-  const j=jitter(MODE==='line'?'y':'z'), st=$('#stab');
-  if(FROZEN){st.textContent='frozen';st.className='stab ok'}
-  else if(!S.live){st.textContent='waiting';st.className='stab'}
-  else if(j<1.2){st.textContent='steady ±'+j.toFixed(1)+'°';st.className='stab ok'}
-  else {st.textContent='moving ±'+(j>20?'20+':j.toFixed(1))+'°';st.className='stab bad'}
-  if(!v){$('#roA').textContent=$('#roB').textContent=$('#roC').textContent='--';return}
-  const o=tp(v), t=(o.t+DECL+360)%360;
-  if(MODE==='line'){
-    $('#roAL').textContent='plunge'; $('#roBL').textContent='trend'; $('#roCL').textContent='—';
-    $('#roA').textContent=pad(o.p,2); $('#roB').textContent=pad(t,3); $('#roC').textContent='··';
-    $('#notation').textContent=`${pad(o.p,2)} → ${pad(t,3)}   (plunge → trend)`;
-  }else{
-    const pl=poleToPlane(t,o.p);
-    $('#roAL').textContent='dip'; $('#roBL').textContent='dip dir'; $('#roCL').textContent='strike';
-    $('#roA').textContent=pad(pl.dip,2); $('#roB').textContent=pad(pl.dd,3); $('#roC').textContent=pad(strikeOf(pl.dd),3);
-    $('#notation').textContent=`${pad(pl.dip,2)}/${pad(pl.dd,3)}   ·   ${pad(strikeOf(pl.dd),3)}/${pad(pl.dip,2)} right-hand rule`;
-  }
+ var v=FROZEN||currentVec();
+ if(!v){$('#roA').textContent='--';$('#roB').textContent='--';$('#roC').textContent='--';return}
+ var o=tp(v),t=(o.t+DECL+360)%360;
+ if(MODE==='line'){
+  $('#roA').textContent=pad(o.p,2);$('#roB').textContent=pad(t,3);
+  var j=jitter();$('#roC').textContent=j==null?'--':(j<1.5?'A':(j<4?'B':'C'));
+ }else{
+  var pl=poleToPlane(t,o.p);
+  $('#roA').textContent=pad(pl.dip,2);$('#roB').textContent=pad(pl.dd,3);$('#roC').textContent=pad(strikeOf(pl.dd),3);
+ }
+ var j2=jitter();
+ $('#stab').textContent=(FROZEN?'FROZEN / ':'')+(S.live?S.src:'no sensor')+(S.absolute?'':' / no absolute north')+(j2==null?'':' / spread '+j2.toFixed(1)+' deg');
 }
 
-/* ---------- capture ---------- */
-function meanVec(list){
-  let s=[0,0,0];
-  list.forEach(v=>{const f=dot(v,list[0])<0?-1:1; s=[s[0]+f*v[0],s[1]+f*v[1],s[2]+f*v[2]]});
-  return {v:norm(s), R:Math.hypot(...s)/list.length};
+function drawDial(){
+ var c=$('#dial'),ctx=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+ var ink=css('--ink'),g2=css('--g2'),g3=css('--g3'),paper=css('--paper');
+ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,w,h);
+ var cx=w/2,cy=h/2,R=Math.min(w,h)/2-16;
+ ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.fillStyle=paper;
+ ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.fill();ctx.stroke();
+ /* graduations every 10 deg, labels every 30 */
+ ctx.font='9px var(--mono),monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+ for(var a=0;a<360;a+=10){
+  var rad=a*D2R,l=(a%30===0)?9:5;
+  ctx.strokeStyle=(a%90===0)?ink:g3;ctx.lineWidth=(a%90===0)?1.4:0.8;
+  ctx.beginPath();ctx.moveTo(cx+Math.sin(rad)*R,cy-Math.cos(rad)*R);
+  ctx.lineTo(cx+Math.sin(rad)*(R-l),cy-Math.cos(rad)*(R-l));ctx.stroke();
+  if(a%90===0){ctx.fillStyle=ink;ctx.fillText(['N','E','S','W'][a/90],cx+Math.sin(rad)*(R-19),cy-Math.cos(rad)*(R-19))}
+ }
+ var v=FROZEN||currentVec();
+ if(!v){ctx.fillStyle=g3;ctx.font='11px var(--sans),sans-serif';ctx.fillText('no sensor data',cx,cy);return}
+ var o=tp(v),t=(o.t+DECL+360)%360,rad2=t*D2R;
+ if(MODE==='plane'){
+  var pl=poleToPlane(t,o.p),st=strikeOf(pl.dd)*D2R;
+  /* strike line */
+  ctx.strokeStyle=ink;ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(cx-Math.sin(st)*R*0.92,cy+Math.cos(st)*R*0.92);
+  ctx.lineTo(cx+Math.sin(st)*R*0.92,cy-Math.cos(st)*R*0.92);ctx.stroke();
+  /* dip arrow, length proportional to dip */
+  var dr=R*0.18+R*0.62*(pl.dip/90),dd=pl.dd*D2R;
+  ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.sin(dd)*dr,cy-Math.cos(dd)*dr);ctx.stroke();
+  arrowHead(ctx,cx+Math.sin(dd)*dr,cy-Math.cos(dd)*dr,dd,6);
+  ctx.fillStyle=ink;ctx.font='600 13px var(--mono),monospace';ctx.textAlign='left';
+  ctx.fillText(fmtPlane({dip:pl.dip,dd:pl.dd}),cx+Math.sin(dd)*(dr+12),cy-Math.cos(dd)*(dr+12));
+  /* levelling bubble: how far the phone is from the plane */
+ }else{
+  var lr=R*0.18+R*0.62*Math.cos(o.p*D2R);
+  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+Math.sin(rad2)*lr,cy-Math.cos(rad2)*lr);ctx.stroke();
+  arrowHead(ctx,cx+Math.sin(rad2)*lr,cy-Math.cos(rad2)*lr,rad2,6);
+  ctx.beginPath();ctx.arc(cx,cy,3,0,6.2832);ctx.fillStyle=ink;ctx.fill();
+  ctx.font='600 13px var(--mono),monospace';ctx.textAlign='left';
+  ctx.fillText(fmtLine({plunge:o.p,trend:t}),cx+Math.sin(rad2)*(lr+12),cy-Math.cos(rad2)*(lr+12));
+ }
+ /* inclinometer bar */
+ var inc=Math.acos(clamp(Math.abs(S.z?S.z[2]:0),0,1))*R2D;
+ ctx.strokeStyle=g2;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(12,h-8);ctx.lineTo(w-12,h-8);ctx.stroke();
+ ctx.strokeStyle=ink;ctx.lineWidth=3;var px=12+(w-24)*clamp(inc/90,0,1);
+ ctx.beginPath();ctx.moveTo(px-6,h-8);ctx.lineTo(px+6,h-8);ctx.stroke();
+}
+function arrowHead(ctx,x,y,rad,s){
+ ctx.beginPath();
+ ctx.moveTo(x,y);
+ ctx.lineTo(x-Math.sin(rad-0.42)*s,y+Math.cos(rad-0.42)*s);
+ ctx.lineTo(x-Math.sin(rad+0.42)*s,y+Math.cos(rad+0.42)*s);
+ ctx.closePath();ctx.fillStyle=css('--ink');ctx.fill();
+}
+
+/* ================= 7. recording ================= */
+function newRec(dip,dd,plunge,trend,q){
+ var r={id:Date.now(),mode:MODE,q:q==null?null:+q.toFixed(1),
+  site:$('#fSite').value.trim()||'-',type:$('#fType').value,note:$('#fNote').value.trim(),decl:DECL};
+ if(MODE==='line'){r.trend=+trend.toFixed(1);r.plunge=+plunge.toFixed(1)}
+ else{r.dip=+dip.toFixed(1);r.dd=+dd.toFixed(1)}
+ if(GEOTAG&&FIX){r.lat=+FIX.lat.toFixed(6);r.lon=+FIX.lon.toFixed(6);r.acc=Math.round(FIX.acc)}
+ DATA.push(r);saveData();
+ toast((MODE==='line'?'Lineation ':'Plane ')+fmtRec(r)+' recorded'+(r.lat?' with position':''));
+ buzz(28);
+ return r;
 }
 function record(){
-  if(!S.live&&!FROZEN){toast('No sensor data — use Manual');return}
-  const key=MODE==='line'?'y':'z';
-  const doIt=()=>{
-    let v, q;
-    if(FROZEN){v=FROZEN;q=0.5}
-    else{
-      const now=performance.now();
-      const w=(AVG?S.buf.filter(b=>now-b.t<2000):S.buf.slice(-3)).map(b=>b[key]);
-      if(!w.length){toast('No sensor data');return}
-      const m=meanVec(w); v=m.v; q=Math.acos(Math.min(1,m.R))*R2D*2;
-    }
-    const o=tp(v), t=(o.t+DECL+360)%360;
-    const rec={id:Date.now(), mode:MODE, q:+q.toFixed(1),
-      site:$('#fSite').value.trim()||'—', type:$('#fType').value, note:$('#fNote').value.trim(), decl:DECL};
-    if(MODE==='line'){rec.trend=+t.toFixed(1); rec.plunge=+o.p.toFixed(1);}
-    else{const pl=poleToPlane(t,o.p); rec.dip=+pl.dip.toFixed(1); rec.dd=+pl.dd.toFixed(1);}
-    DATA.push(rec); save();
-    toast(MODE==='line'?`Line ${pad(rec.plunge,2)}→${pad(rec.trend,3)} recorded`:`Plane ${fmt(rec)} recorded`);
-    if(navigator.vibrate)navigator.vibrate(28);
-    FROZEN=null; $('#btnHold').classList.remove('on'); $('#btnHold').textContent='Freeze';
-  };
-  if(AVG&&!FROZEN){ $('#btnCap').textContent='Averaging…'; $('#btnCap').disabled=true;
-    setTimeout(()=>{doIt(); $('#btnCap').disabled=false; $('#btnCap').textContent=MODE==='line'?'Record lineation':'Record plane';},2000);
-  } else doIt();
+ if(!S.live&&!FROZEN){toast('No sensor data, use manual entry');return}
+ function doIt(){
+  var v,q;
+  if(FROZEN){v=FROZEN;q=0.5}
+  else{
+   var now=performance.now();
+   var w=AVG?S.buf.filter(function(b){return now-b.t<2000}):S.buf.slice(-4);
+   var vs=w.map(function(b){return MODE==='line'?b.y:b.z});
+   if(!vs.length){toast('No sensor data');return}
+   v=meanVec(vs);q=jitter()||0.5;
+  }
+  var o=tp(v),t=(o.t+DECL+360)%360;
+  if(MODE==='line')newRec(null,null,o.p,t,q);
+  else{var pl=poleToPlane(t,o.p);newRec(pl.dip,pl.dd,null,null,q)}
+  FROZEN=null;$('#btnHold').classList.remove('on');$('#btnHold').textContent='Freeze';
+ }
+ if(AVG&&!FROZEN){
+  var b=$('#btnCap');b.textContent='Averaging';b.disabled=true;
+  setTimeout(function(){doIt();b.disabled=false;b.textContent=MODE==='line'?'Record lineation':'Record plane'},2000);
+ }else doIt();
+}
+$('#btnCap').onclick=record;
+$('#btnManual').onclick=function(){
+ var a=parseFloat($('#mDip').value),b=parseFloat($('#mDd').value);
+ if(!isFinite(a)||!isFinite(b)){toast('Enter both values');return}
+ if(MODE==='line')newRec(null,null,clamp(a,0,90),(b+360)%360,0);
+ else newRec(clamp(a,0,90),(b+360)%360,null,null,0);
+ $('#mDip').value='';$('#mDd').value='';
+};
+
+/* ================= 8. canvas plumbing ================= */
+var DPR=Math.min(window.devicePixelRatio||1,2.5);
+function css(v){return getComputedStyle(document.body).getPropertyValue(v).trim()||'#000'}
+function fit(c,ratio){
+ var w=c.parentNode.clientWidth||c.clientWidth||320;
+ if(!w)return false;
+ var h=Math.round(w*ratio);
+ c.style.height=h+'px';c.width=Math.round(w*DPR);c.height=Math.round(h*DPR);
+ return true;
+}
+function sizeCanvases(){
+ if(fit($('#dial'),1))drawDial();
+ if(fit($('#net'),1))drawNet();
+ if(fit($('#rose'),0.62))drawRose();
+ if(fit($('#hist'),0.5))drawHist();
+ sizeMap();
+}
+window.addEventListener('resize',function(){setTimeout(sizeCanvases,80)});
+
+/* ================= 9. projection ================= */
+function proj(v,R){
+ var o=tp(v),th=(90-o.p)*D2R;
+ var r=WULFF?R*Math.tan(th/2):R*Math.SQRT2*Math.sin(th/2);
+ return[Math.sin(o.t*D2R)*r,-Math.cos(o.t*D2R)*r];
+}
+function unproj(dx,dy,R){
+ var r=Math.hypot(dx,dy);if(r>R*1.001)return null;
+ var th=WULFF?2*Math.atan(r/R):2*Math.asin(clamp(r/(R*Math.SQRT2),0,1));
+ var t=Math.atan2(dx,-dy)*R2D;if(t<0)t+=360;
+ return vecFromTP(t,90-th*R2D);
+}
+/* lower hemisphere trace of a plane, split into continuous polylines */
+function greatCircle(dip,dd,R){
+ var p=planeToPole(dip,dd);
+ var u=norm(Math.abs(p[2])>0.9?cross(p,[0,1,0]):cross(p,[0,0,1])), w=norm(cross(p,u));
+ var segs=[],cf=[],a,v,pt,prev=null;
+ for(a=0;a<=360.5;a+=2){
+  var c=Math.cos(a*D2R),s=Math.sin(a*D2R);
+  v=[u[0]*c+w[0]*s,u[1]*c+w[1]*s,u[2]*c+w[2]*s];
+  if(v[2]>1e-6){if(cf.length>1)segs.push(cf);cf=[];prev=null;continue}
+  pt=proj(v,R);
+  if(prev&&Math.hypot(pt[0]-prev[0],pt[1]-prev[1])>R*0.5){if(cf.length>1)segs.push(cf);cf=[]}
+  cf.push(pt);prev=pt;
+ }
+ if(cf.length>1)segs.push(cf);
+ return segs;
+}
+function smallCircle(m,ang,R){
+ var u=norm(Math.abs(m[2])>0.9?cross(m,[0,1,0]):cross(m,[0,0,1])),w=norm(cross(m,u));
+ var ca=Math.cos(ang*D2R),sa=Math.sin(ang*D2R),segs=[],cf=[],a,prev=null;
+ for(a=0;a<=360.5;a+=3){
+  var c=Math.cos(a*D2R),s=Math.sin(a*D2R);
+  var v=norm([m[0]*ca+(u[0]*c+w[0]*s)*sa,m[1]*ca+(u[1]*c+w[1]*s)*sa,m[2]*ca+(u[2]*c+w[2]*s)*sa]);
+  if(v[2]>1e-6){if(cf.length>1)segs.push(cf);cf=[];prev=null;continue}
+  var pt=proj(v,R);
+  if(prev&&Math.hypot(pt[0]-prev[0],pt[1]-prev[1])>R*0.5){if(cf.length>1)segs.push(cf);cf=[]}
+  cf.push(pt);prev=pt;
+ }
+ if(cf.length>1)segs.push(cf);
+ return segs;
 }
 
-/* ---------- clustering (axial k-means + Fisher stats) ---------- */
-function principal(vs){
-  let T=[[0,0,0],[0,0,0],[0,0,0]];
-  vs.forEach(v=>{for(let i=0;i<3;i++)for(let j=0;j<3;j++)T[i][j]+=v[i]*v[j]});
-  let x=[0.3,0.5,0.81];
-  for(let it=0;it<80;it++){
-    const y=[T[0][0]*x[0]+T[0][1]*x[1]+T[0][2]*x[2], T[1][0]*x[0]+T[1][1]*x[1]+T[1][2]*x[2], T[2][0]*x[0]+T[2][1]*x[1]+T[2][2]*x[2]];
-    const m=Math.hypot(...y); if(m<1e-12)break; x=[y[0]/m,y[1]/m,y[2]/m];
-  }
-  return x[2]>0?[-x[0],-x[1],-x[2]]:x;
-}
+/* ================= 10. clustering and density ================= */
+function axDist(a,b){return 1-Math.abs(dot(a,b))}
 function kmeans(vs,k){
-  if(vs.length<k)return null;
-  let C=[vs[0]];
-  while(C.length<k){ // farthest-point seeding on axial distance
-    let best=null,bd=-1;
-    vs.forEach(v=>{const d=Math.min(...C.map(c=>1-Math.abs(dot(v,c)))); if(d>bd){bd=d;best=v}});
-    C.push(best);
-  }
-  let lab=new Array(vs.length).fill(-1);
-  for(let it=0;it<60;it++){
-    let ch=false;
-    vs.forEach((v,i)=>{let b=0,bs=-2; C.forEach((c,j)=>{const s=Math.abs(dot(v,c)); if(s>bs){bs=s;b=j}});
-      if(lab[i]!==b){lab[i]=b;ch=true}});
-    for(let j=0;j<k;j++){const g=vs.filter((_,i)=>lab[i]===j); if(g.length)C[j]=principal(g);}
-    if(!ch)break;
-  }
-  return {C,lab};
+ var i,j,it,cen=[];
+ cen.push(vs[0]);
+ while(cen.length<k){
+  var best=null,bd=-1;
+  for(i=0;i<vs.length;i++){var d=1e9;for(j=0;j<cen.length;j++)d=Math.min(d,axDist(vs[i],cen[j]));if(d>bd){bd=d;best=vs[i]}}
+  cen.push(best||vs[0]);
+ }
+ var lab=new Array(vs.length).fill(0);
+ for(it=0;it<40;it++){
+  var moved=false;
+  for(i=0;i<vs.length;i++){var bi=0,bb=1e9;
+   for(j=0;j<k;j++){var dd2=axDist(vs[i],cen[j]);if(dd2<bb){bb=dd2;bi=j}}
+   if(lab[i]!==bi){lab[i]=bi;moved=true}}
+  for(j=0;j<k;j++){var mem=[];for(i=0;i<vs.length;i++)if(lab[i]===j)mem.push(vs[i]);
+   if(mem.length)cen[j]=meanVec(mem.map(function(v){return dot(v,cen[j])<0?[-v[0],-v[1],-v[2]]:v}))}
+  if(!moved&&it>2)break;
+ }
+ return{lab:lab,cen:cen};
 }
-function silhouette(vs,r){
-  if(!r||new Set(r.lab).size<2)return -1;
-  const ang=(a,b)=>Math.acos(Math.min(1,Math.abs(dot(a,b))))*R2D;
-  let s=0;
-  vs.forEach((v,i)=>{
-    const own=vs.filter((_,j)=>r.lab[j]===r.lab[i]&&j!==i);
-    const a=own.length?own.reduce((t,u)=>t+ang(v,u),0)/own.length:0;
-    let b=Infinity;
-    for(let j=0;j<r.C.length;j++){ if(j===r.lab[i])continue;
-      const o=vs.filter((_,q)=>r.lab[q]===j); if(!o.length)continue;
-      b=Math.min(b,o.reduce((t,u)=>t+ang(v,u),0)/o.length);}
-    if(b<Infinity)s+=(b-a)/Math.max(a,b);
-  });
-  return s/vs.length;
+function silhouette(vs,lab,k){
+ if(k<2)return -1;
+ var i,j,s=0,n=vs.length;
+ for(i=0;i<n;i++){
+  var a=0,ac=0,bmin=1e9,c;
+  for(c=0;c<k;c++){var sum=0,cnt=0;
+   for(j=0;j<n;j++){if(j===i||lab[j]!==c)continue;sum+=axDist(vs[i],vs[j]);cnt++}
+   if(!cnt)continue;
+   if(c===lab[i]){a=sum/cnt;ac=1}else bmin=Math.min(bmin,sum/cnt)}
+  if(!ac||bmin>1e8)continue;
+  s+=(bmin-a)/Math.max(a,bmin);
+ }
+ return s/n;
 }
 function computeSets(){
-  const planes=DATA.filter(d=>d.mode!=='line');
-  const vs=planes.map(d=>norm(planeToPole(d.dip,d.dd)));
-  SETS=[]; if(vs.length<3){planes.forEach(p=>p._s=-1);return}
-  let k=K, best=null;
-  if(!k){let bs=-2; for(let t=1;t<=Math.min(5,Math.floor(vs.length/3));t++){
-      const r=kmeans(vs,t), sc=t===1?0:silhouette(vs,r);
-      if(sc>bs){bs=sc;best=r;k=t}} }
-  else best=kmeans(vs,k);
-  if(!best){planes.forEach(p=>p._s=-1);return}
-  planes.forEach((p,i)=>p._s=best.lab[i]);
-  best.C.forEach((c,j)=>{
-    const g=vs.filter((_,i)=>best.lab[i]===j); if(!g.length)return;
-    const al=g.map(v=>dot(v,c)<0?[-v[0],-v[1],-v[2]]:v);
-    let s=[0,0,0]; al.forEach(v=>{s=[s[0]+v[0],s[1]+v[1],s[2]+v[2]]});
-    const Rm=Math.hypot(...s), n=al.length, mean=principal(g);
-    const kf=n>1?(n-1)/Math.max(1e-6,n-Rm):999;
-    let a95=null;
-    if(n>1&&Rm>0){const t=(n-Rm)/Rm*(Math.pow(20,1/(n-1))-1); if(t<1)a95=Math.acos(1-t)*R2D;}
-    const o=tp(mean), pl=poleToPlane(o.t,o.p);
-    const spread=al.reduce((t,v)=>t+Math.acos(Math.min(1,Math.abs(dot(v,mean))))*R2D,0)/n;
-    SETS.push({i:j,n,dip:pl.dip,dd:pl.dd,pole:mean,k:kf,a95,spread,
-      dips:g.map(v=>poleToPlane(tp(v).t,tp(v).p).dip)});
-  });
-  SETS.sort((a,b)=>b.n-a.n);
-  SETS.forEach((s,i)=>s.rank=i);
-  const map={}; SETS.forEach(s=>map[s.i]=s.rank);
-  planes.forEach(p=>p._s=map[p._s]);
+ SETS=[];
+ var recs=DATA.filter(function(r){return r.mode!=='line'});
+ if(recs.length<3)return;
+ var vs=recs.map(recVec);
+ var k=K,res;
+ if(!k){var bs=-2,bk=1;
+  for(var kk=2;kk<=Math.min(5,Math.floor(vs.length/3));kk++){
+   var t=kmeans(vs,kk),sc=silhouette(vs,t.lab,kk);
+   if(sc>bs){bs=sc;bk=kk}}
+  k=bk;
+ }
+ res=kmeans(vs,k);
+ for(var j=0;j<k;j++){
+  var mem=[],ids=[];
+  for(var i=0;i<vs.length;i++)if(res.lab[i]===j){mem.push(vs[i]);ids.push(recs[i].id)}
+  if(!mem.length)continue;
+  var m=meanVec(mem),o=tp(m),pl=poleToPlane(o.t,o.p),f=fisher(mem,m);
+  SETS.push({n:mem.length,ids:ids,mean:m,dip:pl.dip,dd:pl.dd,k:f.k,a95:f.a95});
+ }
+ SETS.sort(function(a,b){return b.n-a.n});
+}
+/* Kamb counting circle on a square grid, values normalised to the maximum */
+function density(vs,N,R){
+ var alpha=Math.acos(clamp(1-9/(9+vs.length),-1,1)),ca=Math.cos(alpha);
+ var g=new Float32Array(N*N),mx=0,ix,iy;
+ for(iy=0;iy<N;iy++)for(ix=0;ix<N;ix++){
+  var dx=(ix/(N-1)*2-1)*R,dy=(iy/(N-1)*2-1)*R;
+  var v=unproj(dx,dy,R);
+  if(!v){g[iy*N+ix]=NaN;continue}
+  var c=0;
+  for(var i=0;i<vs.length;i++)if(Math.abs(dot(vs[i],v))>=ca)c++;
+  g[iy*N+ix]=c;if(c>mx)mx=c;
+ }
+ return{g:g,N:N,max:mx,alpha:alpha*R2D};
+}
+function contour(g,N,lev){
+ var segs=[],ix,iy;
+ function ip(a,b,va,vb){var t=(lev-va)/((vb-va)||1e-9);return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]}
+ for(iy=0;iy<N-1;iy++)for(ix=0;ix<N-1;ix++){
+  var v0=g[iy*N+ix],v1=g[iy*N+ix+1],v2=g[(iy+1)*N+ix+1],v3=g[(iy+1)*N+ix];
+  if(isNaN(v0)||isNaN(v1)||isNaN(v2)||isNaN(v3))continue;
+  var p0=[ix,iy],p1=[ix+1,iy],p2=[ix+1,iy+1],p3=[ix,iy+1];
+  var idx=(v0>lev?1:0)|(v1>lev?2:0)|(v2>lev?4:0)|(v3>lev?8:0);
+  var e={};
+  e.a=ip(p0,p1,v0,v1);e.b=ip(p1,p2,v1,v2);e.c=ip(p2,p3,v2,v3);e.d=ip(p3,p0,v3,v0);
+  var T=[[],[['d','a']],[['a','b']],[['d','b']],[['b','c']],[['d','a'],['b','c']],[['a','c']],[['d','c']],
+         [['c','d']],[['c','a']],[['a','b'],['c','d']],[['c','b']],[['b','d']],[['b','a']],[['a','d']],[]];
+  T[idx].forEach(function(pr){segs.push([e[pr[0]],e[pr[1]]])});
+ }
+ return segs;
 }
 
-/* ---------- stereonet ---------- */
-function density(vs,R,cone,wulff,step){
-  const g=[], ca=Math.cos(cone*D2R), n=vs.length;
-  const expect=n*(1-ca); // expected count in the cone under uniform distribution
-  for(let y=-R;y<=R;y+=step){const row=[];
-    for(let x=-R;x<=R;x+=step){
-      const u=unproj(x,y,R,wulff); if(!u){row.push(null);continue}
-      let c=0; vs.forEach(v=>{if(Math.abs(dot(v,u))>=ca)c++});
-      row.push(expect>0?c/expect:0);
-    } g.push(row);}
-  return g;
+/* ================= 11. stereonet plate ================= */
+function netFrame(ctx,cx,cy,R,w){
+ var ink=css('--ink'),g2=css('--g2'),g3=css('--g3');
+ ctx.strokeStyle=ink;ctx.lineWidth=1.2;
+ ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.stroke();
+ ctx.strokeStyle=g2;ctx.lineWidth=0.7;
+ /* 10 deg small circles of plunge as a light graticule */
+ for(var p=10;p<90;p+=20){
+  var rr=WULFF?R*Math.tan((90-p)/2*D2R):R*Math.SQRT2*Math.sin((90-p)/2*D2R);
+  ctx.beginPath();ctx.arc(cx,cy,rr,0,6.2832);ctx.stroke();
+ }
+ ctx.strokeStyle=g3;ctx.lineWidth=0.8;
+ for(var a=0;a<360;a+=10){
+  var l=(a%30===0)?7:4,rad=a*D2R;
+  ctx.beginPath();ctx.moveTo(cx+Math.sin(rad)*R,cy-Math.cos(rad)*R);
+  ctx.lineTo(cx+Math.sin(rad)*(R-l),cy-Math.cos(rad)*(R-l));ctx.stroke();
+ }
+ ctx.beginPath();ctx.moveTo(cx,cy-4);ctx.lineTo(cx,cy+4);ctx.moveTo(cx-4,cy);ctx.lineTo(cx+4,cy);
+ ctx.strokeStyle=ink;ctx.lineWidth=0.9;ctx.stroke();
+ ctx.fillStyle=ink;ctx.font='600 11px var(--sans),sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+ ctx.fillText('N',cx,cy-R-6);
 }
 function drawNet(){
-  const W=Math.min(360,innerWidth-28), c=setup($('#net'),W,W), R=W/2-22, cx=W/2, cy=W/2;
-  const wulff=!!LAYERS.wulff;
-  const planes=DATA.filter(d=>d.mode!=='line'), lines=DATA.filter(d=>d.mode==='line');
-  const vs=planes.map(d=>norm(planeToPole(d.dip,d.dd)));
+ var c=$('#net');if(!c.width)return;
+ var ctx=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,w,h);
+ var cx=w/2,cy=h/2,R=Math.min(w,h)/2-20;
+ var ink=css('--ink'),g2=css('--g2'),g3=css('--g3'),g4=css('--g4'),paper=css('--paper');
+ var planes=DATA.filter(function(r){return r.mode!=='line'}),lines=DATA.filter(function(r){return r.mode==='line'});
+ var vs=planes.map(recVec);
 
-  if(LAYERS.density&&vs.length>2){
-    const step=Math.max(3,Math.round(R/34)), g=density(vs,R,CONE,wulff,step);
-    let mx=0; g.forEach(r=>r.forEach(v=>{if(v!=null&&v>mx)mx=v}));
-    const ramp=v=>{const t=Math.min(1,v/Math.max(2,mx));
-      const stops=[[22,28,32],[30,80,96],[63,200,162],[224,179,65],[210,96,63]];
-      const f=t*(stops.length-1), i=Math.min(stops.length-2,Math.floor(f)), r=f-i;
-      const a=stops[i],b=stops[i+1];
-      return `rgba(${a[0]+(b[0]-a[0])*r|0},${a[1]+(b[1]-a[1])*r|0},${a[2]+(b[2]-a[2])*r|0},${0.25+0.6*t})`};
-    g.forEach((row,yi)=>row.forEach((v,xi)=>{ if(v==null)return;
-      c.fillStyle=ramp(v); c.fillRect(cx-R+xi*step-step/2, cy-R+yi*step-step/2, step+1, step+1);}));
-    // contour lines (marching squares) at multiples of the uniform density
-    c.strokeStyle='rgba(233,240,241,.45)'; c.lineWidth=.8;
-    [2,4,6,8,10,14].filter(L=>L<mx).forEach(L=>{
-      for(let yi=0;yi<g.length-1;yi++)for(let xi=0;xi<g[yi].length-1;xi++){
-        const p=[g[yi][xi],g[yi][xi+1],g[yi+1][xi+1],g[yi+1][xi]]; if(p.some(v=>v==null))continue;
-        const X=cx-R+xi*step, Y=cy-R+yi*step, pts=[];
-        const e=(a,b,ax,ay,bx,by)=>{if((p[a]-L)*(p[b]-L)<0){const t=(L-p[a])/(p[b]-p[a]); pts.push([ax+(bx-ax)*t,ay+(by-ay)*t])}};
-        e(0,1,X,Y,X+step,Y); e(1,2,X+step,Y,X+step,Y+step); e(2,3,X+step,Y+step,X,Y+step); e(3,0,X,Y+step,X,Y);
-        if(pts.length>=2){c.beginPath();c.moveTo(pts[0][0],pts[0][1]);c.lineTo(pts[1][0],pts[1][1]);c.stroke()}
-      }});
-    c.save(); c.globalCompositeOperation='destination-in';
-    c.beginPath(); c.arc(cx,cy,R,0,7); c.fill(); c.restore();
-  }
+ if(LAYERS.density&&vs.length>2){
+  var D=density(vs,46,R);
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.clip();
+  var levs=[0.2,0.4,0.6,0.8];
+  levs.forEach(function(f,i){
+   var segs=contour(D.g,D.N,f*D.max);
+   ctx.strokeStyle=ink;ctx.lineWidth=0.6+i*0.45;ctx.beginPath();
+   segs.forEach(function(s){
+    ctx.moveTo(cx+(s[0][0]/(D.N-1)*2-1)*R,cy+(s[0][1]/(D.N-1)*2-1)*R);
+    ctx.lineTo(cx+(s[1][0]/(D.N-1)*2-1)*R,cy+(s[1][1]/(D.N-1)*2-1)*R);
+   });ctx.stroke();
+  });
+  ctx.restore();
+  $('#netCap').textContent='Lower hemisphere, '+(WULFF?'equal angle (Wulff)':'equal area (Schmidt)')+
+   '. Contours at 20, 40, 60 and 80 per cent of the maximum counting-circle density (half-angle '+D.alpha.toFixed(1)+' deg, n='+vs.length+').';
+ }else{
+  $('#netCap').textContent='Lower hemisphere, '+(WULFF?'equal angle (Wulff)':'equal area (Schmidt)')+
+   '. n='+DATA.length+' ('+planes.length+' planes, '+lines.length+' lineations).';
+ }
+ netFrame(ctx,cx,cy,R,w);
 
-  netFrame(c,cx,cy,R,wulff,false);
-
-  const col=d=>LAYERS.sets&&d._s>=0?cvar(SETC[d._s%5]):cvar('--quartz');
-  if(LAYERS.planes) planes.forEach(d=>{
-    c.strokeStyle=col(d); c.globalAlpha=.55; c.lineWidth=1.1; c.beginPath(); let mv=false;
-    greatCircle(planeToPole(d.dip,d.dd)).forEach(g=>{ if(g[2]>0.0001){mv=false;return}
-      const q=proj(g,R,wulff); mv?c.lineTo(cx+q[0],cy+q[1]):(c.moveTo(cx+q[0],cy+q[1]),mv=true);});
-    c.stroke(); c.globalAlpha=1;});
-  if(LAYERS.poles) planes.forEach(d=>{
-    const q=proj(norm(planeToPole(d.dip,d.dd)),R,wulff);
-    c.fillStyle=col(d); c.beginPath(); c.arc(cx+q[0],cy+q[1],3.2,0,7); c.fill();
-    if(SEL.has(d.id)){c.strokeStyle=cvar('--ink');c.lineWidth=1.4;c.beginPath();c.arc(cx+q[0],cy+q[1],6.5,0,7);c.stroke()}});
-  lines.forEach(d=>{
-    const q=proj(vecFromTP(d.trend,d.plunge),R,wulff);
-    c.strokeStyle=cvar('--azurite'); c.lineWidth=1.6; c.beginPath();
-    c.moveTo(cx+q[0],cy+q[1]-5); c.lineTo(cx+q[0]+4.5,cy+q[1]+3); c.lineTo(cx+q[0]-4.5,cy+q[1]+3); c.closePath(); c.stroke();});
-  if(LAYERS.mean) SETS.forEach(s=>{
-    const cl=cvar(SETC[s.rank%5]), q=proj(s.pole,R,wulff);
-    c.strokeStyle=cl; c.lineWidth=2; c.beginPath(); let mv=false;
-    greatCircle(s.pole).forEach(g=>{ if(g[2]>0.0001){mv=false;return}
-      const p=proj(g,R,wulff); mv?c.lineTo(cx+p[0],cy+p[1]):(c.moveTo(cx+p[0],cy+p[1]),mv=true);});
-    c.stroke();
-    if(s.a95){ // cone of confidence about the mean pole
-      c.setLineDash([2,3]); c.lineWidth=1; c.beginPath(); mv=false;
-      const a=norm(Math.abs(s.pole[2])<.9?cross(s.pole,[0,0,1]):cross(s.pole,[0,1,0])), b=norm(cross(s.pole,a));
-      const cs=Math.cos(s.a95*D2R), sn=Math.sin(s.a95*D2R);
-      for(let i=0;i<=90;i++){const t=i/90*2*Math.PI;
-        const v=norm([s.pole[0]*cs+sn*(a[0]*Math.cos(t)+b[0]*Math.sin(t)), s.pole[1]*cs+sn*(a[1]*Math.cos(t)+b[1]*Math.sin(t)), s.pole[2]*cs+sn*(a[2]*Math.cos(t)+b[2]*Math.sin(t))]);
-        const p=proj(v,R,wulff); i?c.lineTo(cx+p[0],cy+p[1]):c.moveTo(cx+p[0],cy+p[1]);}
-      c.stroke(); c.setLineDash([]);
-    }
-    c.fillStyle=cl; c.beginPath(); c.arc(cx+q[0],cy+q[1],5.5,0,7); c.fill();
-    c.fillStyle=cvar('--rock'); c.font='700 8px '+cvar('--mono'); c.textAlign='center'; c.textBaseline='middle';
-    c.fillText(String(s.rank+1), cx+q[0], cy+q[1]+.5);});
-
-  // legend
-  $('#netLegend').innerHTML = SETS.length
-    ? SETS.map(s=>`<span class="chip"><i class="swatch" style="background:${cvar(SETC[s.rank%5])}"></i>Set ${s.rank+1} · ${fmt(s)} · n=${s.n}</span>`).join('')
-      + (lines.length?`<span class="chip"><i class="swatch" style="background:${cvar('--azurite')}"></i>Lineations · n=${lines.length}</span>`:'')
-    : `<span class="chip" style="color:var(--dim)">${planes.length} poles · no families fitted yet</span>`;
-  drawRose(); drawHist();
+ if(LAYERS.planes){
+  ctx.strokeStyle=g4;ctx.lineWidth=0.7;
+  planes.forEach(function(r){
+   greatCircle(r.dip,r.dd,R).forEach(function(sg){
+    ctx.beginPath();sg.forEach(function(p,i){i?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
+   });
+  });
+ }
+ if(LAYERS.poles){
+  planes.forEach(function(r){
+   var p=proj(recVec(r),R),sel=SEL[r.id];
+   ctx.beginPath();ctx.arc(cx+p[0],cy+p[1],sel?4.2:3,0,6.2832);
+   ctx.fillStyle=sel?ink:paper;ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+  });
+  /* lineations use a filled triangle so the two data types stay separable in black and white */
+  lines.forEach(function(r){
+   var p=proj(recVec(r),R);
+   ctx.beginPath();ctx.moveTo(cx+p[0],cy+p[1]-4);ctx.lineTo(cx+p[0]+3.6,cy+p[1]+2.6);ctx.lineTo(cx+p[0]-3.6,cy+p[1]+2.6);
+   ctx.closePath();ctx.fillStyle=ink;ctx.fill();
+  });
+ }
+ if(LAYERS.sets&&SETS.length){
+  SETS.forEach(function(s,i){
+   ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.setLineDash(i%2?[5,3]:[]);
+   greatCircle(s.dip,s.dd,R).forEach(function(sg){
+    ctx.beginPath();sg.forEach(function(p,j){j?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
+   });
+   ctx.setLineDash([]);
+  });
+ }
+ if(LAYERS.mean&&SETS.length){
+  SETS.forEach(function(s,i){
+   var p=proj(s.mean,R);
+   ctx.beginPath();ctx.rect(cx+p[0]-4.5,cy+p[1]-4.5,9,9);ctx.fillStyle=paper;ctx.fill();
+   ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.stroke();
+   ctx.beginPath();ctx.moveTo(cx+p[0]-4.5,cy+p[1]);ctx.lineTo(cx+p[0]+4.5,cy+p[1]);
+   ctx.moveTo(cx+p[0],cy+p[1]-4.5);ctx.lineTo(cx+p[0],cy+p[1]+4.5);ctx.lineWidth=0.9;ctx.stroke();
+   ctx.fillStyle=ink;ctx.font='600 10px var(--mono),monospace';ctx.textAlign='left';
+   ctx.fillText(String(i+1),cx+p[0]+7,cy+p[1]-6);
+  });
+ }
+ if(LAYERS.cone&&SETS.length){
+  ctx.strokeStyle=g3;ctx.lineWidth=0.9;ctx.setLineDash([3,3]);
+  SETS.forEach(function(s){
+   smallCircle(s.mean,CONE,R).forEach(function(sg){
+    ctx.beginPath();sg.forEach(function(p,j){j?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
+   });
+  });
+  ctx.setLineDash([]);
+ }
+ /* scale legend */
+ ctx.fillStyle=g4;ctx.font='9px var(--mono),monospace';ctx.textAlign='left';
+ ctx.fillText('n='+DATA.length+'  decl '+(DECL>=0?'+':'')+DECL+' deg',6,h-6);
 }
 
+/* ================= 12. rose and histogram ================= */
 function drawRose(){
-  const W=Math.min(340,innerWidth-28), H=200, c=setup($('#rose'),W,H), cx=W/2, cy=H-14, R=H-34;
-  const bins=new Array(36).fill(0);
-  DATA.filter(d=>d.mode!=='line').forEach(d=>{bins[Math.floor(strikeOf(d.dd)%180/5)%36]++});
-  const mx=Math.max(1,...bins);
-  c.strokeStyle=cvar('--line');
-  [1,.66,.33].forEach(f=>{c.beginPath();c.arc(cx,cy,R*f,Math.PI,2*Math.PI);c.stroke()});
-  c.beginPath(); c.moveTo(cx-R,cy); c.lineTo(cx+R,cy); c.stroke();
-  bins.forEach((v,i)=>{ if(!v)return;
-    const a0=(i*5-90)*D2R, a1=((i+1)*5-90)*D2R, r=R*v/mx;
-    c.fillStyle='rgba(63,200,162,.65)'; c.beginPath(); c.moveTo(cx,cy);
-    c.arc(cx,cy,r,a0,a1); c.closePath(); c.fill();});
-  c.fillStyle=cvar('--dim'); c.font='9px '+cvar('--mono'); c.textAlign='center';
-  c.fillText('N',cx,12); c.fillText('090',cx+R-6,cy-6); c.fillText('270',cx-R+10,cy-6);
-  c.textAlign='left'; c.fillText('strike, 5° bins · max '+mx,6,H-4);
+ var c=$('#rose');if(!c.width)return;
+ var ctx=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,w,h);
+ var cx=w/2,cy=h/2,R=Math.min(w/2,h/2)-16;
+ var ink=css('--ink'),g2=css('--g2'),g3=css('--g3'),paper=css('--paper');
+ var bins=new Array(36).fill(0),max=0,i;
+ DATA.forEach(function(r){
+  var az=r.mode==='line'?r.trend:strikeOf(r.dd);
+  var b=Math.floor(((az%180)+180)%180/10);
+  bins[b]++;bins[b+18]++;
+ });
+ for(i=0;i<36;i++)max=Math.max(max,bins[i]);
+ ctx.strokeStyle=g2;ctx.lineWidth=0.7;
+ [0.25,0.5,0.75,1].forEach(function(f){ctx.beginPath();ctx.arc(cx,cy,R*f,0,6.2832);ctx.stroke()});
+ if(max){
+  for(i=0;i<36;i++){
+   if(!bins[i])continue;
+   var a0=(i*10-90)*D2R,a1=((i+1)*10-90)*D2R,rr=R*bins[i]/max;
+   ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,rr,a0,a1);ctx.closePath();
+   ctx.fillStyle=paper;ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+  }
+ }
+ ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.stroke();
+ ctx.fillStyle=ink;ctx.font='600 10px var(--sans),sans-serif';ctx.textAlign='center';
+ ctx.fillText('N',cx,cy-R-5);
+ ctx.fillStyle=css('--g4');ctx.font='9px var(--mono),monospace';ctx.textAlign='left';
+ ctx.fillText('max '+max,6,h-6);
 }
 function drawHist(){
-  const W=Math.min(340,innerWidth-28), H=180, c=setup($('#hist'),W,H), pad=26;
-  const bins=new Array(9).fill(0);
-  DATA.filter(d=>d.mode!=='line').forEach(d=>bins[Math.min(8,Math.floor(d.dip/10))]++);
-  const mx=Math.max(1,...bins), bw=(W-pad-8)/9;
-  c.strokeStyle=cvar('--line'); c.beginPath(); c.moveTo(pad,H-22); c.lineTo(W-4,H-22); c.stroke();
-  bins.forEach((v,i)=>{
-    const h=(H-46)*v/mx, x=pad+i*bw;
-    c.fillStyle=v?'rgba(210,96,63,.75)':'transparent'; c.fillRect(x+2,H-22-h,bw-4,h);
-    c.fillStyle=cvar('--dim'); c.font='8.5px '+cvar('--mono'); c.textAlign='center';
-    c.fillText(i*10+'–'+(i*10+10), x+bw/2, H-9);
-    if(v){c.fillStyle=cvar('--mute'); c.fillText(v, x+bw/2, H-27-h)}});
-  c.save(); c.translate(9,H/2); c.rotate(-Math.PI/2); c.textAlign='center';
-  c.fillStyle=cvar('--dim'); c.fillText('count',0,0); c.restore();
+ var c=$('#hist');if(!c.width)return;
+ var ctx=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,w,h);
+ var ink=css('--ink'),g2=css('--g2'),g4=css('--g4'),paper=css('--paper');
+ var L=30,B=22,T=10,Rr=10,pw=w-L-Rr,ph=h-B-T;
+ var bins=new Array(9).fill(0),max=1,i;
+ DATA.forEach(function(r){var d=r.mode==='line'?r.plunge:r.dip;bins[clamp(Math.floor(d/10),0,8)]++});
+ for(i=0;i<9;i++)max=Math.max(max,bins[i]);
+ ctx.strokeStyle=g2;ctx.lineWidth=0.7;ctx.fillStyle=g4;ctx.font='9px var(--mono),monospace';
+ ctx.textAlign='right';ctx.textBaseline='middle';
+ for(i=0;i<=4;i++){var y=T+ph-ph*i/4,vv=Math.round(max*i/4);
+  ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(L+pw,y);ctx.stroke();ctx.fillText(String(vv),L-5,y)}
+ ctx.strokeStyle=ink;ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,T+ph);ctx.lineTo(L+pw,T+ph);ctx.stroke();
+ var bw=pw/9;
+ for(i=0;i<9;i++){
+  if(bins[i]){var bh=ph*bins[i]/max;
+   ctx.fillStyle=paper;ctx.fillRect(L+i*bw,T+ph-bh,bw,bh);
+   ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.strokeRect(L+i*bw,T+ph-bh,bw,bh)}
+  ctx.fillStyle=g4;ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText(String(i*10),L+i*bw,T+ph+4);
+ }
+ ctx.fillText('90',L+pw,T+ph+4);
+ ctx.textAlign='left';ctx.fillText('dip / plunge, degrees',L,T+ph+13);
 }
 
-/* ---------- families view ---------- */
+/* ================= 13. set report and table ================= */
 function drawSets(){
-  const o=$('#setsOut');
-  if(!SETS.length){o.innerHTML='<div class="empty">Fewer than three planes logged.<br>Families appear once there is something to cluster.</div>'; $('#interOut').textContent='Fit two or more families to get the intersection lines that control wedge and block geometry.'; return}
-  o.innerHTML=SETS.map(s=>{
-    const cl=cvar(SETC[s.rank%5]);
-    const dmin=Math.min(...s.dips)|0, dmax=Math.max(...s.dips)|0;
-    const qual=s.spread<8?'tight':s.spread<18?'moderate':'diffuse';
-    return `<div class="card"><div class="setcard" style="border-color:${cl}">
-      <h4 style="color:${cl}">Set ${s.rank+1} · ${fmt(s)}</h4>
-      <div class="hint">Mean plane dips ${Math.round(s.dip)}° towards ${pad(s.dd,3)}° · strike ${pad(strikeOf(s.dd),3)}° (RHR)</div>
-      <div class="kv">
-        <span>Members</span><b>${s.n} of ${DATA.filter(d=>d.mode!=='line').length}</b>
-        <span>Fisher k</span><b>${s.k>900?'—':s.k.toFixed(1)} <span style="color:var(--dim);font-weight:400">(${qual})</span></b>
-        <span>Cone α95</span><b>${s.a95?s.a95.toFixed(1)+'°':'—'}</b>
-        <span>Mean scatter</span><b>${s.spread.toFixed(1)}°</b>
-        <span>Dip range</span><b>${dmin}–${dmax}°</b>
-        <span>Pole</span><b>${pad(90-s.dip,2)} → ${pad((s.dd+180)%360,3)}</b>
-      </div></div></div>`}).join('');
-  if(SETS.length<2){$('#interOut').textContent='Fit two or more families to get the intersection lines that control wedge and block geometry.';return}
-  let h='<div class="hint" style="margin-bottom:10px">Line of intersection of each pair of mean planes — the plunge direction of a potential wedge, and the hinge for block release.</div><table><thead><tr><th>Pair</th><th>Plunge → Trend</th><th>Dihedral</th></tr></thead><tbody>';
-  for(let i=0;i<SETS.length;i++)for(let j=i+1;j<SETS.length;j++){
-    const L=tp(norm(cross(SETS[i].pole,SETS[j].pole)));
-    const ang=Math.acos(Math.min(1,Math.abs(dot(SETS[i].pole,SETS[j].pole))))*R2D;
-    h+=`<tr><td class="k"><i class="swatch" style="background:${cvar(SETC[i%5])}"></i><i class="swatch" style="background:${cvar(SETC[j%5])}"></i>${i+1} × ${j+1}</td>
-      <td class="k">${pad(L.p,2)} → ${pad(L.t,3)}</td><td>${ang.toFixed(0)}°</td></tr>`;}
-  $('#interOut').innerHTML=h+'</tbody></table>'; $('#interOut').className='card';
+ var o=$('#setsOut');
+ if(!SETS.length){o.innerHTML='<div class="empty">At least three planes are needed to extract sets.</div>';$('#interOut').innerHTML='';return}
+ o.innerHTML=SETS.map(function(s,i){
+  return '<h2 class="sec" style="margin-left:0">Set '+(i+1)+' <span class="tag">n='+s.n+'</span></h2>'+
+   '<div class="kv"><span>Mean plane, dip / dip direction</span><b>'+fmtPlane(s)+'</b></div>'+
+   '<div class="kv"><span>Strike</span><b>'+pad(strikeOf(s.dd),3)+'</b></div>'+
+   '<div class="kv"><span>Pole, trend / plunge</span><b>'+pad((s.dd+180)%360,3)+' / '+pad(90-s.dip,2)+'</b></div>'+
+   '<div class="kv"><span>Fisher k</span><b>'+(s.k?s.k.toFixed(1):'-')+'</b></div>'+
+   '<div class="kv"><span>Cone of 95 per cent confidence</span><b>'+(s.a95?s.a95.toFixed(1)+' deg':'-')+'</b></div>';
+ }).join('');
+ var out=[];
+ for(var a=0;a<SETS.length;a++)for(var b=a+1;b<SETS.length;b++){
+  var l=norm(cross(SETS[a].mean,SETS[b].mean)),o2=tp(l);
+  out.push('<div class="kv"><span>Sets '+(a+1)+' and '+(b+1)+', intersection line</span><b>'+pad(o2.p,2)+' - '+pad(o2.t,3)+'</b></div>');
+ }
+ $('#interOut').innerHTML=out.length?out.join(''):'<p class="note" style="margin:0">Two or more sets are needed.</p>';
 }
-
-/* ---------- data table ---------- */
 function drawTable(){
-  const b=$('#tbody');
-  b.innerHTML=DATA.slice().reverse().map((d,i)=>{
-    const n=DATA.length-i;
-    const val=d.mode==='line'?`${pad(d.plunge,2)}→${pad(d.trend,3)}`:fmt(d);
-    const sw=d.mode==='line'?cvar('--azurite'):(d._s>=0?cvar(SETC[d._s%5]):cvar('--dim'));
-    return `<tr data-id="${d.id}" class="${SEL.has(d.id)?'sel':''}">
-      <td>${n}</td><td class="k"><i class="swatch" style="background:${sw}"></i>${val}</td>
-      <td>${d.mode==='line'?'Lineation':d.type}</td><td>${d.site}</td><td>${d.q<=2?'●':d.q<=5?'◐':'○'}</td></tr>`}).join('');
-  $('#dataEmpty').style.display=DATA.length?'none':'block';
-  $('#hdrN').textContent=DATA.filter(d=>d.mode!=='line').length;
-  $('#hdrSite').textContent=$('#fSite').value.trim()||'—';
-  $$('#tbody tr').forEach(tr=>tr.onclick=()=>{
-    const id=+tr.dataset.id; SEL.has(id)?SEL.delete(id):SEL.add(id); drawTable(); drawNet();});
+ var tb=$('#tbody');tb.innerHTML='';
+ $('#dataEmpty').hidden=DATA.length>0;
+ var planes=DATA.filter(function(r){return r.mode!=='line'}).length;
+ $('#dataHead').innerHTML='<div class="pad" style="padding-bottom:0"><div class="kv"><span>Measurements</span><b>'+DATA.length+
+  ' ('+planes+' planes, '+(DATA.length-planes)+' lineations)</b></div>'+
+  '<div class="kv"><span>Fault traces</span><b>'+FAULTS.length+'</b></div>'+
+  '<div class="kv"><span>Photo samples</span><b>'+PHOTOS.length+'</b></div></div>';
+ DATA.slice().reverse().forEach(function(r,i){
+  var tr=document.createElement('tr');
+  if(SEL[r.id])tr.className='sel';
+  tr.innerHTML='<td>'+(DATA.length-i)+'</td><td>'+fmtRec(r)+(r.mode==='line'?' L':'')+'</td><td>'+esc(r.type)+
+   '</td><td>'+esc(r.site)+'</td><td>'+(r.lat?'yes':'-')+'</td>';
+  tr.onclick=function(){if(SEL[r.id])delete SEL[r.id];else SEL[r.id]=1;drawTable();drawNet()};
+  tb.appendChild(tr);
+ });
 }
-
-/* ---------- plumbing ---------- */
-function save(){DB.set('gs_data',DATA); refresh()}
-function refresh(){computeSets(); drawTable(); drawNet(); drawSets()}
-let tt; function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1900)}
-function dl(name,txt,type){
-  if(window.AndroidExport&&AndroidExport.save){ // native build: write into Downloads
-    try{ AndroidExport.save(name,type,btoa(unescape(encodeURIComponent(txt)))); return; }catch(e){}
-  }
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([txt],{type})); a.download=name; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+function drawHome(){
+ var last=DATA[DATA.length-1];
+ $('#homeStat').innerHTML=
+  '<div class="kv"><span>Measurements</span><b>'+DATA.length+'</b></div>'+
+  '<div class="kv"><span>Sets resolved</span><b>'+SETS.length+'</b></div>'+
+  '<div class="kv"><span>Fault traces / photo samples</span><b>'+FAULTS.length+' / '+PHOTOS.length+'</b></div>'+
+  '<div class="kv"><span>Last reading</span><b>'+(last?fmtRec(last)+' '+esc(last.type):'none')+'</b></div>'+
+  '<div class="kv"><span>Sensor</span><b>'+(S.live?esc(S.src):'not available')+'</b></div>'+
+  '<div class="kv"><span>Position</span><b>'+(FIX?FIX.lat.toFixed(5)+', '+FIX.lon.toFixed(5):'no fix')+'</b></div>';
 }
+function refreshAll(){computeSets();drawTable();drawNet();drawRose();drawHist();drawSets();drawHome();drawThumbs();drawFaultList()}
 
-$$('#nav button').forEach(b=>b.onclick=()=>{
-  $$('#nav button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  $$('.view').forEach(v=>v.classList.remove('on')); $('#v-'+b.dataset.v).classList.add('on');
-  $('#app').scrollTop=0; refresh();
+$$('[data-layer]').forEach(function(b){
+ b.onclick=function(){var k=b.getAttribute('data-layer');LAYERS[k]=LAYERS[k]?0:1;b.classList.toggle('on',!!LAYERS[k]);drawNet()};
 });
-$$('#modeSeg button').forEach(b=>b.onclick=()=>{
-  $$('#modeSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  MODE=b.dataset.mode; FROZEN=null;
-  $('#sensorUI').style.display=MODE==='manual'?'none':'block';
-  $('#manualUI').style.display=MODE==='manual'?'block':'none';
-  $('#btnCap').textContent=MODE==='line'?'Record lineation':'Record plane';
-  $('#notation').textContent=MODE==='line'?'point the top edge down-plunge along the lineation':'place phone back flat on the fracture plane';
-});
-$('#btnCap').onclick=record;
-$('#btnAvg').onclick=e=>{AVG=!AVG; e.currentTarget.classList.toggle('on',AVG); toast(AVG?'Averaging 2 s of samples':'Instant capture')};
-$('#btnHold').onclick=e=>{
-  if(FROZEN){FROZEN=null;e.currentTarget.classList.remove('on');e.currentTarget.textContent='Freeze'}
-  else{FROZEN=currentVec();e.currentTarget.classList.add('on');e.currentTarget.textContent='Release'}};
-$('#btnManual').onclick=()=>{
-  const dip=parseFloat($('#mDip').value), dd=parseFloat($('#mDd').value);
-  if(!(dip>=0&&dip<=90)||!(dd>=0&&dd<=360)){toast('Dip 0–90, dip direction 0–360');return}
-  DATA.push({id:Date.now(),mode:'plane',dip,dd:dd%360,q:0,site:$('#fSite').value.trim()||'—',type:$('#fType').value,note:$('#fNote').value.trim(),decl:0});
-  $('#mDip').value=$('#mDd').value=''; save(); toast('Plane added');
+$('#kSel').onchange=function(){K=+this.value;DB.set('gs_k',K);refreshAll()};
+
+/* ================= 14. export and import ================= */
+function csvOf(){
+ var head='id,timestamp,mode,type,dip,dip_direction,strike,trend,plunge,quality_deg,site,latitude,longitude,accuracy_m,declination,note';
+ return head+'\n'+DATA.map(function(r){
+  return [r.id,new Date(r.id).toISOString(),r.mode,r.type,
+   r.dip==null?'':r.dip,r.dd==null?'':r.dd,r.dd==null?'':Math.round(strikeOf(r.dd)),
+   r.trend==null?'':r.trend,r.plunge==null?'':r.plunge,r.q==null?'':r.q,
+   '"'+String(r.site||'').replace(/"/g,'""')+'"',r.lat==null?'':r.lat,r.lon==null?'':r.lon,r.acc==null?'':r.acc,
+   r.decl==null?'':r.decl,'"'+String(r.note||'').replace(/"/g,'""')+'"'].join(',');
+ }).join('\n');
+}
+function geojsonOf(){
+ var f=[];
+ DATA.forEach(function(r){
+  if(r.lat==null)return;
+  f.push({type:'Feature',geometry:{type:'Point',coordinates:[r.lon,r.lat]},properties:{
+   kind:'orientation',mode:r.mode,type:r.type,dip:r.dip,dip_direction:r.dd,strike:r.dd==null?null:Math.round(strikeOf(r.dd)),
+   trend:r.trend,plunge:r.plunge,site:r.site,note:r.note,accuracy_m:r.acc,timestamp:new Date(r.id).toISOString()}});
+ });
+ FAULTS.forEach(function(t){
+  f.push({type:'Feature',geometry:{type:'LineString',coordinates:t.pts},properties:{
+   kind:'structural_line',line_type:t.type,note:t.note,site:t.site,timestamp:new Date(t.id).toISOString()}});
+ });
+ PHOTOS.forEach(function(p){
+  f.push({type:'Feature',geometry:{type:'Point',coordinates:[p.lon,p.lat]},properties:{
+   kind:'photo_sample',label:p.label,note:p.note,site:p.site,file:'photo_'+p.id+'.jpg',timestamp:new Date(p.id).toISOString()}});
+ });
+ return JSON.stringify({type:'FeatureCollection',
+  crs:{type:'name',properties:{name:'urn:ogc:def:crs:OGC:1.3:CRS84'}},
+  metadata:{app:'GeoTools',exported:new Date().toISOString(),declination:DECL},features:f},null,1);
+}
+function stamp(){return new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}
+$('#btnCsv').onclick=function(){if(!DATA.length){toast('Nothing to export');return}dl('geotools-'+stamp()+'.csv',csvOf(),'text/csv')};
+$('#btnJson').onclick=function(){dl('geotools-'+stamp()+'.json',JSON.stringify({app:'GeoTools',version:3,exported:new Date().toISOString(),declination:DECL,data:DATA,faults:FAULTS,photos:PHOTOS},null,1),'application/json')};
+$('#btnGeo').onclick=function(){dl('geotools-'+stamp()+'.geojson',geojsonOf(),'application/geo+json')};
+$('#btnImp').onclick=function(){$('#fileImp').click()};
+$('#fileImp').onchange=function(){
+ var f=this.files&&this.files[0];if(!f)return;
+ var rd=new FileReader();
+ rd.onload=function(){
+  try{
+   var j=JSON.parse(rd.result);
+   var arr=Array.isArray(j)?j:(j.data||[]);
+   var n=0;
+   arr.forEach(function(r){if(r&&(r.dip!=null||r.trend!=null)){if(!r.id)r.id=Date.now()+(n++);if(!r.mode)r.mode=r.trend!=null?'line':'plane';DATA.push(r);n++}});
+   if(j.faults)j.faults.forEach(function(t){if(t&&t.pts&&t.pts.length>1)FAULTS.push(t)});
+   if(j.photos)j.photos.forEach(function(p){if(p&&p.lat!=null)PHOTOS.push(p)});
+   saveFaults();savePhotos();saveData();toast('Imported '+n+' records');
+  }catch(e){toast('Could not read that file')}
+ };
+ rd.readAsText(f);this.value='';
 };
-$('#fSite').oninput=()=>$('#hdrSite').textContent=$('#fSite').value.trim()||'—';
-$$('[data-lay]').forEach(b=>b.onclick=()=>{
-  const k=b.dataset.lay; LAYERS[k]=LAYERS[k]?0:1; b.classList.toggle('on',!!LAYERS[k]); drawNet();});
-$('#cone').oninput=e=>{CONE=+e.target.value; $('#coneV').textContent=CONE; if(LAYERS.density)drawNet()};
-$$('#kSeg button').forEach(b=>b.onclick=()=>{
-  $$('#kSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  K=+b.dataset.k; DB.set('gs_k',K); refresh();});
-$('#decl').oninput=e=>{DECL=parseFloat(e.target.value)||0; DB.set('gs_decl',DECL)};
-$('#btnCsv').onclick=()=>{
-  const h='id,mode,dip,dip_direction,strike_rhr,trend,plunge,type,station,quality_deg,declination,note,timestamp\n';
-  const rows=DATA.map(d=>[d.id,d.mode,d.dip??'',d.dd??'',d.dd!=null?Math.round(strikeOf(d.dd)):'',d.trend??'',d.plunge??'',
-    d.type||'',d.site,d.q,d.decl,'"'+(d.note||'').replace(/"/g,'""')+'"',new Date(d.id).toISOString()].join(','));
-  dl('geostruct_'+new Date().toISOString().slice(0,10)+'.csv',h+rows.join('\n'),'text/csv');};
-$('#btnJson').onclick=()=>dl('geostruct_'+new Date().toISOString().slice(0,10)+'.json',
-  JSON.stringify({app:'GeoStruct',version:1,exported:new Date().toISOString(),declination:DECL,measurements:DATA},null,1),'application/json');
-$('#btnImp').onclick=()=>$('#fileImp').click();
-$('#fileImp').onchange=e=>{const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader(); r.onload=()=>{try{
-    const j=JSON.parse(r.result), arr=Array.isArray(j)?j:j.measurements;
-    if(!Array.isArray(arr))throw 0;
-    const ids=new Set(DATA.map(d=>d.id)); let n=0;
-    arr.forEach(d=>{if(d&&!ids.has(d.id)){DATA.push(d);n++}});
-    save(); toast(n+' measurements imported');
-  }catch(x){toast('That file is not a GeoStruct export')} e.target.value='';};
-  r.readAsText(f);};
-$('#btnDel').onclick=()=>{ if(!SEL.size){toast('Tap rows to select them first');return}
-  DATA=DATA.filter(d=>!SEL.has(d.id)); const n=SEL.size; SEL.clear(); save(); toast(n+' deleted');};
-$('#btnWipe').onclick=()=>{ if(!DATA.length){toast('Nothing to clear');return}
-  if(confirm('Delete all '+DATA.length+' measurements? Export first if you need them.')){DATA=[];SEL.clear();save();toast('Log cleared')}};
-$('#btnTheme').onclick=e=>{document.body.classList.toggle('sun');
-  e.currentTarget.textContent=document.body.classList.contains('sun')?'Night mode':'Daylight mode';
-  DB.set('gs_sun',document.body.classList.contains('sun')); drawNet();};
-$('#btnRetry').onclick=()=>{S.tries=[]; startSensors(); tryOrientationSensor(); tryRawSensors(); diagnose(); toast('Re-requesting the sensors')};
-setInterval(diagnose,1000); diagnose();
-$('#gateBtn').onclick=()=>{startSensors(); $('#gate').style.display='none'};
-$('#gateSkip').onclick=()=>{$('#gate').style.display='none'};
+$('#btnDelSel').onclick=function(){
+ var ids=Object.keys(SEL).map(Number);
+ if(!ids.length){toast('Select rows first');return}
+ DATA=DATA.filter(function(r){return ids.indexOf(r.id)<0});SEL={};saveData();toast('Deleted '+ids.length+' records');
+};
+$('#btnClear').onclick=function(){SEL={};drawTable();drawNet()};
+$('#btnPng').onclick=function(){
+ var src=[$('#net'),$('#rose'),$('#hist')],gap=14,W=760,y=54,i;
+ var out=document.createElement('canvas');
+ var hs=src.map(function(c){return Math.round(W*c.height/c.width)});
+ out.width=W;out.height=y+hs.reduce(function(a,b){return a+b+gap},0)+26;
+ var x=out.getContext('2d');
+ x.fillStyle='#fff';x.fillRect(0,0,out.width,out.height);
+ x.fillStyle='#000';x.font='600 17px Helvetica,Arial,sans-serif';
+ x.fillText('GeoTools stereographic plate',18,28);
+ x.font='11px Helvetica,Arial,sans-serif';x.fillStyle='#555';
+ x.fillText((WULFF?'Equal angle':'Equal area')+', lower hemisphere / n='+DATA.length+' / declination '+DECL+' deg / '+new Date().toISOString().slice(0,10),18,44);
+ x.filter=THEME==='dark'?'grayscale(1) invert(1)':'grayscale(1)';
+ for(i=0;i<src.length;i++){x.drawImage(src[i],0,0,src[i].width,src[i].height,18,y,W-36,hs[i]);y+=hs[i]+gap}
+ x.filter='none';x.fillStyle='#777';x.font='10px Helvetica,Arial,sans-serif';
+ x.fillText('Produced with GeoTools, github.com/3m0ra/gneisstools',18,out.height-10);
+ dlBase64('geotools-plate-'+stamp()+'.png',out.toDataURL('image/png').split(',')[1],'image/png');
+};
 
-if(DB.get('gs_sun',false)){document.body.classList.add('sun'); $('#btnTheme').textContent='Night mode'}
-$('#decl').value=DECL;
-(function loop(){drawDial(); updateReadout(); requestAnimationFrame(loop)})();
-addEventListener('resize',()=>{drawNet()});
-refresh();
+/* ================= 15. tool 02 : GeoCover field map ================= */
+var BASES={
+ grau:{id:'ch.swisstopo.pixelkarte-grau',ext:'jpeg',lab:'Topographic, grey'},
+ farbe:{id:'ch.swisstopo.pixelkarte-farbe',ext:'jpeg',lab:'Topographic, colour'},
+ image:{id:'ch.swisstopo.swissimage',ext:'jpeg',lab:'Orthophoto'}
+};
+var GEOCOVER='ch.swisstopo.geologie-geocover';
+var MAP=DB.get('gs_view',null)||{};
+MAP.lon=MAP.lon||8.2275;MAP.lat=MAP.lat||46.8182;MAP.z=MAP.z||10.5;
+MAP.base=MAP.base||'grau';MAP.geo=MAP.geo==null?1:MAP.geo;MAP.alpha=MAP.alpha==null?0.75:MAP.alpha;
+MAP.tool='pan';MAP.draft=null;MAP.follow=0;MAP.sel=null;MAP.faultType='fault';MAP.tiles={};MAP.pending=0;
+function saveView(){DB.set('gs_view',{lon:MAP.lon,lat:MAP.lat,z:MAP.z,base:MAP.base,geo:MAP.geo,alpha:MAP.alpha})}
+
+function lon2tx(lon,z){return(lon+180)/360*Math.pow(2,z)}
+function lat2ty(lat,z){var s=Math.sin(clamp(lat,-85,85)*D2R);return(0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*Math.pow(2,z)}
+function tx2lon(x,z){return x/Math.pow(2,z)*360-180}
+function ty2lat(y,z){var n=Math.PI-2*Math.PI*y/Math.pow(2,z);return R2D*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)))}
+function zInt(){return clamp(Math.round(MAP.z),7,19)}
+function mScale(){return Math.pow(2,MAP.z-zInt())}
+function toScreen(lon,lat){
+ var Z=zInt(),s=mScale()*256;
+ return[MAP.w/2+(lon2tx(lon,Z)-lon2tx(MAP.lon,Z))*s, MAP.h/2+(lat2ty(lat,Z)-lat2ty(MAP.lat,Z))*s];
+}
+function toGeo(px,py){
+ var Z=zInt(),s=mScale()*256;
+ return[tx2lon(lon2tx(MAP.lon,Z)+(px-MAP.w/2)/s,Z), ty2lat(lat2ty(MAP.lat,Z)+(py-MAP.h/2)/s,Z)];
+}
+function tileUrl(layer,ext,Z,x,y){
+ return 'https://wmts.geo.admin.ch/1.0.0/'+layer+'/default/current/3857/'+Z+'/'+x+'/'+y+'.'+ext;
+}
+function getTile(url){
+ var t=MAP.tiles[url];
+ if(t)return t.ok?t.img:null;
+ var img=new Image();
+ t={img:img,ok:false};MAP.tiles[url]=t;
+ img.onload=function(){t.ok=true;queueMap()};
+ img.onerror=function(){t.err=true};
+ img.src=url;
+ var ks=Object.keys(MAP.tiles);
+ if(ks.length>420)for(var i=0;i<120;i++)delete MAP.tiles[ks[i]];
+ return null;
+}
+var mapQ=0;
+function queueMap(){if(mapQ)return;mapQ=requestAnimationFrame(function(){mapQ=0;drawMap()})}
+function sizeMap(){
+ var c=$('#mapCv'),w=c.clientWidth,h=c.clientHeight;
+ if(!w||!h)return;
+ MAP.w=w;MAP.h=h;c.width=Math.round(w*DPR);c.height=Math.round(h*DPR);
+ drawMap();
+}
+function drawMap(){
+ var c=$('#mapCv');if(!c.width||!MAP.w)return;
+ var x=c.getContext('2d');
+ x.setTransform(DPR,0,0,DPR,0,0);
+ x.fillStyle=css('--g1');x.fillRect(0,0,MAP.w,MAP.h);
+ var Z=zInt(),s=mScale()*256,n=Math.pow(2,Z);
+ var cxT=lon2tx(MAP.lon,Z),cyT=lat2ty(MAP.lat,Z);
+ var x0=Math.floor(cxT-(MAP.w/2)/s),x1=Math.floor(cxT+(MAP.w/2)/s);
+ var y0=Math.floor(cyT-(MAP.h/2)/s),y1=Math.floor(cyT+(MAP.h/2)/s);
+ var b=BASES[MAP.base],ix,iy,img,px,py,miss=0;
+ x.filter=MONO?'grayscale(1) contrast(1.04)':'none';
+ for(iy=y0;iy<=y1;iy++)for(ix=x0;ix<=x1;ix++){
+  if(iy<0||iy>=n)continue;
+  var tx=((ix%n)+n)%n;
+  px=MAP.w/2+(ix-cxT)*s;py=MAP.h/2+(iy-cyT)*s;
+  img=getTile(tileUrl(b.id,b.ext,Z,tx,iy));
+  if(img)x.drawImage(img,px,py,s+0.6,s+0.6);else miss++;
+ }
+ if(MAP.geo){
+  x.globalAlpha=MAP.alpha;
+  for(iy=y0;iy<=y1;iy++)for(ix=x0;ix<=x1;ix++){
+   if(iy<0||iy>=n)continue;
+   var tx2=((ix%n)+n)%n;
+   px=MAP.w/2+(ix-cxT)*s;py=MAP.h/2+(iy-cyT)*s;
+   img=getTile(tileUrl(GEOCOVER,'png',Z,tx2,iy));
+   if(img)x.drawImage(img,px,py,s+0.6,s+0.6);
+  }
+  x.globalAlpha=1;
+ }
+ x.filter='none';
+ drawOverlays(x);
+ drawMapFurniture(x,miss);
+}
+function drawMapFurniture(x,miss){
+ var ink=css('--ink'),paper=css('--paper');
+ /* metric scale bar, derived from the local mercator resolution */
+ var res=156543.03392*Math.cos(MAP.lat*D2R)/Math.pow(2,MAP.z);
+ var target=90,m=target*res,pow=Math.pow(10,Math.floor(Math.log(m)/Math.LN10));
+ var nice=[1,2,5,10].map(function(f){return f*pow}).reduce(function(a,b){return Math.abs(b-m)<Math.abs(a-m)?b:a});
+ var wpx=nice/res;
+ var bx=MAP.w-14-wpx,by=MAP.h-16;
+ x.strokeStyle=paper;x.lineWidth=4;
+ x.beginPath();x.moveTo(bx,by);x.lineTo(bx+wpx,by);x.moveTo(bx,by-5);x.lineTo(bx,by+3);x.moveTo(bx+wpx,by-5);x.lineTo(bx+wpx,by+3);x.stroke();
+ x.strokeStyle=ink;x.lineWidth=1.4;
+ x.beginPath();x.moveTo(bx,by);x.lineTo(bx+wpx,by);x.moveTo(bx,by-5);x.lineTo(bx,by+3);x.moveTo(bx+wpx,by-5);x.lineTo(bx+wpx,by+3);x.stroke();
+ var lab=nice>=1000?(nice/1000)+' km':nice+' m';
+ x.font='600 10px var(--sans),sans-serif';x.textAlign='center';x.textBaseline='alphabetic';
+ x.strokeStyle=paper;x.lineWidth=3;x.strokeText(lab,bx+wpx/2,by-8);
+ x.fillStyle=ink;x.fillText(lab,bx+wpx/2,by-8);
+ $('#mapHud').innerHTML=MAP.lat.toFixed(5)+' N<br>'+MAP.lon.toFixed(5)+' E<br>z'+MAP.z.toFixed(1)+
+  (MAP.geo?'<br>GeoCover on':'<br>GeoCover off')+(miss?'<br>loading '+miss:'');
+}
+function mapEnter(){
+ setTimeout(sizeMap,30);
+ syncRail();
+ if(!FIX)startGps();
+ hint(MAP.tool);
+}
+function mapLeave(){saveView()}
+function hint(t){
+ var H={pan:'Pan and pinch to explore. Long-press to identify the GeoCover unit under your finger.',
+  dip:'Tap the outcrop position to place a dip symbol. The sensor reading is offered as the default.',
+  fault:'Tap to add vertices of the trace. Press the trace button again to close it.',
+  photo:'Tap the sample position, then take or pick a photograph.',
+  edit:'Tap a symbol to inspect, edit or delete it.'};
+ $('#mapHint').textContent=H[t]||H.pan;
+}
+function syncRail(){
+ var m={pan:'#tPan',dip:'#tDip',fault:'#tFault',photo:'#tPhoto'};
+ Object.keys(m).forEach(function(k){$(m[k]).classList.toggle('on',MAP.tool===k)});
+ $('#tGps').classList.toggle('on',!!MAP.follow);
+ hint(MAP.tool);
+}
+function pickTool(t){
+ if(MAP.tool==='fault'&&t!=='fault'&&MAP.draft)finishFault();
+ if(t==='fault'&&MAP.tool==='fault'){finishFault();MAP.tool='pan';syncRail();drawMap();return}
+ MAP.tool=MAP.tool===t?'pan':t;
+ if(MAP.tool==='fault')MAP.draft={type:MAP.faultType,pts:[]};
+ syncRail();drawMap();
+}
+$('#tPan').onclick=function(){MAP.tool='pan';if(MAP.draft)finishFault();syncRail();drawMap()};
+$('#tDip').onclick=function(){pickTool('dip')};
+$('#tFault').onclick=function(){pickTool('fault')};
+$('#tPhoto').onclick=function(){pickTool('photo')};
+$('#tGps').onclick=function(){MAP.follow=MAP.follow?0:1;startGps();if(MAP.follow&&FIX){MAP.lon=FIX.lon;MAP.lat=FIX.lat;MAP.z=Math.max(MAP.z,16)}syncRail();drawMap()};
+$('#tLayers').onclick=function(){layerSheet()};
+$('#zIn').onclick=function(){MAP.z=clamp(MAP.z+1,7,19);saveView();drawMap()};
+$('#zOut').onclick=function(){MAP.z=clamp(MAP.z-1,7,19);saveView();drawMap()};
+
+/* ---------- gestures ---------- */
+(function(){
+ var c=$('#mapCv'),pts={},lastD=0,moved=0,t0=0,lp=null,start=null;
+ function pl(e){var r=c.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+ c.addEventListener('pointerdown',function(e){
+  c.setPointerCapture(e.pointerId);
+  pts[e.pointerId]=pl(e);
+  if(Object.keys(pts).length===1){moved=0;t0=Date.now();start=pts[e.pointerId].slice();
+   lp=setTimeout(function(){lp=null;var g=toGeo(start[0],start[1]);identify(g[0],g[1]);moved=999},560);
+  }else{clearTimeout(lp);lp=null}
+  lastD=0;
+ });
+ c.addEventListener('pointermove',function(e){
+  if(!pts[e.pointerId])return;
+  var p=pl(e),ids=Object.keys(pts);
+  if(ids.length===1){
+   var dx=p[0]-pts[e.pointerId][0],dy=p[1]-pts[e.pointerId][1];
+   moved+=Math.hypot(dx,dy);
+   if(moved>9&&lp){clearTimeout(lp);lp=null}
+   if(moved>9){
+    var Z=zInt(),s=mScale()*256;
+    MAP.lon=tx2lon(lon2tx(MAP.lon,Z)-dx/s,Z);
+    MAP.lat=ty2lat(lat2ty(MAP.lat,Z)-dy/s,Z);
+    MAP.follow=0;queueMap();
+   }
+  }else if(ids.length===2){
+   pts[e.pointerId]=p;
+   var a=pts[ids[0]],b=pts[ids[1]],d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+   if(lastD){MAP.z=clamp(MAP.z+Math.log(d/lastD)/Math.LN2,7,19);queueMap()}
+   lastD=d;moved=999;return;
+  }
+  pts[e.pointerId]=p;
+ });
+ function up(e){
+  clearTimeout(lp);lp=null;
+  var was=Object.keys(pts).length;
+  delete pts[e.pointerId];
+  if(was===1&&moved<9&&Date.now()-t0<600&&start)tap(start[0],start[1]);
+  if(!Object.keys(pts).length){lastD=0;saveView()}
+ }
+ c.addEventListener('pointerup',up);
+ c.addEventListener('pointercancel',up);
+ c.addEventListener('wheel',function(e){e.preventDefault();MAP.z=clamp(MAP.z-Math.sign(e.deltaY)*0.4,7,19);queueMap()},{passive:false});
+})();
+
+/* ---------- geolocation ---------- */
+var gpsW=null;
+function startGps(){
+ if(gpsW!=null||!navigator.geolocation){syncGeoBtn();return}
+ gpsW=navigator.geolocation.watchPosition(function(p){
+  FIX={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy||99,alt:p.coords.altitude};
+  if(MAP.follow){MAP.lon=FIX.lon;MAP.lat=FIX.lat}
+  syncGeoBtn();
+  if(cur()==='map')queueMap();
+  if(cur()==='home')drawHome();
+ },function(){toast('No position, check GPS permission')},{enableHighAccuracy:true,maximumAge:4000,timeout:20000});
+}
+
+/* ---------- overlay symbology, strictly black and white ---------- */
+function halo(x,fn,wide,thin){
+ x.lineCap='round';x.lineJoin='round';
+ x.strokeStyle=css('--paper');x.lineWidth=wide;fn();
+ x.strokeStyle=css('--ink');x.lineWidth=thin;fn();
+}
+function dipSymbol(x,px,py,dip,dd,mode,trend,plunge,sel){
+ var ink=css('--ink'),paper=css('--paper');
+ if(mode==='line'){
+  var a=trend*D2R,L=13;
+  halo(x,function(){x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.sin(a)*L,py-Math.cos(a)*L);x.stroke()},4,1.6);
+  arrowHead(x,px+Math.sin(a)*L,py-Math.cos(a)*L,a,5);
+  x.beginPath();x.arc(px,py,2.6,0,6.2832);x.fillStyle=paper;x.fill();x.strokeStyle=ink;x.lineWidth=1.2;x.stroke();
+  lab(x,pad(plunge,2),px+6,py+11);
+  return;
+ }
+ var st=strikeOf(dd)*D2R,L2=15;
+ halo(x,function(){x.beginPath();
+  x.moveTo(px-Math.sin(st)*L2,py+Math.cos(st)*L2);x.lineTo(px+Math.sin(st)*L2,py-Math.cos(st)*L2);x.stroke()},4.5,2);
+ var a2=dd*D2R,T=dip<5?4:8;
+ halo(x,function(){x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.sin(a2)*T,py-Math.cos(a2)*T);x.stroke()},4,2);
+ if(dip>=88){ /* vertical plane: bar on both sides */
+  halo(x,function(){x.beginPath();x.moveTo(px-Math.sin(a2)*T,py+Math.cos(a2)*T);x.lineTo(px,py);x.stroke()},4,2);
+ }
+ lab(x,pad(dip,2),px+Math.sin(a2)*(T+8)-4,py-Math.cos(a2)*(T+8)+4);
+ if(sel){x.strokeStyle=css('--ink');x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.arc(px,py,19,0,6.2832);x.stroke();x.setLineDash([])}
+}
+function lab(x,t,px,py){
+ x.font='600 10px var(--mono),monospace';x.textAlign='left';x.textBaseline='alphabetic';
+ x.strokeStyle=css('--paper');x.lineWidth=3;x.strokeText(t,px,py);
+ x.fillStyle=css('--ink');x.fillText(t,px,py);
+}
+function faultPath(x,pts){
+ x.beginPath();
+ pts.forEach(function(p,i){var s=toScreen(p[0],p[1]);i?x.lineTo(s[0],s[1]):x.moveTo(s[0],s[1])});
+ x.stroke();
+}
+function decorate(x,pts,type){
+ var ink=css('--ink'),i,step=22;
+ for(i=0;i<pts.length-1;i++){
+  var a=toScreen(pts[i][0],pts[i][1]),b=toScreen(pts[i+1][0],pts[i+1][1]);
+  var len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(len<1)continue;
+  var ux=(b[0]-a[0])/len,uy=(b[1]-a[1])/len,nx=-uy,ny=ux,d;
+  for(d=step/2;d<len;d+=step){
+   var mx=a[0]+ux*d,my=a[1]+uy*d;
+   x.strokeStyle=ink;x.fillStyle=ink;x.lineWidth=1.6;
+   if(type==='thrust'){
+    x.beginPath();x.moveTo(mx,my);x.lineTo(mx+nx*7-ux*4,my+ny*7-uy*4);x.lineTo(mx+nx*7+ux*4,my+ny*7+uy*4);
+    x.closePath();x.fill();
+   }else if(type==='normal'){
+    x.beginPath();x.moveTo(mx,my);x.lineTo(mx+nx*7,my+ny*7);x.stroke();
+   }
+  }
+ }
+}
+function drawOverlays(x){
+ var ink=css('--ink'),paper=css('--paper');
+ /* structural lines first, symbols on top */
+ FAULTS.forEach(function(t){
+  var dash=t.type==='inferred'?[7,5]:(t.type==='contact'?[2,3]:[]);
+  x.setLineDash([]);x.strokeStyle=paper;x.lineWidth=5.5;faultPath(x,t.pts);
+  x.setLineDash(dash);x.strokeStyle=ink;x.lineWidth=t.type==='contact'?1.4:2.4;faultPath(x,t.pts);
+  x.setLineDash([]);
+  decorate(x,t.pts,t.type);
+  if(MAP.sel&&MAP.sel.kind==='fault'&&MAP.sel.id===t.id){
+   x.setLineDash([3,3]);x.lineWidth=1;x.strokeStyle=ink;faultPath(x,t.pts);x.setLineDash([])
+  }
+ });
+ if(MAP.draft&&MAP.draft.pts.length){
+  x.setLineDash([4,4]);x.strokeStyle=paper;x.lineWidth=5;faultPath(x,MAP.draft.pts);
+  x.strokeStyle=ink;x.lineWidth=1.8;faultPath(x,MAP.draft.pts);x.setLineDash([]);
+  MAP.draft.pts.forEach(function(p){var s=toScreen(p[0],p[1]);
+   x.beginPath();x.rect(s[0]-2.5,s[1]-2.5,5,5);x.fillStyle=paper;x.fill();x.strokeStyle=ink;x.lineWidth=1.2;x.stroke()});
+ }
+ PHOTOS.forEach(function(p){
+  var s=toScreen(p.lon,p.lat);
+  x.beginPath();x.rect(s[0]-6,s[1]-6,12,12);x.fillStyle=paper;x.fill();x.strokeStyle=ink;x.lineWidth=1.6;x.stroke();
+  x.beginPath();x.arc(s[0],s[1],2.2,0,6.2832);x.fillStyle=ink;x.fill();
+  if(p.label)lab(x,p.label,s[0]+9,s[1]+4);
+ });
+ DATA.forEach(function(r){
+  if(r.lat==null)return;
+  var s=toScreen(r.lon,r.lat);
+  if(s[0]<-40||s[0]>MAP.w+40||s[1]<-40||s[1]>MAP.h+40)return;
+  dipSymbol(x,s[0],s[1],r.dip,r.dd,r.mode,r.trend,r.plunge,MAP.sel&&MAP.sel.kind==='rec'&&MAP.sel.id===r.id);
+ });
+ if(FIX){
+  var s2=toScreen(FIX.lon,FIX.lat);
+  var res=156543.03392*Math.cos(MAP.lat*D2R)/Math.pow(2,MAP.z);
+  var rr=clamp(FIX.acc/res,4,150);
+  x.strokeStyle=ink;x.lineWidth=0.8;x.setLineDash([2,3]);
+  x.beginPath();x.arc(s2[0],s2[1],rr,0,6.2832);x.stroke();x.setLineDash([]);
+  x.beginPath();x.arc(s2[0],s2[1],5,0,6.2832);x.fillStyle=paper;x.fill();x.lineWidth=2;x.strokeStyle=ink;x.stroke();
+  x.beginPath();x.arc(s2[0],s2[1],1.8,0,6.2832);x.fillStyle=ink;x.fill();
+ }
+ if(MAP.tool==='dip'||MAP.tool==='photo'){
+  x.strokeStyle=ink;x.lineWidth=1;
+  x.beginPath();x.moveTo(MAP.w/2-11,MAP.h/2);x.lineTo(MAP.w/2+11,MAP.h/2);
+  x.moveTo(MAP.w/2,MAP.h/2-11);x.lineTo(MAP.w/2,MAP.h/2+11);x.stroke();
+ }
+}
+/* ---------- hit testing and tap routing ---------- */
+function hit(px,py){
+ var best=null,bd=26,i;
+ for(i=DATA.length-1;i>=0;i--){var r=DATA[i];if(r.lat==null)continue;
+  var s=toScreen(r.lon,r.lat),d=Math.hypot(s[0]-px,s[1]-py);
+  if(d<bd){bd=d;best={kind:'rec',id:r.id}}}
+ for(i=PHOTOS.length-1;i>=0;i--){var p=PHOTOS[i];
+  var s2=toScreen(p.lon,p.lat),d2=Math.hypot(s2[0]-px,s2[1]-py);
+  if(d2<bd){bd=d2;best={kind:'photo',id:p.id}}}
+ for(i=FAULTS.length-1;i>=0;i--){var t=FAULTS[i];
+  for(var j=0;j<t.pts.length-1;j++){
+   var a=toScreen(t.pts[j][0],t.pts[j][1]),b=toScreen(t.pts[j+1][0],t.pts[j+1][1]);
+   var d3=segDist(px,py,a[0],a[1],b[0],b[1]);
+   if(d3<Math.min(bd,14)){bd=d3;best={kind:'fault',id:t.id}}}}
+ return best;
+}
+function segDist(px,py,x1,y1,x2,y2){
+ var dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;
+ var t=l2?clamp(((px-x1)*dx+(py-y1)*dy)/l2,0,1):0;
+ return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
+}
+function tap(px,py){
+ var g=toGeo(px,py);
+ if(MAP.tool==='dip'){dipSheet(g[0],g[1]);return}
+ if(MAP.tool==='photo'){photoSheet(g[0],g[1]);return}
+ if(MAP.tool==='fault'){
+  if(!MAP.draft)MAP.draft={type:MAP.faultType,pts:[]};
+  MAP.draft.pts.push([+g[0].toFixed(6),+g[1].toFixed(6)]);
+  $('#mapHint').textContent='Trace: '+MAP.draft.pts.length+' vertices. Press the trace button to close, or the back key to cancel.';
+  drawMap();buzz(12);return;
+ }
+ var h=hit(px,py);
+ MAP.sel=h;drawMap();
+ if(h)featureSheet(h);
+}
+
+/* ---------- annotation sheets ---------- */
+function sensorDefaults(){
+ var v=FROZEN||currentVec();if(!v)return null;
+ var o=tp(v),t=(o.t+DECL+360)%360;
+ return MODE==='line'?{mode:'line',a:o.p,b:t}:(function(){var p=poleToPlane(t,o.p);return{mode:'plane',a:p.dip,b:p.dd}})();
+}
+function dipSheet(lon,lat,exist){
+ var d=exist||sensorDefaults()||{mode:'plane',a:'',b:''};
+ var types=['bedding','foliation','joint','fault plane','vein','shear zone','fold axial plane','fold axis','slickenline','intersection lineation','other'];
+ sheet(exist?'Edit orientation':'New orientation at tapped point',
+  '<div class="grid2"><button class="btn '+(d.mode!=='line'?'on':'')+'" id="dsP">Plane</button><button class="btn '+(d.mode==='line'?'on':'')+'" id="dsL">Lineation</button></div>'+
+  '<div class="row"><label class="f"><span id="dsAL">'+(d.mode==='line'?'Plunge':'Dip')+'</span><input id="dsA" type="number" inputmode="decimal" value="'+(d.a===''?'':Math.round(d.a))+'"></label>'+
+  '<label class="f"><span id="dsBL">'+(d.mode==='line'?'Trend':'Dip direction')+'</span><input id="dsB" type="number" inputmode="decimal" value="'+(d.b===''?'':Math.round(d.b))+'"></label></div>'+
+  '<div class="row"><button class="btn wide" id="dsRead">Take current sensor reading</button></div>'+
+  '<div class="row"><label class="f"><span>Structure</span><select id="dsType">'+
+   types.map(function(t){return '<option'+(d.type===t?' selected':'')+'>'+t+'</option>'}).join('')+'</select></label></div>'+
+  '<div class="row"><label class="f"><span>Site</span><input id="dsSite" value="'+esc(d.site||$('#fSite').value)+'"></label></div>'+
+  '<div class="row"><label class="f"><span>Note / lithology</span><input id="dsNote" value="'+esc(d.note||MAP.litho||'')+'"></label></div>'+
+  '<p class="note" style="margin:0 0 10px">'+lat.toFixed(5)+' N, '+lon.toFixed(5)+' E</p>'+
+  '<div class="grid2"><button class="btn" id="dsCancel">Cancel</button><button class="btn on" id="dsSave">Save</button></div>',
+ function(){
+  var mode=d.mode;
+  function sync(){$('#dsP').classList.toggle('on',mode!=='line');$('#dsL').classList.toggle('on',mode==='line');
+   $('#dsAL').textContent=mode==='line'?'Plunge':'Dip';$('#dsBL').textContent=mode==='line'?'Trend':'Dip direction'}
+  $('#dsP').onclick=function(){mode='plane';sync()};
+  $('#dsL').onclick=function(){mode='line';sync()};
+  $('#dsRead').onclick=function(){
+   var v=FROZEN||(mode==='line'?S.y:S.z);if(!v){toast('No sensor data');return}
+   var o=tp(v),t=(o.t+DECL+360)%360;
+   if(mode==='line'){$('#dsA').value=Math.round(o.p);$('#dsB').value=Math.round(t)}
+   else{var p=poleToPlane(t,o.p);$('#dsA').value=Math.round(p.dip);$('#dsB').value=Math.round(p.dd)}
+   buzz(14);
+  };
+  $('#dsCancel').onclick=closeSheet;
+  $('#dsSave').onclick=function(){
+   var a=parseFloat($('#dsA').value),b=parseFloat($('#dsB').value);
+   if(!isFinite(a)||!isFinite(b)){toast('Enter both values');return}
+   var r=exist?DATA.filter(function(q){return q.id===exist.id})[0]:{id:Date.now()};
+   r.mode=mode;r.type=$('#dsType').value;r.site=$('#dsSite').value.trim()||'-';r.note=$('#dsNote').value.trim();
+   r.decl=DECL;r.lat=+lat.toFixed(6);r.lon=+lon.toFixed(6);
+   if(mode==='line'){r.plunge=clamp(a,0,90);r.trend=(b+360)%360;delete r.dip;delete r.dd}
+   else{r.dip=clamp(a,0,90);r.dd=(b+360)%360;delete r.plunge;delete r.trend}
+   if(!exist)DATA.push(r);
+   saveData();closeSheet();MAP.tool='pan';syncRail();drawMap();
+   toast('Orientation '+fmtRec(r)+' stored on the map');
+  };
+ });
+}
+function shrink(url,max,cb){
+ var im=new Image();
+ im.onload=function(){
+  var s=Math.min(1,max/Math.max(im.width,im.height));
+  var cv=document.createElement('canvas');cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);
+  cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+  cb(cv.toDataURL('image/jpeg',0.72));
+ };
+ im.onerror=function(){cb(url)};
+ im.src=url;
+}
+function pickPhoto(cb){
+ var inp=document.createElement('input');
+ inp.type='file';inp.accept='image/*';inp.setAttribute('capture','environment');
+ inp.style.position='fixed';inp.style.left='-9999px';document.body.appendChild(inp);
+ inp.onchange=function(){
+  var f=inp.files&&inp.files[0];
+  if(!f){document.body.removeChild(inp);cb(null);return}
+  var rd=new FileReader();
+  rd.onload=function(){shrink(rd.result,1280,function(u){cb(u);document.body.removeChild(inp)})};
+  rd.onerror=function(){document.body.removeChild(inp);cb(null)};
+  rd.readAsDataURL(f);
+ };
+ inp.click();
+}
+function photoSheet(lon,lat){
+ sheet('New photo sample',
+  '<div class="row"><label class="f"><span>Sample label</span><input id="phLab" value="P'+(PHOTOS.length+1)+'"></label>'+
+  '<label class="f"><span>Site</span><input id="phSite" value="'+esc($('#fSite').value)+'"></label></div>'+
+  '<div class="row"><label class="f"><span>Note</span><input id="phNote" value="'+esc(MAP.litho||'')+'"></label></div>'+
+  '<p class="note" style="margin:0 0 10px">'+lat.toFixed(5)+' N, '+lon.toFixed(5)+' E</p>'+
+  '<div class="row"><button class="btn wide big" id="phShot">Take photograph</button></div>'+
+  '<button class="btn wide" id="phCancel">Cancel</button>',
+ function(){
+  $('#phCancel').onclick=closeSheet;
+  $('#phShot').onclick=function(){
+   var meta={id:Date.now(),lat:+lat.toFixed(6),lon:+lon.toFixed(6),
+    label:$('#phLab').value.trim(),site:$('#phSite').value.trim()||'-',note:$('#phNote').value.trim()};
+   pickPhoto(function(url){
+    if(!url){toast('No photograph taken');return}
+    IDB.put('p'+meta.id,url).then(function(){
+     PHOTOS.push(meta);savePhotos();closeSheet();
+     MAP.tool='pan';syncRail();drawMap();drawThumbs();drawHome();
+     toast('Photo sample '+meta.label+' stored at the point');
+    }).catch(function(){toast('Could not store the photograph')});
+   });
+  };
+ });
+}
+function featureSheet(h){
+ if(h.kind==='rec'){
+  var r=DATA.filter(function(q){return q.id===h.id})[0];if(!r)return;
+  sheet('Orientation '+fmtRec(r),
+   '<div class="kv"><span>Type</span><b>'+esc(r.type)+'</b></div>'+
+   '<div class="kv"><span>'+(r.mode==='line'?'Plunge / trend':'Dip / dip direction')+'</span><b>'+fmtRec(r)+'</b></div>'+
+   (r.mode==='line'?'':'<div class="kv"><span>Strike</span><b>'+pad(strikeOf(r.dd),3)+'</b></div>')+
+   '<div class="kv"><span>Site</span><b>'+esc(r.site)+'</b></div>'+
+   '<div class="kv"><span>Note</span><b>'+esc(r.note||'-')+'</b></div>'+
+   '<div class="kv"><span>Position</span><b>'+r.lat.toFixed(5)+', '+r.lon.toFixed(5)+'</b></div>'+
+   '<div class="grid2" style="margin-top:12px"><button class="btn" id="fsEdit">Edit</button><button class="btn" id="fsDel">Delete</button></div>',
+  function(){
+   $('#fsEdit').onclick=function(){closeSheet();dipSheet(r.lon,r.lat,{id:r.id,mode:r.mode,a:r.mode==='line'?r.plunge:r.dip,b:r.mode==='line'?r.trend:r.dd,type:r.type,site:r.site,note:r.note})};
+   $('#fsDel').onclick=function(){DATA=DATA.filter(function(q){return q.id!==r.id});saveData();closeSheet();MAP.sel=null;drawMap();toast('Deleted')};
+  });
+ }else if(h.kind==='photo'){
+  var p=PHOTOS.filter(function(q){return q.id===h.id})[0];if(!p)return;
+  sheet('Photo sample '+esc(p.label),
+   '<div id="fsImg" class="empty">loading image</div>'+
+   '<div class="kv"><span>Site</span><b>'+esc(p.site)+'</b></div>'+
+   '<div class="kv"><span>Note</span><b>'+esc(p.note||'-')+'</b></div>'+
+   '<div class="kv"><span>Position</span><b>'+p.lat.toFixed(5)+', '+p.lon.toFixed(5)+'</b></div>'+
+   '<div class="grid2" style="margin-top:12px"><button class="btn" id="fsSave">Export JPEG</button><button class="btn" id="fsDel2">Delete</button></div>',
+  function(){
+   IDB.get('p'+p.id).then(function(u){
+    $('#fsImg').outerHTML=u?'<img src="'+u+'" style="width:100%;border:1px solid var(--ink);filter:grayscale(1)">':'<div class="empty">image missing</div>';
+   });
+   $('#fsSave').onclick=function(){IDB.get('p'+p.id).then(function(u){if(u)dlBase64('photo_'+p.id+'.jpg',u.split(',')[1],'image/jpeg')})};
+   $('#fsDel2').onclick=function(){IDB.del('p'+p.id);PHOTOS=PHOTOS.filter(function(q){return q.id!==p.id});savePhotos();closeSheet();MAP.sel=null;drawMap();drawThumbs();toast('Deleted')};
+  });
+ }else if(h.kind==='fault'){
+  var t=FAULTS.filter(function(q){return q.id===h.id})[0];if(!t)return;
+  var kinds=['fault','normal','thrust','inferred','contact'];
+  sheet('Structural line',
+   '<div class="row"><label class="f"><span>Line type</span><select id="ftType">'+
+    kinds.map(function(k){return '<option'+(t.type===k?' selected':'')+'>'+k+'</option>'}).join('')+'</select></label></div>'+
+   '<div class="row"><label class="f"><span>Note</span><input id="ftNote" value="'+esc(t.note||'')+'"></label></div>'+
+   '<div class="kv"><span>Vertices</span><b>'+t.pts.length+'</b></div>'+
+   '<div class="kv"><span>Length</span><b>'+lineLen(t.pts).toFixed(0)+' m</b></div>'+
+   '<div class="grid2" style="margin-top:12px"><button class="btn" id="ftSave">Apply</button><button class="btn" id="ftDel">Delete</button></div>',
+  function(){
+   $('#ftSave').onclick=function(){t.type=$('#ftType').value;t.note=$('#ftNote').value.trim();saveFaults();closeSheet();drawMap();drawFaultList();toast('Updated')};
+   $('#ftDel').onclick=function(){FAULTS=FAULTS.filter(function(q){return q.id!==t.id});saveFaults();closeSheet();MAP.sel=null;drawMap();drawFaultList();toast('Trace deleted')};
+  });
+ }
+}
+function lineLen(pts){
+ var s=0;
+ for(var i=0;i<pts.length-1;i++){
+  var a=pts[i],b=pts[i+1];
+  var dx=(b[0]-a[0])*111320*Math.cos((a[1]+b[1])/2*D2R),dy=(b[1]-a[1])*110540;
+  s+=Math.hypot(dx,dy);
+ }
+ return s;
+}
+function finishFault(){
+ var d=MAP.draft;MAP.draft=null;
+ if(!d||d.pts.length<2){drawMap();return}
+ var kinds=['fault','normal','thrust','inferred','contact'];
+ sheet('Close structural line',
+  '<div class="row"><label class="f"><span>Line type</span><select id="nfType">'+
+   kinds.map(function(k){return '<option'+(MAP.faultType===k?' selected':'')+'>'+k+'</option>'}).join('')+'</select></label></div>'+
+  '<div class="row"><label class="f"><span>Note</span><input id="nfNote" value="'+esc(MAP.litho||'')+'"></label></div>'+
+  '<div class="kv"><span>Vertices</span><b>'+d.pts.length+'</b></div>'+
+  '<div class="kv"><span>Length</span><b>'+lineLen(d.pts).toFixed(0)+' m</b></div>'+
+  '<div class="grid2" style="margin-top:12px"><button class="btn" id="nfDrop">Discard</button><button class="btn on" id="nfSave">Save trace</button></div>',
+ function(){
+  $('#nfDrop').onclick=function(){closeSheet();drawMap();toast('Discarded')};
+  $('#nfSave').onclick=function(){
+   MAP.faultType=$('#nfType').value;
+   FAULTS.push({id:Date.now(),type:MAP.faultType,note:$('#nfNote').value.trim(),site:$('#fSite').value.trim()||'-',pts:d.pts});
+   saveFaults();closeSheet();drawMap();drawFaultList();drawHome();toast('Trace saved');
+  };
+ });
+}
+/* ---------- GeoCover identify: vector attributes under the finger ---------- */
+function identify(lon,lat){
+ var d=0.02*Math.pow(2,11-zInt())+0.002;
+ var ext=[lon-d,lat-d,lon+d,lat+d].join(',');
+ var url='https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry='+lon.toFixed(6)+','+lat.toFixed(6)+
+  '&geometryType=esriGeometryPoint&geometryFormat=geojson&imageDisplay=400,400,96&mapExtent='+ext+
+  '&tolerance=6&layers=all:'+GEOCOVER+'&sr=4326&lang=en';
+ sheet('GeoCover unit','<div class="empty" id="idOut">Querying swisstopo</div>');
+ buzz(12);
+ fetch(url).then(function(r){return r.json()}).then(function(j){
+  var res=(j&&j.results)||[];
+  if(!res.length){$('#idOut').textContent='No GeoCover polygon at this point.';return}
+  var pr=res[0].properties||res[0].attributes||{};
+  var keys=Object.keys(pr).filter(function(k){
+   return pr[k]!=null&&pr[k]!==''&&k.indexOf('geom')<0&&k!=='label'&&typeof pr[k]!=='object';
+  }).slice(0,14);
+  var label=pr.litstrat||pr.lithology||pr.description||pr.label||res[0].featureId||'GeoCover polygon';
+  var html='<div class="kv"><span>Unit</span><b>'+esc(label)+'</b></div>'+
+   keys.map(function(k){return '<div class="kv"><span>'+esc(k.replace(/_/g,' '))+'</span><b>'+esc(pr[k])+'</b></div>'}).join('')+
+   '<div class="kv"><span>Point</span><b>'+lat.toFixed(5)+', '+lon.toFixed(5)+'</b></div>'+
+   '<div class="grid2" style="margin-top:12px"><button class="btn" id="idUse">Use as note</button><button class="btn" id="idDip">Annotate dip here</button></div>';
+  var o=$('#idOut');o.outerHTML=html;
+  $('#idUse').onclick=function(){MAP.litho=String(label).slice(0,60);toast('Note preset: '+MAP.litho);closeSheet()};
+  $('#idDip').onclick=function(){MAP.litho=String(label).slice(0,60);closeSheet();dipSheet(lon,lat)};
+ }).catch(function(){
+  var o=$('#idOut');if(o)o.textContent='swisstopo could not be reached. The map needs a data connection.';
+ });
+}
+/* ---------- layers sheet ---------- */
+function layerSheet(){
+ sheet('Map layers',
+  Object.keys(BASES).map(function(k){
+   return '<button class="btn wide '+(MAP.base===k?'on':'')+'" data-base="'+k+'" style="margin-bottom:7px">'+BASES[k].lab+'</button>';
+  }).join('')+
+  '<div class="grid2" style="margin:10px 0"><button class="btn '+(MAP.geo?'on':'')+'" id="lyGeo">GeoCover overlay</button>'+
+  '<button class="btn '+(MONO?'on':'')+'" id="lyMono">Monochrome</button></div>'+
+  '<div class="row"><label class="f"><span>Overlay opacity: <b id="lyAV">'+Math.round(MAP.alpha*100)+'</b> per cent</span>'+
+  '<input id="lyA" type="range" min="10" max="100" step="5" value="'+Math.round(MAP.alpha*100)+'"></label></div>'+
+  '<div class="grid2" style="margin-top:6px"><button class="btn" id="lyGeoJson">Export GeoJSON</button><button class="btn" id="lyClose">Close</button></div>'+
+  '<p class="note" style="margin:12px 0 0">Basemap and GeoCover vector geology: swisstopo WMTS and api3.geo.admin.ch. Coverage is limited to Switzerland.</p>',
+ function(){
+  $$('[data-base]').forEach(function(b){b.onclick=function(){MAP.base=b.getAttribute('data-base');saveView();closeSheet();drawMap()}});
+  $('#lyGeo').onclick=function(){MAP.geo=MAP.geo?0:1;this.classList.toggle('on',!!MAP.geo);saveView();drawMap()};
+  $('#lyMono').onclick=function(){MONO=MONO?0:1;DB.set('gs_mono',MONO);this.classList.toggle('on',!!MONO);syncSettings();drawMap()};
+  $('#lyA').oninput=function(){MAP.alpha=+this.value/100;$('#lyAV').textContent=this.value;saveView();queueMap()};
+  $('#lyGeoJson').onclick=function(){dl('geotools-map-'+stamp()+'.geojson',geojsonOf(),'application/geo+json')};
+  $('#lyClose').onclick=closeSheet;
+ });
+}
+/* ---------- photo gallery and trace list ---------- */
+function drawThumbs(){
+ var g=$('#thumbs');if(!g)return;
+ $('#phEmpty').hidden=PHOTOS.length>0;
+ g.innerHTML=PHOTOS.slice().reverse().map(function(p){
+  return '<figure data-ph="'+p.id+'"><img alt="'+esc(p.label)+'"><figcaption>'+esc(p.label||'-')+'<br>'+p.lat.toFixed(4)+'<br>'+p.lon.toFixed(4)+'</figcaption></figure>';
+ }).join('');
+ PHOTOS.forEach(function(p){
+  IDB.get('p'+p.id).then(function(u){
+   var f=g.querySelector('[data-ph="'+p.id+'"] img');
+   if(f&&u)f.src=u;
+  });
+ });
+ $$('[data-ph]',g).forEach(function(f){
+  f.onclick=function(){featureSheet({kind:'photo',id:+f.getAttribute('data-ph')})};
+ });
+ var ex=$('#btnPhExp');
+ if(!ex&&g.parentNode){
+  ex=document.createElement('button');ex.id='btnPhExp';ex.className='btn wide';ex.style.marginTop='12px';
+  ex.textContent='Export all photographs';
+  ex.onclick=function(){
+   if(!PHOTOS.length){toast('No photographs');return}
+   PHOTOS.forEach(function(p,i){
+    setTimeout(function(){IDB.get('p'+p.id).then(function(u){if(u)dlBase64('photo_'+(p.label||p.id)+'_'+p.id+'.jpg',u.split(',')[1],'image/jpeg')})},i*350);
+   });
+   toast('Exporting '+PHOTOS.length+' photographs');
+  };
+  g.parentNode.appendChild(ex);
+ }
+}
+function drawFaultList(){
+ var o=$('#faultsOut');if(!o)return;
+ if(!FAULTS.length){o.innerHTML='<div class="empty">No structural lines yet. Open Tools, Field map, then the trace tool.</div>';return}
+ o.innerHTML=FAULTS.slice().reverse().map(function(t){
+  return '<div class="kv" data-ft="'+t.id+'"><span><b style="font-weight:600">'+esc(t.type)+'</b><br>'+
+   '<span style="font-size:11px;color:var(--g4)">'+esc(t.note||'no note')+'</span></span>'+
+   '<b>'+lineLen(t.pts).toFixed(0)+' m<br>'+t.pts.length+' pts</b></div>';
+ }).join('');
+ $$('[data-ft]',o).forEach(function(e){
+  e.onclick=function(){
+   var id=+e.getAttribute('data-ft'),t=FAULTS.filter(function(q){return q.id===id})[0];
+   if(!t)return;
+   MAP.lon=t.pts[0][0];MAP.lat=t.pts[0][1];MAP.sel={kind:'fault',id:id};saveView();
+   featureSheet({kind:'fault',id:id});
+  };
+ });
+}
+
+/* ================= 16. settings ================= */
+function applyTheme(){
+ document.body.setAttribute('data-theme',THEME);
+ var mt=document.querySelector('meta[name=theme-color]');
+ if(mt)mt.setAttribute('content',THEME==='dark'?'#000000':'#ffffff');
+ if(window.AndroidExport&&AndroidExport.theme){try{AndroidExport.theme(THEME)}catch(e){}}
+ sizeCanvases();queueMap();
+}
+function syncSettings(){
+ $('#btnSchmidt').classList.toggle('on',!WULFF);
+ $('#btnWulff').classList.toggle('on',!!WULFF);
+ $('#decl').value=DECL;
+ $('#cone').value=CONE;$('#coneV').textContent=CONE;
+ $('#btnTheme').textContent='Theme: '+(THEME==='dark'?'night':'paper');
+ $('#btnTheme').classList.toggle('on',THEME==='dark');
+ $('#btnMono').classList.toggle('on',!!MONO);
+ $('#btnAwake').textContent='Keep screen on: '+(AWAKE?'on':'off');
+ $('#btnAwake').classList.toggle('on',AWAKE);
+ $('#kSel').value=String(K);
+}
+$('#btnSchmidt').onclick=function(){WULFF=0;DB.set('gs_wulff',0);syncSettings();drawNet()};
+$('#btnWulff').onclick=function(){WULFF=1;DB.set('gs_wulff',1);syncSettings();drawNet()};
+$('#decl').onchange=function(){DECL=parseFloat(this.value)||0;DB.set('gs_decl',DECL);refreshAll()};
+$('#cone').oninput=function(){CONE=+this.value;$('#coneV').textContent=CONE;DB.set('gs_cone',CONE);drawNet()};
+$('#btnTheme').onclick=function(){THEME=THEME==='dark'?'light':'dark';DB.set('gs_theme',THEME);applyTheme();syncSettings()};
+$('#btnMono').onclick=function(){MONO=MONO?0:1;DB.set('gs_mono',MONO);syncSettings();queueMap()};
+$('#btnAwake').onclick=function(){
+ AWAKE=!AWAKE;
+ if(window.AndroidExport&&AndroidExport.keepAwake){try{AndroidExport.keepAwake(AWAKE)}catch(e){}}
+ syncSettings();
+};
+$('#btnDiag').onclick=function(){
+ sheet('Sensor report',
+  '<div class="kv"><span>Live</span><b>'+(S.live?'yes':'no')+'</b></div>'+
+  '<div class="kv"><span>Source</span><b>'+esc(S.src||'-')+'</b></div>'+
+  '<div class="kv"><span>Absolute north</span><b>'+(S.absolute?'yes':'no')+'</b></div>'+
+  '<div class="kv"><span>Samples</span><b>'+S.n+'</b></div>'+
+  '<div class="kv"><span>Origin</span><b>'+esc(location.origin)+'</b></div>'+
+  '<h2 class="sec" style="margin-left:0">Attempts</h2>'+
+  S.tries.map(function(t){return '<div class="kv"><span>'+esc(t)+'</span><b></b></div>'}).join('')+
+  '<div class="grid2" style="margin-top:12px"><button class="btn" id="dgRetry">Restart sensors</button><button class="btn" id="dgClose">Close</button></div>',
+ function(){
+  $('#dgRetry').onclick=function(){startSensors();closeSheet();toast('Sensors restarted')};
+  $('#dgClose').onclick=closeSheet;
+ });
+};
+$('#btnWipe').onclick=function(){
+ sheet('Erase everything',
+  '<p class="note" style="margin:0 0 12px">This removes '+DATA.length+' measurements, '+FAULTS.length+' traces and '+PHOTOS.length+
+  ' photo samples from this device. Export first if you need the data.</p>'+
+  '<div class="grid2"><button class="btn" id="wpNo">Keep data</button><button class="btn on" id="wpYes">Erase</button></div>',
+ function(){
+  $('#wpNo').onclick=closeSheet;
+  $('#wpYes').onclick=function(){
+   DATA=[];FAULTS=[];PHOTOS=[];SEL={};IDB.clear();
+   saveFaults();savePhotos();saveData();closeSheet();drawMap();toast('All field data erased');
+  };
+ });
+};
+
+/* ================= 17. tutorials ================= */
+var DOCS=[
+ {t:'Measuring a plane',s:'Sensor workflow, 40 seconds',h:
+  '<h3>1. Prepare</h3><p>Open General settings and enter the local magnetic declination. Keep the phone away from steel, magnets and vehicles.</p>'+
+  '<h3>2. Place the phone</h3><p>Lay the back of the phone flat on the surface. The screen must face away from the rock. Watch the strike bar and the dip arrow on the dial settle.</p>'+
+  '<div class="fig">dial readout<br>dip / dip direction / strike</div>'+
+  '<h3>3. Record</h3><p>Press Record plane. Use Freeze when the outcrop is awkward: freeze the reading with the phone on the rock, then read the screen comfortably.</p>'+
+  '<p>Average 2 s takes a two second mean and reports the angular spread, which is the quality figure stored with the reading.</p>'+
+  '<h3>4. Attributes</h3><p>Site, structure type and note are attached to every following reading, so set them once per station.</p>'},
+ {t:'Lineations and fold axes',s:'Trend and plunge',h:
+  '<h3>Switch mode</h3><p>Press Lineation. The device long axis, the top edge of the phone, becomes the measured direction.</p>'+
+  '<h3>Align</h3><p>Hold the top edge of the phone along the lineation, pointing down plunge. Record.</p>'+
+  '<p>Lineations are drawn as filled triangles on the stereonet so they stay distinguishable from poles in a black and white plate.</p>'},
+ {t:'Reading the stereonet',s:'Poles, contours, sets',h:
+  '<h3>Projection</h3><p>Equal area, the Schmidt net, preserves density and is the default for contouring. Equal angle, the Wulff net, preserves angles and is better for geometric constructions. Both plot the lower hemisphere.</p>'+
+  '<h3>Layers</h3><p>Poles are open circles, planes are their great circles, mean set planes are heavy lines and the mean pole is a crossed square.</p>'+
+  '<h3>Density</h3><p>Contours use a Kamb counting circle. Lines are drawn at 20, 40, 60 and 80 per cent of the maximum density and the caption states the counting circle half-angle and n.</p>'+
+  '<h3>Sets</h3><p>The Sets pane clusters poles with an axial k-means. Automatic mode picks the number of sets with the best silhouette score. Each set reports the mean plane, the Fisher concentration k and the 95 per cent confidence cone.</p>'},
+ {t:'Mapping and annotation',s:'Tool 02, GeoCover',h:
+  '<h3>Basemap</h3><p>The map streams swisstopo tiles. The grey topographic base plus the GeoCover geological overlay is the default; monochrome rendering keeps the sheet publication ready. A data connection is required.</p>'+
+  '<h3>Identify</h3><p>Long-press anywhere to query the GeoCover vector polygon under your finger. Use as note copies the unit name into the next annotation.</p>'+
+  '<h3>Dip symbols</h3><p>Press the dip tool, tap the outcrop, then accept the sensor reading or type the values. The symbol is drawn in standard cartographic form: strike bar, dip tick and dip value.</p>'+
+  '<h3>Fault traces</h3><p>Press the trace tool and tap each vertex. Press the trace tool again to close the line and choose its type: fault, normal with ticks, thrust with triangles, inferred as a dashed line, or lithological contact.</p>'+
+  '<h3>Photo samples</h3><p>Press the photo tool, tap the sample point, then take the photograph. It is stored on the device and pinned to that coordinate as a square symbol.</p>'},
+ {t:'Exporting',s:'CSV, JSON, GeoJSON, PNG',h:
+  '<h3>Tabular</h3><p>Data, Export CSV writes one row per reading with dip, dip direction, strike, trend, plunge, quality, site, coordinates and note.</p>'+
+  '<h3>Spatial</h3><p>Export GeoJSON writes orientations, structural lines and photo sample points in WGS 84, ready for QGIS.</p>'+
+  '<h3>Figures</h3><p>Plot, Export plate as PNG renders the stereonet, rose and histogram as one captioned figure on white ground.</p>'+
+  '<h3>Backup</h3><p>Export JSON writes everything and can be read back with Import JSON.</p>'}
+];
+function drawDocMenu(){
+ $('#docMenu').innerHTML=DOCS.map(function(d,i){
+  return '<li data-doc="'+i+'"><span class="num">'+pad(i+1,2)+'</span><span class="lab"><b>'+d.t+'</b><i>'+d.s+'</i></span><span class="chev">&#8250;</span></li>';
+ }).join('');
+ $$('[data-doc]').forEach(function(li){
+  li.onclick=function(){
+   var d=DOCS[+li.getAttribute('data-doc')];
+   ROUTES.doc.t=d.t;ROUTES.doc.s=d.s;$('#docBody').innerHTML=d.h;go('doc');
+  };
+ });
+}
+function drawAbout(){
+ var ver='-';
+ if(window.AndroidExport&&AndroidExport.appVersion){try{ver=AndroidExport.appVersion()}catch(e){}}
+ $('#aboutBody').innerHTML=
+  '<div class="kv"><span>Application</span><b>GeoTools</b></div>'+
+  '<div class="kv"><span>Build</span><b>'+esc(ver)+'</b></div>'+
+  '<div class="kv"><span>Tools</span><b>Stereonet, GeoCover field map</b></div>'+
+  '<div class="kv"><span>Records on device</span><b>'+DATA.length+' / '+FAULTS.length+' / '+PHOTOS.length+'</b></div>'+
+  '<h2 class="sec" style="margin-left:0">Data sources</h2>'+
+  '<p class="note" style="margin:0">Basemaps and the GeoCover vector geological map are served by swisstopo through wmts.geo.admin.ch and api3.geo.admin.ch. Their terms of use apply. Orientation data are computed on the device from the accelerometer and magnetometer.</p>'+
+  '<h2 class="sec" style="margin-left:0">Conventions</h2>'+
+  '<p class="note" style="margin:0">Planes are stored as dip and dip direction. Lineations are stored as plunge and trend. Azimuths are true north after the declination correction. All plots use the lower hemisphere.</p>'+
+  '<h2 class="sec" style="margin-left:0">Repository</h2>'+
+  '<p class="note" style="margin:0">github.com/3m0ra/gneisstools</p>';
+}
+
+/* ================= 18. boot ================= */
+setMode('plane');
+applyTheme();
+syncSettings();
+syncGeoBtn();
+startSensors();
+startGps();
+render();
+refreshAll();
+window.addEventListener('load',function(){setTimeout(sizeCanvases,60)});
+var lastPaint=0;
+(function loop(ts){
+ requestAnimationFrame(loop);
+ if(ts-lastPaint<80)return;
+ lastPaint=ts;
+ if(cur()==='stereo'&&ROUTES.stereo.pane==='pn-measure'){updateReadout();drawDial();syncGeoBtn()}
+})(0);
 </script>
 </body>
 </html>
