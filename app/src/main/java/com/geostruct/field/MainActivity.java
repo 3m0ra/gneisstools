@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -13,6 +14,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
@@ -34,8 +36,8 @@ import java.io.OutputStream;
 /**
  * GeoTools shell.
  *
- * The whole field application lives in app/src/main/assets and is served over a
- * real secure origin (https://appassets.androidplatform.net/) through
+ * The whole application is app/src/main/assets/index.html, served from a real
+ * secure origin (https://appassets.androidplatform.net/) through
  * WebViewAssetLoader. That is what makes the motion sensors, geolocation and
  * canvas exports work; the same files opened from file:// are rejected by the
  * WebView with NotAllowedError.
@@ -44,7 +46,10 @@ import java.io.OutputStream;
  *   save(name, mime, base64)  write a file into the public Downloads folder
  *   theme("light"|"dark")     recolour the system bars to match the UI theme
  *   keepAwake(boolean)        hold the screen on during a measuring session
- *   appVersion()              versionName shown in Settings
+ *   appVersion()              versionName shown in About
+ *
+ * The file chooser also offers the camera, so the field map tool can store
+ * photo samples taken on the spot.
  */
 public class MainActivity extends Activity {
 
@@ -54,6 +59,7 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private ValueCallback<Uri[]> filePicker;
+    private Uri captureUri;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -68,6 +74,7 @@ public class MainActivity extends Activity {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
+        s.setDatabaseEnabled(true);
         s.setGeolocationEnabled(true);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
@@ -104,8 +111,15 @@ public class MainActivity extends Activity {
             public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams params) {
                 if (filePicker != null) filePicker.onReceiveValue(null);
                 filePicker = cb;
+                captureUri = null;
+
+                Intent chooser = Intent.createChooser(params.createIntent(), "Photo sample");
+                if (wantsImage(params)) {
+                    Intent cam = buildCaptureIntent();
+                    if (cam != null) chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cam});
+                }
                 try {
-                    startActivityForResult(params.createIntent(), REQ_FILE);
+                    startActivityForResult(chooser, REQ_FILE);
                 } catch (Exception e) {
                     filePicker = null;
                     return false;
@@ -126,13 +140,52 @@ public class MainActivity extends Activity {
         web.loadUrl(ORIGIN);
     }
 
+    private boolean wantsImage(WebChromeClient.FileChooserParams params) {
+        String[] types = params.getAcceptTypes();
+        if (types == null) return false;
+        for (String t : types) {
+            if (t != null && t.toLowerCase().startsWith("image/")) return true;
+        }
+        return false;
+    }
+
+    /** Camera intent that writes straight into the gallery, so the result is a readable Uri. */
+    private Intent buildCaptureIntent() {
+        try {
+            Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (cam.resolveActivity(getPackageManager()) == null) return null;
+            ContentValues cv = new ContentValues();
+            cv.put(MediaStore.Images.Media.DISPLAY_NAME, "geotools_" + System.currentTimeMillis() + ".jpg");
+            cv.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            captureUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
+            if (captureUri == null) return null;
+            cam.putExtra(MediaStore.EXTRA_OUTPUT, captureUri);
+            cam.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            return cam;
+        } catch (Exception e) {
+            captureUri = null;
+            return null;
+        }
+    }
+
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         if (req == REQ_FILE) {
             Uri[] out = null;
-            if (res == RESULT_OK && data != null && data.getData() != null) {
-                out = new Uri[]{data.getData()};
+            if (res == RESULT_OK) {
+                if (data != null && data.getData() != null) {
+                    out = new Uri[]{data.getData()};
+                } else if (captureUri != null) {
+                    out = new Uri[]{captureUri};
+                }
             }
+            if (out == null && captureUri != null) {
+                try {
+                    getContentResolver().delete(captureUri, null, null);
+                } catch (Exception ignored) {
+                }
+            }
+            captureUri = null;
             if (filePicker != null) filePicker.onReceiveValue(out);
             filePicker = null;
             return;
@@ -174,21 +227,20 @@ public class MainActivity extends Activity {
                     Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv);
                     if (uri == null) throw new IllegalStateException("MediaStore refused the file");
                     OutputStream os = getContentResolver().openOutputStream(uri);
+                    if (os == null) throw new IllegalStateException("no output stream");
                     os.write(data);
-                    os.flush();
                     os.close();
                     cv.clear();
                     cv.put(MediaStore.Downloads.IS_PENDING, 0);
                     getContentResolver().update(uri, cv, null, null);
                 } else {
-                    File dir = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
-                    if (!dir.exists()) dir.mkdirs();
-                    FileOutputStream fo = new FileOutputStream(new File(dir, name));
-                    fo.write(data);
-                    fo.flush();
-                    fo.close();
+                    File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    if (!dir.exists() && !dir.mkdirs()) throw new IllegalStateException("no Downloads folder");
+                    FileOutputStream fos = new FileOutputStream(new File(dir, name));
+                    fos.write(data);
+                    fos.close();
                 }
-                toast("Saved in Downloads: " + name);
+                toast("Saved to Downloads: " + name);
             } catch (Exception e) {
                 toast("Export failed: " + e.getMessage());
             }
@@ -200,10 +252,11 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    int bg = dark ? 0xFF12171A : 0xFFFFFFFF;
-                    getWindow().setStatusBarColor(bg);
-                    getWindow().setNavigationBarColor(bg);
-                    View d = getWindow().getDecorView();
+                    Window w = getWindow();
+                    int c = dark ? 0xFF000000 : 0xFFFFFFFF;
+                    w.setStatusBarColor(c);
+                    w.setNavigationBarColor(c);
+                    View d = w.getDecorView();
                     int f = d.getSystemUiVisibility();
                     int light = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                     d.setSystemUiVisibility(dark ? (f & ~light) : (f | light));
@@ -225,9 +278,10 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String appVersion() {
             try {
-                return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                PackageInfo p = getPackageManager().getPackageInfo(getPackageName(), 0);
+                return p.versionName + " (build " + p.versionCode + ")";
             } catch (Exception e) {
-                return "?";
+                return "unknown";
             }
         }
     }
