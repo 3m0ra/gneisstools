@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#ffffff">
 <meta name="mobile-web-app-capable" content="yes">
-<title>GeoTools</title>
+<title>GneissTools</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 input,textarea,select,.doc p,.doc li{-webkit-user-select:text;user-select:text}
@@ -113,13 +113,23 @@ tr.sel td{background:var(--ink);color:var(--paper)}
 .thumbs img{display:block;width:100%;height:88px;object-fit:cover;filter:grayscale(1)}
 .thumbs figcaption{font:400 9px/1.25 var(--mono);padding:3px 4px;border-top:1px solid var(--g2)}
 .tag{display:inline-block;border:1px solid var(--ink);padding:2px 5px;font:600 9px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-right:4px}
+body.colour .thumbs img{filter:none}
+body.bigtype ol.menu .lab b{font-size:18px}
+body.bigtype ol.menu .lab i{font-size:13px}
+body.bigtype .btn{font-size:13px}
+body.bigtype table{font-size:13px}
+body.bigtype .kv{font-size:14px}
+body.bigtype .readout b{font-size:29px}
+body.bigtype .doc p,body.bigtype .doc li{font-size:15px}
+body.bigtype #mapHud,body.bigtype #mapHint{font-size:12px}
+body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
 </style>
 </head>
 <body data-theme="light">
 
 <header id="bar">
   <button class="ico" id="btnBack" hidden>&#8249;</button>
-  <div id="barTitle"><h1 id="hTitle">GeoTools</h1><p id="hSub">Field toolkit for structural geology</p></div>
+  <div id="barTitle"><h1 id="hTitle">GneissTools</h1><p id="hSub">Field toolkit for structural geology</p></div>
   <button class="ico sq" id="btnCtx" hidden></button>
 </header>
 
@@ -306,16 +316,49 @@ var IDB=(function(){var dbp=null;
 })();
 
 /* ================= 1. state ================= */
-var DATA=DB.get('gs_data',[]), FAULTS=DB.get('gs_faults',[]), PHOTOS=DB.get('gs_photos',[]);
+/* ---------- projects: every project owns its own dataset ---------- */
+var PROJ=DB.get('gs_proj',null);
+if(!PROJ||!PROJ.list||!PROJ.list.length)PROJ={list:[{id:'default',name:'Field project 1',created:Date.now()}],cur:'default'};
+if(!PROJ.list.filter(function(p){return p.id===PROJ.cur}).length)PROJ.cur=PROJ.list[0].id;
+function saveProj(){DB.set('gs_proj',PROJ)}
+saveProj();
+/* the first project keeps the legacy keys, so data recorded before this update is still there */
+function pk(k){return PROJ.cur==='default'?k:k+'@'+PROJ.cur}
+function curProj(){return PROJ.list.filter(function(p){return p.id===PROJ.cur})[0]||PROJ.list[0]}
+
+var DATA=DB.get(pk('gs_data'),[]), FAULTS=DB.get(pk('gs_faults'),[]), PHOTOS=DB.get(pk('gs_photos'),[]), ATT=DB.get(pk('gs_att'),[]);
 var DECL=DB.get('gs_decl',0), K=DB.get('gs_k',0), CONE=DB.get('gs_cone',10);
 var WULFF=DB.get('gs_wulff',0), MONO=DB.get('gs_mono',1), THEME=DB.get('gs_theme','light');
+var COLOR=DB.get('gs_color',0), UISCALE=DB.get('gs_uiscale',100), FONTSCALE=DB.get('gs_fontscale',100);
+var TERZ=DB.get('gs_terz',0), TERZT=DB.get('gs_terzt',0), TERZP=DB.get('gs_terzp',90), TERZMAX=DB.get('gs_terzmax',10);
 var GEOTAG=DB.get('gs_geotag',0);
+
+/* ---------- graphics palette. a canvas cannot resolve CSS custom properties ---------- */
+var FMONO='ui-monospace,Menlo,Consolas,monospace', FSANS='-apple-system,Helvetica,Arial,sans-serif';
+var PAL={fault:'#d0021b',contact:'#0072b2',sel:'#d0021b',plane:'#6b7f95',pole:'#08519c',line:'#d0021b',
+ photo:'#c05600',gps:'#0072b2',rose:'#cfe3f2',roseEdge:'#08519c',
+ dens:['#cfe3f2','#8cbcdb','#3d8dc4','#08519c'],
+ sets:['#d0021b','#0072b2','#009e73','#d55e00','#7b3f99']};
+function lineColor(ty){return COLOR?(ty==='contact'?PAL.contact:PAL.fault):css('--ink')}
+function lineDash(ty){return ty==='inferred'?[0.6,4.5]:(ty==='contact'?[6,4]:[])}
+function setColor(i){return COLOR?PAL.sets[i%PAL.sets.length]:css('--ink')}
+
+/* ---------- Terzaghi correction: orientation sampling bias along a scanline ---------- */
+function terzVec(){return vecFromTP(TERZT,TERZP)}
+function terzW(v){
+ if(!TERZ||!v)return 1;
+ var c=Math.abs(dot(norm(v),terzVec()));
+ return clamp(1/Math.max(c,1e-6),1,clamp(TERZMAX,2,50));
+}
+function terzSum(vs){var s=0;vs.forEach(function(v){s+=terzW(v)});return s}
+
 var SEL={}, SETS=[], LAYERS={poles:1,planes:0,density:0,sets:1,mean:1,cone:0};
 var MODE='plane', AVG=false, FROZEN=null, AWAKE=false, FIX=null;
 
-function saveData(){DB.set('gs_data',DATA);refreshAll()}
-function saveFaults(){DB.set('gs_faults',FAULTS)}
-function savePhotos(){DB.set('gs_photos',PHOTOS)}
+function saveData(){DB.set(pk('gs_data'),DATA);refreshAll()}
+function saveFaults(){DB.set(pk('gs_faults'),FAULTS)}
+function savePhotos(){DB.set(pk('gs_photos'),PHOTOS)}
+function saveAtt(){DB.set(pk('gs_att'),ATT)}
 
 var tt; function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},1900)}
 function buzz(ms){if(navigator.vibrate)navigator.vibrate(ms||26)}
@@ -440,7 +483,7 @@ function currentVec(){return MODE==='line'?S.y:S.z}
 
 /* ================= 4. router ================= */
 var ROUTES={
- home:{t:'GeoTools',s:'Field toolkit for structural geology',sc:'sc-home',enter:function(){drawHome()}},
+ home:{t:'GneissTools',s:'Field toolkit for structural geology',sc:'sc-home',enter:function(){drawHome()}},
  tools:{t:'Tools',s:'Select an instrument',sc:'sc-tools'},
  stereo:{t:'Stereonet',s:'Tool 01 / orientation measurement',sc:'sc-stereo',
    seg:[['pn-measure','Measure'],['pn-plot','Plot'],['pn-sets','Sets']],pane:'pn-measure',enter:function(){refreshAll()}},
@@ -542,7 +585,7 @@ function drawDial(){
  ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.fillStyle=paper;
  ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.fill();ctx.stroke();
  /* graduations every 10 deg, labels every 30 */
- ctx.font='9px var(--mono),monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.font='9px '+FMONO;ctx.textAlign='center';ctx.textBaseline='middle';
  for(var a=0;a<360;a+=10){
   var rad=a*D2R,l=(a%30===0)?9:5;
   ctx.strokeStyle=(a%90===0)?ink:g3;ctx.lineWidth=(a%90===0)?1.4:0.8;
@@ -551,7 +594,7 @@ function drawDial(){
   if(a%90===0){ctx.fillStyle=ink;ctx.fillText(['N','E','S','W'][a/90],cx+Math.sin(rad)*(R-19),cy-Math.cos(rad)*(R-19))}
  }
  var v=FROZEN||currentVec();
- if(!v){ctx.fillStyle=g3;ctx.font='11px var(--sans),sans-serif';ctx.fillText('no sensor data',cx,cy);return}
+ if(!v){ctx.fillStyle=g3;ctx.font='11px '+FSANS;ctx.fillText('no sensor data',cx,cy);return}
  var o=tp(v),t=(o.t+DECL+360)%360,rad2=t*D2R;
  if(MODE==='plane'){
   var pl=poleToPlane(t,o.p),st=strikeOf(pl.dd)*D2R;
@@ -563,7 +606,7 @@ function drawDial(){
   var dr=R*0.18+R*0.62*(pl.dip/90),dd=pl.dd*D2R;
   ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.sin(dd)*dr,cy-Math.cos(dd)*dr);ctx.stroke();
   arrowHead(ctx,cx+Math.sin(dd)*dr,cy-Math.cos(dd)*dr,dd,6);
-  ctx.fillStyle=ink;ctx.font='600 13px var(--mono),monospace';ctx.textAlign='left';
+  ctx.fillStyle=ink;ctx.font='600 13px '+FMONO;ctx.textAlign='left';
   ctx.fillText(fmtPlane({dip:pl.dip,dd:pl.dd}),cx+Math.sin(dd)*(dr+12),cy-Math.cos(dd)*(dr+12));
   /* levelling bubble: how far the phone is from the plane */
  }else{
@@ -572,7 +615,7 @@ function drawDial(){
   ctx.lineTo(cx+Math.sin(rad2)*lr,cy-Math.cos(rad2)*lr);ctx.stroke();
   arrowHead(ctx,cx+Math.sin(rad2)*lr,cy-Math.cos(rad2)*lr,rad2,6);
   ctx.beginPath();ctx.arc(cx,cy,3,0,6.2832);ctx.fillStyle=ink;ctx.fill();
-  ctx.font='600 13px var(--mono),monospace';ctx.textAlign='left';
+  ctx.font='600 13px '+FMONO;ctx.textAlign='left';
   ctx.fillText(fmtLine({plunge:o.p,trend:t}),cx+Math.sin(rad2)*(lr+12),cy-Math.cos(rad2)*(lr+12));
  }
  /* inclinometer bar */
@@ -748,23 +791,25 @@ function computeSets(){
   for(var i=0;i<vs.length;i++)if(res.lab[i]===j){mem.push(vs[i]);ids.push(recs[i].id)}
   if(!mem.length)continue;
   var m=meanVec(mem),o=tp(m),pl=poleToPlane(o.t,o.p),f=fisher(mem,m);
-  SETS.push({n:mem.length,ids:ids,mean:m,dip:pl.dip,dd:pl.dd,k:f.k,a95:f.a95});
+  SETS.push({n:mem.length,wn:terzSum(mem),ids:ids,mean:m,dip:pl.dip,dd:pl.dd,k:f.k,a95:f.a95});
  }
  SETS.sort(function(a,b){return b.n-a.n});
 }
 /* Kamb counting circle on a square grid, values normalised to the maximum */
 function density(vs,N,R){
- var alpha=Math.acos(clamp(1-9/(9+vs.length),-1,1)),ca=Math.cos(alpha);
+ var W=vs.map(terzW),wn=0,i;
+ for(i=0;i<W.length;i++)wn+=W[i];
+ var alpha=Math.acos(clamp(1-9/(9+Math.max(wn,1)),-1,1)),ca=Math.cos(alpha);
  var g=new Float32Array(N*N),mx=0,ix,iy;
  for(iy=0;iy<N;iy++)for(ix=0;ix<N;ix++){
   var dx=(ix/(N-1)*2-1)*R,dy=(iy/(N-1)*2-1)*R;
   var v=unproj(dx,dy,R);
   if(!v){g[iy*N+ix]=NaN;continue}
   var c=0;
-  for(var i=0;i<vs.length;i++)if(Math.abs(dot(vs[i],v))>=ca)c++;
+  for(i=0;i<vs.length;i++)if(Math.abs(dot(vs[i],v))>=ca)c+=W[i];
   g[iy*N+ix]=c;if(c>mx)mx=c;
  }
- return{g:g,N:N,max:mx,alpha:alpha*R2D};
+ return{g:g,N:N,max:mx,alpha:alpha*R2D,wn:wn};
 }
 function contour(g,N,lev){
  var segs=[],ix,iy;
@@ -802,7 +847,7 @@ function netFrame(ctx,cx,cy,R,w){
  }
  ctx.beginPath();ctx.moveTo(cx,cy-4);ctx.lineTo(cx,cy+4);ctx.moveTo(cx-4,cy);ctx.lineTo(cx+4,cy);
  ctx.strokeStyle=ink;ctx.lineWidth=0.9;ctx.stroke();
- ctx.fillStyle=ink;ctx.font='600 11px var(--sans),sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+ ctx.fillStyle=ink;ctx.font='600 11px '+FSANS;ctx.textAlign='center';ctx.textBaseline='alphabetic';
  ctx.fillText('N',cx,cy-R-6);
 }
 function drawNet(){
@@ -820,7 +865,7 @@ function drawNet(){
   var levs=[0.2,0.4,0.6,0.8];
   levs.forEach(function(f,i){
    var segs=contour(D.g,D.N,f*D.max);
-   ctx.strokeStyle=ink;ctx.lineWidth=0.6+i*0.45;ctx.beginPath();
+   ctx.strokeStyle=COLOR?PAL.dens[i]:ink;ctx.lineWidth=(COLOR?1.1:0.6)+i*0.45;ctx.beginPath();
    segs.forEach(function(s){
     ctx.moveTo(cx+(s[0][0]/(D.N-1)*2-1)*R,cy+(s[0][1]/(D.N-1)*2-1)*R);
     ctx.lineTo(cx+(s[1][0]/(D.N-1)*2-1)*R,cy+(s[1][1]/(D.N-1)*2-1)*R);
@@ -828,7 +873,7 @@ function drawNet(){
   });
   ctx.restore();
   $('#netCap').textContent='Lower hemisphere, '+(WULFF?'equal angle (Wulff)':'equal area (Schmidt)')+
-   '. Contours at 20, 40, 60 and 80 per cent of the maximum counting-circle density (half-angle '+D.alpha.toFixed(1)+' deg, n='+vs.length+').';
+   '. Contours at 20, 40, 60 and 80 per cent of the maximum counting-circle density (half-angle '+D.alpha.toFixed(1)+' deg, n='+vs.length+(TERZ?', Terzaghi weighted n='+D.wn.toFixed(1)+', scanline '+pad(TERZP,2)+'-'+pad(TERZT,3)+', w max '+TERZMAX:'')+').';
  }else{
   $('#netCap').textContent='Lower hemisphere, '+(WULFF?'equal angle (Wulff)':'equal area (Schmidt)')+
    '. n='+DATA.length+' ('+planes.length+' planes, '+lines.length+' lineations).';
@@ -836,7 +881,7 @@ function drawNet(){
  netFrame(ctx,cx,cy,R,w);
 
  if(LAYERS.planes){
-  ctx.strokeStyle=g4;ctx.lineWidth=0.7;
+  ctx.strokeStyle=COLOR?PAL.plane:g4;ctx.lineWidth=0.7;
   planes.forEach(function(r){
    greatCircle(r.dip,r.dd,R).forEach(function(sg){
     ctx.beginPath();sg.forEach(function(p,i){i?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
@@ -847,18 +892,18 @@ function drawNet(){
   planes.forEach(function(r){
    var p=proj(recVec(r),R),sel=SEL[r.id];
    ctx.beginPath();ctx.arc(cx+p[0],cy+p[1],sel?4.2:3,0,6.2832);
-   ctx.fillStyle=sel?ink:paper;ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+   var pc=COLOR?PAL.pole:ink;ctx.fillStyle=sel?pc:paper;ctx.fill();ctx.strokeStyle=pc;ctx.lineWidth=1;ctx.stroke();
   });
   /* lineations use a filled triangle so the two data types stay separable in black and white */
   lines.forEach(function(r){
    var p=proj(recVec(r),R);
    ctx.beginPath();ctx.moveTo(cx+p[0],cy+p[1]-4);ctx.lineTo(cx+p[0]+3.6,cy+p[1]+2.6);ctx.lineTo(cx+p[0]-3.6,cy+p[1]+2.6);
-   ctx.closePath();ctx.fillStyle=ink;ctx.fill();
+   ctx.closePath();ctx.fillStyle=COLOR?PAL.line:ink;ctx.fill();
   });
  }
  if(LAYERS.sets&&SETS.length){
   SETS.forEach(function(s,i){
-   ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.setLineDash(i%2?[5,3]:[]);
+   ctx.strokeStyle=setColor(i);ctx.lineWidth=1.6;ctx.setLineDash(COLOR?[]:(i%2?[5,3]:[]));
    greatCircle(s.dip,s.dd,R).forEach(function(sg){
     ctx.beginPath();sg.forEach(function(p,j){j?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
    });
@@ -869,16 +914,17 @@ function drawNet(){
   SETS.forEach(function(s,i){
    var p=proj(s.mean,R);
    ctx.beginPath();ctx.rect(cx+p[0]-4.5,cy+p[1]-4.5,9,9);ctx.fillStyle=paper;ctx.fill();
-   ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.stroke();
+   ctx.strokeStyle=setColor(i);ctx.lineWidth=1.5;ctx.stroke();
    ctx.beginPath();ctx.moveTo(cx+p[0]-4.5,cy+p[1]);ctx.lineTo(cx+p[0]+4.5,cy+p[1]);
    ctx.moveTo(cx+p[0],cy+p[1]-4.5);ctx.lineTo(cx+p[0],cy+p[1]+4.5);ctx.lineWidth=0.9;ctx.stroke();
-   ctx.fillStyle=ink;ctx.font='600 10px var(--mono),monospace';ctx.textAlign='left';
+   ctx.fillStyle=ink;ctx.font='600 10px '+FMONO;ctx.textAlign='left';
    ctx.fillText(String(i+1),cx+p[0]+7,cy+p[1]-6);
   });
  }
  if(LAYERS.cone&&SETS.length){
-  ctx.strokeStyle=g3;ctx.lineWidth=0.9;ctx.setLineDash([3,3]);
-  SETS.forEach(function(s){
+  ctx.lineWidth=0.9;ctx.setLineDash([3,3]);
+  SETS.forEach(function(s,i){
+   ctx.strokeStyle=COLOR?setColor(i):g3;
    smallCircle(s.mean,CONE,R).forEach(function(sg){
     ctx.beginPath();sg.forEach(function(p,j){j?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
    });
@@ -886,7 +932,7 @@ function drawNet(){
   ctx.setLineDash([]);
  }
  /* scale legend */
- ctx.fillStyle=g4;ctx.font='9px var(--mono),monospace';ctx.textAlign='left';
+ ctx.fillStyle=g4;ctx.font='9px '+FMONO;ctx.textAlign='left';
  ctx.fillText('n='+DATA.length+'  decl '+(DECL>=0?'+':'')+DECL+' deg',6,h-6);
 }
 
@@ -901,7 +947,7 @@ function drawRose(){
  DATA.forEach(function(r){
   var az=r.mode==='line'?r.trend:strikeOf(r.dd);
   var b=Math.floor(((az%180)+180)%180/10);
-  bins[b]++;bins[b+18]++;
+  var wq=terzW(recVec(r));bins[b]+=wq;bins[b+18]+=wq;
  });
  for(i=0;i<36;i++)max=Math.max(max,bins[i]);
  ctx.strokeStyle=g2;ctx.lineWidth=0.7;
@@ -911,14 +957,14 @@ function drawRose(){
    if(!bins[i])continue;
    var a0=(i*10-90)*D2R,a1=((i+1)*10-90)*D2R,rr=R*bins[i]/max;
    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,rr,a0,a1);ctx.closePath();
-   ctx.fillStyle=paper;ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+   ctx.fillStyle=COLOR?PAL.rose:paper;ctx.fill();ctx.strokeStyle=COLOR?PAL.roseEdge:ink;ctx.lineWidth=1;ctx.stroke();
   }
  }
  ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.stroke();
- ctx.fillStyle=ink;ctx.font='600 10px var(--sans),sans-serif';ctx.textAlign='center';
+ ctx.fillStyle=ink;ctx.font='600 10px '+FSANS;ctx.textAlign='center';
  ctx.fillText('N',cx,cy-R-5);
- ctx.fillStyle=css('--g4');ctx.font='9px var(--mono),monospace';ctx.textAlign='left';
- ctx.fillText('max '+max,6,h-6);
+ ctx.fillStyle=css('--g4');ctx.font='9px '+FMONO;ctx.textAlign='left';
+ ctx.fillText('max '+(TERZ?max.toFixed(1)+' Terzaghi weighted':max),6,h-6);
 }
 function drawHist(){
  var c=$('#hist');if(!c.width)return;
@@ -927,9 +973,9 @@ function drawHist(){
  var ink=css('--ink'),g2=css('--g2'),g4=css('--g4'),paper=css('--paper');
  var L=30,B=22,T=10,Rr=10,pw=w-L-Rr,ph=h-B-T;
  var bins=new Array(9).fill(0),max=1,i;
- DATA.forEach(function(r){var d=r.mode==='line'?r.plunge:r.dip;bins[clamp(Math.floor(d/10),0,8)]++});
+ DATA.forEach(function(r){var d=r.mode==='line'?r.plunge:r.dip;bins[clamp(Math.floor(d/10),0,8)]+=terzW(recVec(r))});
  for(i=0;i<9;i++)max=Math.max(max,bins[i]);
- ctx.strokeStyle=g2;ctx.lineWidth=0.7;ctx.fillStyle=g4;ctx.font='9px var(--mono),monospace';
+ ctx.strokeStyle=g2;ctx.lineWidth=0.7;ctx.fillStyle=g4;ctx.font='9px '+FMONO;
  ctx.textAlign='right';ctx.textBaseline='middle';
  for(i=0;i<=4;i++){var y=T+ph-ph*i/4,vv=Math.round(max*i/4);
   ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(L+pw,y);ctx.stroke();ctx.fillText(String(vv),L-5,y)}
@@ -938,7 +984,7 @@ function drawHist(){
  var bw=pw/9;
  for(i=0;i<9;i++){
   if(bins[i]){var bh=ph*bins[i]/max;
-   ctx.fillStyle=paper;ctx.fillRect(L+i*bw,T+ph-bh,bw,bh);
+   ctx.fillStyle=COLOR?PAL.rose:paper;ctx.fillRect(L+i*bw,T+ph-bh,bw,bh);
    ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.strokeRect(L+i*bw,T+ph-bh,bw,bh)}
   ctx.fillStyle=g4;ctx.textAlign='center';ctx.textBaseline='top';
   ctx.fillText(String(i*10),L+i*bw,T+ph+4);
@@ -956,7 +1002,7 @@ function drawSets(){
    '<div class="kv"><span>Mean plane, dip / dip direction</span><b>'+fmtPlane(s)+'</b></div>'+
    '<div class="kv"><span>Strike</span><b>'+pad(strikeOf(s.dd),3)+'</b></div>'+
    '<div class="kv"><span>Pole, trend / plunge</span><b>'+pad((s.dd+180)%360,3)+' / '+pad(90-s.dip,2)+'</b></div>'+
-   '<div class="kv"><span>Fisher k</span><b>'+(s.k?s.k.toFixed(1):'-')+'</b></div>'+
+   '<div class="kv"><span>Fisher k</span><b>'+(s.k?s.k.toFixed(1):'-')+'</b></div>'+(TERZ?'<div class="kv"><span>Terzaghi weighted n</span><b>'+(s.wn||s.n).toFixed(1)+'</b></div>':'')+
    '<div class="kv"><span>Cone of 95 per cent confidence</span><b>'+(s.a95?s.a95.toFixed(1)+' deg':'-')+'</b></div>';
  }).join('');
  var out=[];
@@ -1029,12 +1075,12 @@ function geojsonOf(){
  });
  return JSON.stringify({type:'FeatureCollection',
   crs:{type:'name',properties:{name:'urn:ogc:def:crs:OGC:1.3:CRS84'}},
-  metadata:{app:'GeoTools',exported:new Date().toISOString(),declination:DECL},features:f},null,1);
+  metadata:{app:'GneissTools',exported:new Date().toISOString(),declination:DECL},features:f},null,1);
 }
 function stamp(){return new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}
-$('#btnCsv').onclick=function(){if(!DATA.length){toast('Nothing to export');return}dl('geotools-'+stamp()+'.csv',csvOf(),'text/csv')};
-$('#btnJson').onclick=function(){dl('geotools-'+stamp()+'.json',JSON.stringify({app:'GeoTools',version:3,exported:new Date().toISOString(),declination:DECL,data:DATA,faults:FAULTS,photos:PHOTOS},null,1),'application/json')};
-$('#btnGeo').onclick=function(){dl('geotools-'+stamp()+'.geojson',geojsonOf(),'application/geo+json')};
+$('#btnCsv').onclick=function(){if(!DATA.length){toast('Nothing to export');return}dl('gneisstools-'+stamp()+'.csv',csvOf(),'text/csv')};
+$('#btnJson').onclick=function(){dl('gneisstools-'+stamp()+'.json',JSON.stringify({app:'GneissTools',version:4,exported:new Date().toISOString(),declination:DECL,data:DATA,faults:FAULTS,photos:PHOTOS},null,1),'application/json')};
+$('#btnGeo').onclick=function(){dl('gneisstools-'+stamp()+'.geojson',geojsonOf(),'application/geo+json')};
 $('#btnImp').onclick=function(){$('#fileImp').click()};
 $('#fileImp').onchange=function(){
  var f=this.files&&this.files[0];if(!f)return;
@@ -1066,14 +1112,14 @@ $('#btnPng').onclick=function(){
  var x=out.getContext('2d');
  x.fillStyle='#fff';x.fillRect(0,0,out.width,out.height);
  x.fillStyle='#000';x.font='600 17px Helvetica,Arial,sans-serif';
- x.fillText('GeoTools stereographic plate',18,28);
+ x.fillText('GneissTools stereographic plate',18,28);
  x.font='11px Helvetica,Arial,sans-serif';x.fillStyle='#555';
  x.fillText((WULFF?'Equal angle':'Equal area')+', lower hemisphere / n='+DATA.length+' / declination '+DECL+' deg / '+new Date().toISOString().slice(0,10),18,44);
- x.filter=THEME==='dark'?'grayscale(1) invert(1)':'grayscale(1)';
+ x.filter=COLOR?(THEME==='dark'?'invert(1)':'none'):(THEME==='dark'?'grayscale(1) invert(1)':'grayscale(1)');
  for(i=0;i<src.length;i++){x.drawImage(src[i],0,0,src[i].width,src[i].height,18,y,W-36,hs[i]);y+=hs[i]+gap}
  x.filter='none';x.fillStyle='#777';x.font='10px Helvetica,Arial,sans-serif';
- x.fillText('Produced with GeoTools, github.com/3m0ra/gneisstools',18,out.height-10);
- dlBase64('geotools-plate-'+stamp()+'.png',out.toDataURL('image/png').split(',')[1],'image/png');
+ x.fillText('Produced with GneissTools, github.com/3m0ra/gneisstools',18,out.height-10);
+ dlBase64('gneisstools-plate-'+stamp()+'.png',out.toDataURL('image/png').split(',')[1],'image/png');
 };
 
 /* ================= 15. tool 02 : GeoCover field map ================= */
@@ -1172,7 +1218,7 @@ function drawMapFurniture(x,miss){
  x.strokeStyle=ink;x.lineWidth=1.4;
  x.beginPath();x.moveTo(bx,by);x.lineTo(bx+wpx,by);x.moveTo(bx,by-5);x.lineTo(bx,by+3);x.moveTo(bx+wpx,by-5);x.lineTo(bx+wpx,by+3);x.stroke();
  var lab=nice>=1000?(nice/1000)+' km':nice+' m';
- x.font='600 10px var(--sans),sans-serif';x.textAlign='center';x.textBaseline='alphabetic';
+ x.font='600 10px '+FSANS;x.textAlign='center';x.textBaseline='alphabetic';
  x.strokeStyle=paper;x.lineWidth=3;x.strokeText(lab,bx+wpx/2,by-8);
  x.fillStyle=ink;x.fillText(lab,bx+wpx/2,by-8);
  $('#mapHud').innerHTML=MAP.lat.toFixed(5)+' N<br>'+MAP.lon.toFixed(5)+' E<br>z'+MAP.z.toFixed(1)+
@@ -1301,7 +1347,7 @@ function dipSymbol(x,px,py,dip,dd,mode,trend,plunge,sel){
  if(sel){x.strokeStyle=css('--ink');x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.arc(px,py,19,0,6.2832);x.stroke();x.setLineDash([])}
 }
 function lab(x,t,px,py){
- x.font='600 10px var(--mono),monospace';x.textAlign='left';x.textBaseline='alphabetic';
+ x.font='600 10px '+FMONO;x.textAlign='left';x.textBaseline='alphabetic';
  x.strokeStyle=css('--paper');x.lineWidth=3;x.strokeText(t,px,py);
  x.fillStyle=css('--ink');x.fillText(t,px,py);
 }
@@ -1627,7 +1673,7 @@ function layerSheet(){
   $('#lyGeo').onclick=function(){MAP.geo=MAP.geo?0:1;this.classList.toggle('on',!!MAP.geo);saveView();drawMap()};
   $('#lyMono').onclick=function(){MONO=MONO?0:1;DB.set('gs_mono',MONO);this.classList.toggle('on',!!MONO);syncSettings();drawMap()};
   $('#lyA').oninput=function(){MAP.alpha=+this.value/100;$('#lyAV').textContent=this.value;saveView();queueMap()};
-  $('#lyGeoJson').onclick=function(){dl('geotools-map-'+stamp()+'.geojson',geojsonOf(),'application/geo+json')};
+  $('#lyGeoJson').onclick=function(){dl('gneisstools-map-'+stamp()+'.geojson',geojsonOf(),'application/geo+json')};
   $('#lyClose').onclick=closeSheet;
  });
 }
@@ -1784,7 +1830,7 @@ function drawAbout(){
  var ver='-';
  if(window.AndroidExport&&AndroidExport.appVersion){try{ver=AndroidExport.appVersion()}catch(e){}}
  $('#aboutBody').innerHTML=
-  '<div class="kv"><span>Application</span><b>GeoTools</b></div>'+
+  '<div class="kv"><span>Application</span><b>GneissTools</b></div>'+
   '<div class="kv"><span>Build</span><b>'+esc(ver)+'</b></div>'+
   '<div class="kv"><span>Tools</span><b>Stereonet, GeoCover field map</b></div>'+
   '<div class="kv"><span>Records on device</span><b>'+DATA.length+' / '+FAULTS.length+' / '+PHOTOS.length+'</b></div>'+
