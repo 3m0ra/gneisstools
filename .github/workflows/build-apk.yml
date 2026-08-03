@@ -2,7 +2,11 @@ name: Build APK
 
 on:
   push:
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   apk:
@@ -24,9 +28,31 @@ jobs:
       - name: Build APKs
         run: gradle assembleDebug assembleRelease --no-daemon
 
-      - name: Upload APKs
+      - name: Stage APKs with stable names
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/release/app-release.apk out/GeoTools-release.apk
+          cp app/build/outputs/apk/debug/app-debug.apk   out/GeoTools-debug.apk
+          ls -l out
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: GeoStruct-apk
-          path: app/build/outputs/apk/**/*.apk
+          name: GeoTools-apk
+          path: out/*.apk
           if-no-files-found: error
+
+      - name: Publish rolling "latest" release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest out/GeoTools-release.apk out/GeoTools-debug.apk \
+            --title "GeoTools - latest APK (build ${{ github.run_number }})" \
+            --latest \
+            --notes "Automatic build of commit ${{ github.sha }} (run ${{ github.run_number }}).
+
+          Install on Android: download **GeoTools-release.apk**, open it, allow installation from unknown sources.
+
+          Direct link (always newest): https://github.com/${{ github.repository }}/releases/latest/download/GeoTools-release.apk"
