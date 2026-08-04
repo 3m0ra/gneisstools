@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="mobile-web-app-capable" content="yes">
 <title>GneissTools</title>
-<style>
+<style id="appCss">
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 input,textarea,select,.doc p,.doc li{-webkit-user-select:text;user-select:text}
 html,body{height:100%;margin:0}
@@ -170,7 +170,7 @@ body:not(.pjround) .pjc .ic{border-radius:16px}
 #pjTrack{display:flex;align-items:flex-start;gap:15px;margin:0;padding:10px 50% 6px;list-style:none;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 #pjTrack::-webkit-scrollbar{display:none}
 .pjs{flex:0 0 auto;width:21vw;max-width:98px;padding:0;border:0;background:none;color:var(--ink);text-align:center;scroll-snap-align:center}
-.pjs .disc{position:relative;display:block;width:100%;padding-top:100%;border:1px solid var(--ink);border-radius:50%;overflow:hidden;background:var(--g1);transform:scale(.80);opacity:.5;transition:transform .3s cubic-bezier(.22,.9,.28,1),opacity .3s,box-shadow .3s}
+.pjs .disc{position:relative;display:block;width:100%;padding-top:100%;border:1px solid var(--ink);border-radius:50%;overflow:hidden;background:var(--g1);transform:scale(.8);opacity:.5;transform-origin:50% 50%;backface-visibility:hidden;will-change:transform,opacity;transition:transform .15s linear,opacity .15s linear,box-shadow .3s}
 .pjs .disc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .pjs .disc>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 20px/1 var(--sans);color:#fff}
 .pjs em{display:block;font-style:normal;font:600 10px/1.3 var(--sans);color:var(--g4);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s}
@@ -458,7 +458,7 @@ figure.plate canvas{max-width:100%}
   <h2 class="sec" style="margin-left:0">Appearance</h2>
   <div class="grid2"><button class="btn" id="btnTheme">Theme: paper</button><button class="btn on" id="btnMono">Monochrome map</button><button class="btn on" id="btnDgrad">Density: colour</button></div>
   <p class="note" style="margin:0">Density contours are filled with the viridis ramp by default. Switch the density button to black and white for a hairline publication plate. Monochrome map renders swisstopo tiles in greyscale so the plate stays publication ready. Turn it off when you need the GeoCover lithology colours.</p>
-  <h2 class="sec" style="margin-left:0">Session</h2>
+  <h2 class="sec" style="margin-left:0">Text size</h2><div class="row"><label class="f"><span>App font size: <b id="fsV">100 %</b></span><input id="fs" type="range" min="80" max="160" step="5"></label></div><p class="note" style="margin:0">Scales every text of the application at once, titles and paragraphs keeping their proportion.</p><h2 class="sec" style="margin-left:0">Session</h2>
   <div class="grid2"><button class="btn" id="btnAwake">Keep screen on: off</button><button class="btn" id="btnDiag">Sensor report</button></div>
   <h2 class="sec" style="margin-left:0">Demonstration data</h2>
 <div class="grid2"><button class="btn" id="btnDemo">Load demo data here</button><button class="btn" id="btnDemoProj">Create a demo project</button></div>
@@ -780,7 +780,7 @@ function render(){
  var scr=$('#'+r.sc);
  $$('.pane',scr).forEach(function(p){p.classList.toggle('on',!r.seg||p.id===r.pane)});
  scr.scrollTop=0;
- if(r.enter)r.enter();
+ try{if(r.enter)r.enter()}catch(err){}if(window.requestAnimationFrame)requestAnimationFrame(sizeCanvases);
  sizeCanvases();
 }
 window.GT={onBack:function(){
@@ -956,8 +956,8 @@ $('#btnManual').onclick=function(){
 /* ================= 8. canvas plumbing ================= */
 var DPR=Math.min(window.devicePixelRatio||1,2.5);
 function css(v){return getComputedStyle(document.body).getPropertyValue(v).trim()||'#000'}
-function fit(c,ratio){
- var w=c.parentNode.clientWidth||c.clientWidth||320;
+function plateWidth(){var s=document.querySelector('.screen.on'),w=s?s.clientWidth:0;if(!w)w=document.documentElement.clientWidth||360;return Math.max(240,w-30)}function fit(c,ratio){if(!c)return false;
+ var w=c.parentNode.clientWidth||c.clientWidth||plateWidth();
  if(!w)return false;
  var h=Math.round(w*ratio);
  c.style.height=h+'px';c.width=Math.round(w*DPR);c.height=Math.round(h*DPR);
@@ -1616,7 +1616,7 @@ function repText(S1){
 function drawA4(){
 var keepD=LAYERS.density,keepP=LAYERS.poles;
 LAYERS.density=1;LAYERS.poles=1;
-computeSets();drawNet();drawRose();drawHist();
+computeSets();fit($('#net'),1);fit($('#rose'),0.62);fit($('#hist'),0.5);drawNet();drawRose();drawHist();
 var S1=repStats(),out=document.createElement('canvas');
 out.width=A4W;out.height=A4H;
 var x=out.getContext('2d');
@@ -2349,11 +2349,11 @@ function applyTheme(){
  if(window.AndroidExport&&AndroidExport.theme){try{AndroidExport.theme(THEME)}catch(e){}}
  sizeCanvases();queueMap();
 }
-function syncSettings(){
+var FSBASE=null;function applyFontScale(){var st=document.getElementById('appCss');if(!st)return;if(FSBASE===null)FSBASE=st.textContent;var k=(+FONTSCALE||100)/100,txt=FSBASE;if(k!==1)txt=FSBASE.replace(/font(-size)?\s*:[^;}]*/g,function(m){return m.replace(/(\d*\.?\d+)px/g,function(a,n){return (Math.round(+n*k*100)/100)+'px'})});st.textContent=txt;var v=$('#fsV');if(v)v.textContent=Math.round(k*100)+' %';sizeCanvases();if(typeof pjActive==='function')pjActive()}function syncSettings(){
  $('#btnSchmidt').classList.toggle('on',!WULFF);
  $('#btnWulff').classList.toggle('on',!!WULFF);
  $('#decl').value=DECL;
- $('#cone').value=CONE;$('#coneV').textContent=CONE;
+ $('#cone').value=CONE;$('#coneV').textContent=CONE;$('#fs').value=FONTSCALE;$('#fsV').textContent=FONTSCALE+' %';
  $('#btnTheme').textContent='Theme: '+(THEME==='dark'?'night':'paper');
  $('#btnTheme').classList.toggle('on',THEME==='dark');
  $('#btnMono').classList.toggle('on',!!MONO);
@@ -2366,7 +2366,7 @@ function syncSettings(){
 $('#btnSchmidt').onclick=function(){WULFF=0;DB.set('gs_wulff',0);syncSettings();drawNet()};
 $('#btnWulff').onclick=function(){WULFF=1;DB.set('gs_wulff',1);syncSettings();drawNet()};
 $('#decl').onchange=function(){DECL=parseFloat(this.value)||0;DB.set('gs_decl',DECL);refreshAll()};
-$('#cone').oninput=function(){CONE=+this.value;$('#coneV').textContent=CONE;DB.set('gs_cone',CONE);drawNet()};
+$('#cone').oninput=function(){CONE=+this.value;$('#coneV').textContent=CONE;DB.set('gs_cone',CONE);drawNet()};$('#fs').oninput=function(){FONTSCALE=clamp(+this.value||100,70,200);DB.set('gs_fontscale',FONTSCALE);applyFontScale()};
 $('#btnTheme').onclick=function(){THEME=THEME==='dark'?'light':'dark';DB.set('gs_theme',THEME);applyTheme();syncSettings()};
 $('#btnMono').onclick=function(){MONO=MONO?0:1;DB.set('gs_mono',MONO);syncSettings();queueMap()};
 $('#btnDgrad').onclick=function(){DGRAD=DGRAD?0:1;DB.set('gs_dgrad',DGRAD);syncSettings();drawNet()};
@@ -3251,7 +3251,7 @@ the track is a native horizontal scroller with mandatory centre snapping, so the
 gesture keeps the inertia and the rubber banding of the platform. the disc nearest
 the centre is scaled up, its neighbours sit slightly back, and when the scroll
 settles the centred project becomes the open one. tapping a disc does the same. */
-var PJSIG='',PJTMR=0,PJHOLD=0;
+var PJSIG='',PJTMR=0,PJHOLD=0,PJPEND=0;
 function pjBuild(){
 var tr=$('#pjTrack');if(!tr)return;
 tr.innerHTML=PROJ.list.map(function(p){
@@ -3268,11 +3268,11 @@ var e=tr.querySelector('[data-disc="'+p.id+'"]');
 if(e)e.innerHTML='<img alt="" src="'+u+'">';
 });
 });
-$('[data-slide]',tr).forEach(function(b){
+$$('[data-slide]',tr).forEach(function(b){
 b.onclick=function(){
 var id=b.getAttribute('data-slide');
 pjCentre(b,1);
-if(id==='+'){go('projects');return}
+if(id==='+'){go('projects');setTimeout(function(){var i=$('#pjName');if(i){try{i.scrollIntoView({block:'center'})}catch(e){}i.focus()}},80);toast('Name the new project, then tap Create');return}
 if(id!==PROJ.cur)pjOpen(id);else pjSheet(id);
 };
 });
@@ -3280,7 +3280,7 @@ pjActive();
 }
 function pjCentre(el,smooth){
 var tr=$('#pjTrack');if(!tr||!el)return;
-var to=el.offsetLeft+el.offsetWidth/2-tr.clientWidth/2;
+if(!tr.clientWidth||!el.offsetWidth){PJPEND=1;return}PJPEND=0;var to=el.offsetLeft+el.offsetWidth/2-tr.clientWidth/2;
 if(Math.abs(to-tr.scrollLeft)<2)return;
 PJHOLD=1;
 if(tr.scrollTo&&smooth)tr.scrollTo({left:to,behavior:'smooth'});else tr.scrollLeft=to;
@@ -3289,7 +3289,7 @@ setTimeout(function(){PJHOLD=0},smooth?420:60);
 function pjNearest(){
 var tr=$('#pjTrack');if(!tr)return null;
 var mid=tr.scrollLeft+tr.clientWidth/2,best=null,bd=1e9;
-$('.pjs',tr).forEach(function(b){
+$$('.pjs',tr).forEach(function(b){
 var d=Math.abs(b.offsetLeft+b.offsetWidth/2-mid);
 if(d<bd){bd=d;best=b}
 });
@@ -3298,8 +3298,8 @@ return best;
 function pjDepth(){
 var tr=$('#pjTrack');if(!tr)return;
 var mid=tr.scrollLeft+tr.clientWidth/2;
-$('.pjs',tr).forEach(function(b){
-var d=Math.abs(b.offsetLeft+b.offsetWidth/2-mid)/(b.offsetWidth+16);
+$$('.pjs',tr).forEach(function(b){
+var off=(b.offsetLeft+b.offsetWidth/2-mid)/(b.offsetWidth+15),d=Math.abs(off),t=Math.min(d,1.8)/1.8,disc=b.querySelector('.disc');if(disc){disc.style.transform='perspective(460px) rotateY('+(-off*28).toFixed(2)+'deg) translateZ('+(-36*t).toFixed(1)+'px) scale('+(1-0.30*t).toFixed(3)+')';disc.style.opacity=(1-0.55*t).toFixed(3)}b.style.zIndex=String(200-Math.round(d*20));
 b.classList.toggle('on',d<0.5);
 b.classList.toggle('near',d>=0.5&&d<1.5);
 });
@@ -3323,7 +3323,7 @@ if(id!=='+'&&id!==PROJ.cur)pjOpen(id);
 function pjSync(){
 var tr=$('#pjTrack');if(!tr)return;
 var sig=PROJ.list.map(function(p){return p.id+'~'+p.name}).join('|');
-if(sig!==PJSIG){PJSIG=sig;pjBuild();return}
+if(sig!==PJSIG){PJSIG=sig;pjBuild();return}if(PJPEND){pjActive();return}
 pjDepth();
 }
 (function(){
@@ -3338,7 +3338,7 @@ var _drawHomeBase=drawHome;
 drawHome=function(){_drawHomeBase();pjSync()};
 
 /* ================= 26. boot ================= */
-setMode('plane');
+setMode('plane');applyFontScale();
 applyTheme();
 syncSettings();
 syncGeoBtn();
