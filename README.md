@@ -37,7 +37,7 @@ Both APKs are signed with the Android debug key, so they install straight away b
 
 ## Projects
 
-Every field project owns its own dataset: measurements, extracted sets, structural lines and photo samples are stored separately and nothing is mixed between projects. A circular project carousel sits on the home screen between the title block and the instruments: swipe it with an inertial, snapping scroll and tap a disc to switch project. Projects can also be created, opened and renamed from the first entry of the main menu; the active project is shown on the home screen and printed in the header of the A4 report.
+Every field project owns its own dataset: measurements, extracted sets, structural lines and photo samples are stored separately and nothing is mixed between projects. A circular project carousel sits on the home screen between the title block and the instruments: swipe it with an inertial, snapping scroll and tap a disc to switch project. The centred disc is drawn full size while its neighbours sit slightly behind it, turned away and smaller, and the last disc, marked with a plus, opens the field where a new project is named. A slider in General settings scales every text of the application at once, titles and paragraphs keeping their proportion. Projects can also be created, opened and renamed from the first entry of the main menu; the active project is shown on the home screen and printed in the header of the A4 report.
 
 ## What is inside
 
@@ -49,7 +49,7 @@ The app opens on a main menu and never buries a function more than two taps deep
     |     |-- 01 Stereonet          Measure / Plot / Sets
     |     |-- 02 Field map          GeoCover annotation
     |-- 03 Data                     Table / Photos / Traces
-    |-- 04 General settings         Projection, declination, theme, sensors
+    |-- 04 General settings         Projection, declination, theme, text size, sensors
     |-- 05 Tutorials                Five guided workflows
     |-- 06 About                    Build, data sources, conventions
 
