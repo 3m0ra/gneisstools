@@ -31,14 +31,14 @@ jobs:
       - name: Stage APKs with stable names
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/release/app-release.apk out/GeoTools-release.apk
-          cp app/build/outputs/apk/debug/app-debug.apk   out/GeoTools-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk out/GneissTools-release.apk
+          cp app/build/outputs/apk/debug/app-debug.apk   out/GneissTools-debug.apk
           ls -l out
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: GeoTools-apk
+          name: GneissTools-apk
           path: out/*.apk
           if-no-files-found: error
 
@@ -48,11 +48,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --cleanup-tag --yes || true
-          gh release create latest out/GeoTools-release.apk out/GeoTools-debug.apk \
-            --title "GeoTools - latest APK (build ${{ github.run_number }})" \
+          gh release create latest out/GneissTools-release.apk out/GneissTools-debug.apk \
+            --title "GneissTools - latest APK (build ${{ github.run_number }})" \
             --latest \
             --notes "Automatic build of commit ${{ github.sha }} (run ${{ github.run_number }}).
 
-          Install on Android: download **GeoTools-release.apk**, open it, allow installation from unknown sources.
+          Install on Android: download **GneissTools-release.apk**, open it, allow installation from unknown sources.
 
-          Direct link (always newest): https://github.com/${{ github.repository }}/releases/latest/download/GeoTools-release.apk"
+          Direct link (always newest): https://github.com/${{ github.repository }}/releases/latest/download/GneissTools-release.apk"
