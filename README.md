@@ -35,18 +35,23 @@ Both APKs are signed with the Android debug key, so they install straight away b
 
 ---
 
+## Projects
+
+Every field project owns its own dataset: measurements, extracted sets, structural lines and photo samples are stored separately and nothing is mixed between projects. Create, open and rename projects from the first entry of the main menu; the active project is shown on the home screen and printed in the header of the A4 report.
+
 ## What is inside
 
 The app opens on a main menu and never buries a function more than two taps deep.
 
     Main menu
-    |-- 01 Tools
+    |-- 01 Projects                  Create, choose and rename a field project
+    |-- 02 Tools
     |     |-- 01 Stereonet          Measure / Plot / Sets
     |     |-- 02 Field map          GeoCover annotation
-    |-- 02 Data                     Table / Photos / Traces
-    |-- 03 General settings         Projection, declination, theme, sensors
-    |-- 04 Tutorials                Five guided workflows
-    |-- 05 About                    Build, data sources, conventions
+    |-- 03 Data                     Table / Photos / Traces
+    |-- 04 General settings         Projection, declination, theme, sensors
+    |-- 05 Tutorials                Five guided workflows
+    |-- 06 About                    Build, data sources, conventions
 
 ### Tool 01 - Stereonet
 
@@ -54,11 +59,13 @@ The app opens on a main menu and never buries a function more than two taps deep
 - **Freeze** captures the reading on the rock so you can read the screen comfortably; **Average 2 s** takes a windowed mean and stores the angular spread as a quality figure.
 - Manual entry, per-station site, structure type and note, optional GPS tagging of every reading.
 - Lower-hemisphere plots: equal-area (Schmidt) or equal-angle (Wulff), poles, great circles, mean planes, small circles.
+- **Three density estimators**, cycled by tapping the stereonet itself: Schmidt counting circle (1 per cent of the hemisphere area), Kamb counting circle and a Fisher kernel. The name of the active method flashes on the plate and is written into the caption.
 - **Kamb counting-circle density** (Kamb, 1959): the counting area is set so that the expected count of a uniform distribution equals three standard deviations, cos(alpha) = 1 - 9 / (9 + n). Contours are drawn at 20 / 40 / 60 / 80 per cent of the maximum and the counting half-angle, the sample size and the distance of the maximum from a uniform count are printed in the caption.
 - Density is filled with the **viridis ramp by default**, with a scale bar in per cent of the maximum. One button in General settings switches the whole density rendering back to hairline black and white.
 - Strike rose and dip histogram, both in the same hairline black-and-white idiom.
 - **Set extraction** by axial k-means, number of sets chosen automatically by silhouette score, with Fisher k, the 95 per cent confidence cone and the intersection line of every set pair.
 - One-tap PNG export of the whole plate on white ground.
+- **Undo** for the last action, including the last recorded plane, on the measure screen, in the data table and on the map.
 - **One-page A4 report**, laid out automatically: header, stereonet with density, strike rose, dip histogram, a table of the extracted sets and a written summary of the results. The text is assembled on the device from the computed statistics; it describes the results only and offers no interpretation.
 
 ### Tool 02 - Field map (swisstopo GeoCover)
@@ -68,7 +75,8 @@ The app opens on a main menu and never buries a function more than two taps deep
 - **Dip symbols:** tap the outcrop, accept the live sensor reading or type the values. Drawn in standard cartographic form - strike bar, dip tick, dip value - and written into the same dataset as the stereonet.
 - **Fault traces:** tap the vertices, then close the line and pick its type - fault, normal with ticks, thrust with triangles, inferred as a dashed line, or lithological contact.
 - **Photo samples:** tap the sample point, take the photograph, and it is pinned to that coordinate as a square symbol. Images are held in IndexedDB on the device.
-- Live GPS position with its accuracy circle, metric scale bar, and a follow mode.
+- Live GPS position with its accuracy circle, metric scale bar, a follow mode and a **centre on my position** button that recentres the view on the current fix.
+- Manually drawn fault traces are **solid red**; inferred faults are dashed red, lithological contacts keep the black hairline idiom.
 
 > Coverage note: the GeoCover geological map is a swisstopo product and exists for **Switzerland only**. Outside Switzerland the stereonet, the annotation layers and the export all keep working, only the tiles will be blank.
 
