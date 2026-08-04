@@ -126,6 +126,45 @@ body.bigtype .readout b{font-size:29px}
 body.bigtype .doc p,body.bigtype .doc li{font-size:15px}
 body.bigtype #mapHud,body.bigtype #mapHint{font-size:12px}
 body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
+
+/* ================= 19. colour, home hero, tiles, project grid ================= */
+body{--geoBlue:#1f6f8b;--geoDeep:#124559;--geoOchre:#b06d1a;--geoRust:#a8432b;--geoGreen:#3f7d3f;--geoViolet:#6b4a8f;--water:#2a9dbf}
+body[data-theme=dark]{--geoBlue:#4fb3d1;--geoDeep:#8fd4e8;--geoOchre:#e0a552;--geoRust:#e0785e;--geoGreen:#7ec27e;--geoViolet:#b492d8;--water:#5fc8e0}
+.hero{position:relative;border-bottom:1px solid var(--ink);overflow:hidden;background:linear-gradient(160deg,#e9f4f8 0%,#f7f0e3 55%,#f1e4d3 100%)}
+body[data-theme=dark] .hero{background:linear-gradient(160deg,#0b1c22 0%,#1a1408 60%,#120d06 100%)}
+.hero svg{display:block;width:100%;height:auto}
+.heroTxt{position:absolute;left:14px;right:14px;bottom:9px}
+.heroTxt b{display:block;font:700 21px/1.1 var(--sans);color:var(--ink)}
+.heroTxt i{display:block;font-style:normal;font:400 12px/1.35 var(--sans);color:var(--g4);margin-top:2px}
+.heroTag{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:11px;background:var(--geoBlue);color:#fff;font:600 9px/1.4 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
+.tile{position:relative;display:block;padding:12px;border:1px solid var(--ink);border-radius:14px;background:var(--g05);overflow:hidden}
+.tile:active{background:var(--g1)}
+.tile svg{display:block;width:34px;height:34px;margin-bottom:8px}
+.tile b{display:block;font:600 14px/1.2 var(--sans)}
+.tile i{display:block;font-style:normal;font:400 11px/1.35 var(--sans);color:var(--g4);margin-top:3px}
+.tile .bdg{position:absolute;right:9px;top:9px;min-width:20px;padding:2px 6px;border-radius:10px;background:var(--ink);color:var(--paper);font:600 9px/1.5 var(--mono);text-align:center}
+.tile.t1{border-color:var(--geoBlue)}.tile.t2{border-color:var(--geoOchre)}
+.tile.t3{border-color:var(--water)}.tile.t4{border-color:var(--geoGreen)}
+ol.menu li .dot{width:26px;height:26px;flex:0 0 auto;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 11px/1 var(--sans)}
+.strip{display:flex;height:6px;margin:0}
+.strip i{flex:1}
+.pjbar{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.pjbar .btn{flex:0 0 auto}
+#pjGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-height:58vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}
+.pjc{position:relative;text-align:center}
+.pjc .ic{position:relative;width:100%;padding-top:100%;border:1px solid var(--ink);overflow:hidden;background:var(--g1)}
+body.pjround .pjc .ic{border-radius:50%}
+body:not(.pjround) .pjc .ic{border-radius:16px}
+.pjc .ic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pjc .ic span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 20px/1 var(--sans);color:#fff}
+.pjc.on .ic{box-shadow:0 0 0 3px var(--geoBlue)}
+.pjc em{display:block;font-style:normal;font:600 11px/1.25 var(--sans);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pjc small{display:block;font:400 9px/1.3 var(--mono);color:var(--g4)}
+.pjc .cur{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% - 46px);background:var(--geoBlue);color:#fff;border-radius:9px;padding:1px 7px;font:600 8px/1.6 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.chip{display:inline-block;margin:0 5px 5px 0;padding:4px 9px;border-radius:12px;border:1px solid var(--ink);font:600 10px/1.3 var(--sans)}
+.chip.on{background:var(--ink);color:var(--paper)}
+
 </style>
 </head>
 <body data-theme="light">
@@ -142,25 +181,71 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
 
 <!-- ============ MAIN MENU ============ -->
 <section class="screen" id="sc-home">
-  <ol class="menu">
-    <li data-go="projects"><span class="num">01</span><span class="lab"><b>Projects</b><i>Create, choose and rename a field project</i></span><span class="chev">&#8250;</span></li>
-    <li data-go="tools"><span class="num">02</span><span class="lab"><b>Tools</b><i>Stereonet &middot; GeoCover field map</i></span><span class="chev">&#8250;</span></li>
-    <li data-go="data"><span class="num">03</span><span class="lab"><b>Data</b><i>Table, import and export</i></span><span class="chev">&#8250;</span></li>
-    <li data-go="settings"><span class="num">04</span><span class="lab"><b>General settings</b><i>Projection, declination, theme, sensors</i></span><span class="chev">&#8250;</span></li>
-    <li data-go="tutorials"><span class="num">05</span><span class="lab"><b>Tutorials</b><i>How to measure, plot and map</i></span><span class="chev">&#8250;</span></li>
-    <li data-go="about"><span class="num">06</span><span class="lab"><b>About</b><i>Version, data sources, licence</i></span><span class="chev">&#8250;</span></li>
-  </ol>
-  <h2 class="sec">Current session</h2>
-  <div class="pad" style="padding-top:0" id="homeStat"></div>
+
+<div class="hero">
+<svg viewBox="0 0 360 152" preserveAspectRatio="none" aria-hidden="true">
+<defs>
+<linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe4f0"/><stop offset="1" stop-color="#f3ead9"/></linearGradient>
+<linearGradient id="gWat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fb6d4"/><stop offset="1" stop-color="#1f6f8b"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="360" height="152" fill="url(#gSky)"/>
+<circle cx="308" cy="30" r="15" fill="#f2b43c" opacity=".85"/>
+<path d="M0 62 L46 34 L78 52 L118 20 L160 56 L196 38 L232 60 L268 44 L310 64 L360 46 L360 152 L0 152 Z" fill="#8fa9b3" opacity=".55"/>
+<path d="M0 78 C60 62 110 92 160 80 C214 67 268 96 360 74 L360 152 L0 152 Z" fill="#c98a3e"/>
+<path d="M0 92 C60 76 110 106 160 94 C214 81 268 110 360 88 L360 152 L0 152 Z" fill="#a8532b"/>
+<path d="M0 106 C60 90 110 120 160 108 C214 95 268 124 360 102 L360 152 L0 152 Z" fill="#7d5a3c"/>
+<path d="M0 122 C60 106 110 136 160 124 C214 111 268 140 360 118 L360 152 L0 152 Z" fill="#4a4a52"/>
+<path d="M0 100 C70 86 120 114 178 102 C238 90 292 116 360 96" fill="none" stroke="#2a9dbf" stroke-width="2.4" opacity=".9"/>
+<g fill="#2a9dbf" opacity=".85"><circle cx="52" cy="112" r="2.2"/><circle cx="96" cy="122" r="1.8"/><circle cx="150" cy="118" r="2.4"/><circle cx="214" cy="112" r="1.9"/><circle cx="272" cy="126" r="2.2"/><circle cx="322" cy="114" r="1.8"/></g>
+<rect x="204" y="40" width="7" height="70" fill="#31383d"/>
+<rect x="197" y="34" width="21" height="8" fill="#31383d"/>
+<path d="M207.5 110 L207.5 138" stroke="#2a9dbf" stroke-width="3"/>
+<g transform="translate(46,116)"><circle r="13" fill="none" stroke="#f7f3ea" stroke-width="2"/><path d="M0 -11 L4 0 L0 11 L-4 0 Z" fill="#f7f3ea"/></g>
+<g stroke="#f7f3ea" stroke-width="1.6" opacity=".9"><path d="M258 70 l16 0"/><path d="M266 70 l0 7"/><path d="M120 60 l14 0"/><path d="M127 60 l0 6"/></g>
+</svg>
+<div class="heroTxt"><b>GneissTools</b><i>Structural geology and hydrogeology, measured in the field</i><span class="heroTag" id="heroTag">Project</span></div>
+</div>
+<div class="strip"><i style="background:var(--geoBlue)"></i><i style="background:var(--water)"></i><i style="background:var(--geoGreen)"></i><i style="background:var(--geoOchre)"></i><i style="background:var(--geoRust)"></i><i style="background:var(--geoViolet)"></i></div>
+
+<h2 class="sec">Instruments</h2>
+<div class="tiles">
+<div class="tile t1" data-go="stereo">
+<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#1f6f8b" stroke-width="2"/><path d="M6 24 C13 8 27 8 34 24" fill="none" stroke="#a8432b" stroke-width="2"/><circle cx="15" cy="16" r="2.4" fill="#1f6f8b"/><circle cx="25" cy="26" r="2.4" fill="#a8432b"/></svg>
+<b>Stereonet</b><i>Planes, poles, density, sets</i><span class="bdg" id="bdgStereo">0</span></div>
+<div class="tile t2" data-go="map">
+<svg viewBox="0 0 40 40"><path d="M4 12 L15 8 L26 12 L36 8 L36 30 L26 34 L15 30 L4 34 Z" fill="#f0dcc0" stroke="#b06d1a" stroke-width="2"/><path d="M15 8 L15 30 M26 12 L26 34" stroke="#b06d1a" stroke-width="1.4"/><path d="M9 26 L20 16 L31 27" fill="none" stroke="#a8432b" stroke-width="2"/></svg>
+<b>Field map</b><i>GeoCover annotation</i><span class="bdg" id="bdgMap">0</span></div>
+<div class="tile t3" data-go="pump">
+<svg viewBox="0 0 40 40"><rect x="16" y="4" width="8" height="18" fill="#31383d"/><rect x="12" y="2" width="16" height="5" fill="#31383d"/><path d="M4 24 C12 21 20 27 36 22" fill="none" stroke="#2a9dbf" stroke-width="2.2"/><path d="M20 22 L20 36" stroke="#2a9dbf" stroke-width="3"/><path d="M6 34 C14 31 24 36 34 32" fill="none" stroke="#1f6f8b" stroke-width="2"/></svg>
+<b>Pumping test</b><i>Theis and Cooper-Jacob</i><span class="bdg" id="bdgPump">0</span></div>
+<div class="tile t4" data-go="data">
+<svg viewBox="0 0 40 40"><rect x="6" y="6" width="28" height="28" rx="3" fill="none" stroke="#3f7d3f" stroke-width="2"/><path d="M6 15 H34 M6 24 H34 M16 6 V34" stroke="#3f7d3f" stroke-width="1.4"/><circle cx="26" cy="29" r="3" fill="#a8432b"/></svg>
+<b>Data</b><i>Table, photos, traces, export</i><span class="bdg" id="bdgData">0</span></div>
+</div>
+<div class="pad" style="padding-top:10px;padding-bottom:0">
+<span class="chip" data-go="tools">All instruments &#8250;</span><span class="chip" id="chipDemo">Load demo data</span><span class="chip" id="chipRep">One-page PDF report</span>
+</div>
+
+<h2 class="sec">Menu</h2>
+<ol class="menu">
+<li data-go="projects"><span class="dot" style="background:var(--geoBlue)">01</span><span class="lab"><b>Projects</b><i>Create, rename, illustrate and switch field projects</i></span><span class="chev">&#8250;</span></li>
+<li data-go="settings"><span class="dot" style="background:var(--geoOchre)">02</span><span class="lab"><b>General settings</b><i>Projection, declination, theme, sensors, demo data</i></span><span class="chev">&#8250;</span></li>
+<li data-go="tutorials"><span class="dot" style="background:var(--geoGreen)">03</span><span class="lab"><b>Tutorials</b><i>Six guided field workflows</i></span><span class="chev">&#8250;</span></li>
+<li data-go="about"><span class="dot" style="background:var(--geoViolet)">04</span><span class="lab"><b>About</b><i>Version, methods, data sources, licence</i></span><span class="chev">&#8250;</span></li>
+</ol>
+
+<h2 class="sec">Current session</h2>
+<div class="pad" style="padding-top:0" id="homeStat"></div>
 </section>
 
 <!-- ============ TOOLS SUBMENU ============ -->
 <section class="screen" id="sc-tools">
-  <ol class="menu">
-    <li data-go="stereo"><span class="num">01</span><span class="lab"><b>Stereonet</b><i>Measure planes and lineations, plot poles, contour density, cluster sets</i></span><span class="chev">&#8250;</span></li>
-    <li data-go="map"><span class="num">02</span><span class="lab"><b>Field map &middot; GeoCover</b><i>Dip symbols, fault traces and photo samples on the swisstopo vector geological map</i></span><span class="chev">&#8250;</span></li>
-  </ol>
-  <p class="note">Both tools write into the same dataset: a dip reading taken with the stereonet can be dropped on the map, and a dip annotated on the map is plotted on the stereonet.</p>
+<ol class="menu">
+<li data-go="stereo"><span class="dot" style="background:var(--geoBlue)">01</span><span class="lab"><b>Stereonet</b><i>Measure planes and lineations, plot poles, contour density, cluster sets</i></span><span class="chev">&#8250;</span></li>
+<li data-go="map"><span class="dot" style="background:var(--geoOchre)">02</span><span class="lab"><b>Field map &middot; GeoCover</b><i>Dip symbols, fault traces and photo samples on the swisstopo vector geological map</i></span><span class="chev">&#8250;</span></li>
+<li data-go="pump"><span class="dot" style="background:var(--water)">03</span><span class="lab"><b>Pumping test</b><i>Time versus drawdown, Theis and Cooper-Jacob estimates of transmissivity and storativity</i></span><span class="chev">&#8250;</span></li>
+</ol>
+<p class="note">The structural tools write into the same dataset: a dip reading taken with the stereonet can be dropped on the map, and a dip annotated on the map is plotted on the stereonet. The pumping test keeps its own hydraulic dataset inside the same project.</p>
 </section>
 
 <!-- ============ TOOL 01 : STEREONET ============ -->
@@ -212,7 +297,8 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
     <figure class="plate" style="margin-top:14px"><canvas id="rose"></canvas><figcaption>Strike rose, 10&deg; sectors, frequency scaled to the outer circle.</figcaption></figure>
     <figure class="plate"><canvas id="hist"></canvas><figcaption>Dip-angle histogram, 10&deg; classes.</figcaption></figure>
     <button class="btn wide" id="btnPng">Export plate as PNG</button>
-    <button class="btn wide" id="btnRep">Export one-page A4 report</button>
+    <button class="btn wide" id="btnRep">Export one-page A4 report as PNG</button>
+<button class="btn wide" id="btnRepPdf">Export one-page PDF report</button>
   </div></div>
 
   <div class="pane" id="pn-sets"><div class="pad">
@@ -243,6 +329,47 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
   <div id="mapHint">Pan and pinch to explore. Long-press to identify the GeoCover unit.</div>
 </section>
 
+<!-- ============ TOOL 03 : PUMPING TEST ============ -->
+<section class="screen" id="sc-pump">
+
+<div class="pane on" id="pn-ptdata"><div class="pad">
+<div class="row">
+<label class="f"><span>Discharge Q, m3/day</span><input id="ptQ" type="number" step="any" inputmode="decimal" placeholder="e.g. 1000"></label>
+<label class="f"><span>Radial distance r, m</span><input id="ptR" type="number" step="any" inputmode="decimal" placeholder="e.g. 30"></label>
+</div>
+<div class="row">
+<label class="f"><span>Aquifer thickness b, m (optional)</span><input id="ptB" type="number" step="any" inputmode="decimal" placeholder="for K = T / b"></label>
+<label class="f"><span>Well / test name</span><input id="ptName" placeholder="e.g. PW-1 / OW-2"></label>
+</div>
+<h2 class="sec" style="margin-left:0">Time versus drawdown</h2>
+<p class="note" style="margin:0 0 8px">One pair per line: elapsed time in minutes, then drawdown in metres. Comma, semicolon, tab or space are all accepted.</p>
+<textarea id="ptRows" rows="9" style="font:400 13px/1.45 var(--mono)" placeholder="1  0.28
+2  0.42
+5  0.61"></textarea>
+<div class="grid2" style="margin-top:9px">
+<button class="btn" id="ptApply">Compute</button>
+<button class="btn" id="ptDemoB">Load demo test</button>
+<button class="btn" id="ptClear">Clear data</button>
+<button class="btn" id="ptCsv">Export CSV</button>
+</div>
+<div id="ptCount" class="stab"></div>
+</div></div>
+
+<div class="pane" id="pn-ptplot"><div class="pad">
+<figure class="plate"><canvas id="ptSemi"></canvas><figcaption id="ptSemiCap">Cooper-Jacob semi-logarithmic plot of drawdown against time.</figcaption></figure>
+<figure class="plate"><canvas id="ptLog"></canvas><figcaption id="ptLogCap">Theis fit, drawdown and time on logarithmic axes.</figcaption></figure>
+<figure class="plate"><canvas id="ptRes"></canvas><figcaption>Residuals of the Theis fit, metres.</figcaption></figure>
+<button class="btn wide" id="ptPng">Export plate as PNG</button>
+<button class="btn wide" id="ptPdf">Export one-page PDF report</button>
+</div></div>
+
+<div class="pane" id="pn-ptres"><div class="pad">
+<div id="ptOut"></div>
+<h2 class="sec" style="margin-left:0">Method</h2>
+<p class="note" style="margin:0">Cooper-Jacob fits a straight line to drawdown against the logarithm of time by least squares, T = 2.303 Q / (4 pi ds) and S = 2.25 T t0 / r squared, where ds is the drawdown per log cycle and t0 the intercept of zero drawdown. Theis fits the full well function W(u), u = r squared S / (4 T t), by a Levenberg-Marquardt search in log T and log S started from the Cooper-Jacob estimate. Both assume a confined, homogeneous, isotropic aquifer of infinite extent, a fully penetrating well and a constant discharge.</p>
+</div></div>
+</section>
+
 <!-- ============ DATA ============ -->
 <section class="screen" id="sc-data">
   <div class="pane on" id="pn-table">
@@ -257,6 +384,8 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
       <button class="btn" id="btnDelSel">Delete selected</button>
       <button class="btn" id="btnClear">Clear selection</button>
       <button class="btn" id="btnUndoData">Nothing to undo</button>
+<button class="btn" id="btnRepPdf2">Report PDF</button>
+<button class="btn" id="btnDemo3">Load demo data</button>
     </div><input type="file" id="fileImp" accept="application/json,.json" hidden></div>
   </div>
   <div class="pane" id="pn-photos"><div class="pad"><div class="thumbs" id="thumbs"></div><div class="empty" id="phEmpty" hidden>No photo samples yet.</div></div></div>
@@ -265,20 +394,21 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
 
 <!-- ============ PROJECTS ============ -->
 <section class="screen" id="sc-projects"><div class="pad">
-  <h2 class="sec" style="margin-left:0">New project</h2>
-  <div class="row">
-    <label class="f"><span>Name</span><input id="pjName" placeholder="e.g. Val Bedretto 2026"></label>
-    <button class="btn" id="pjAdd" style="flex:0 0 auto">Create</button>
-  </div>
-  <p class="note" style="margin:0">A project owns its own measurements, stereonet sets, structural lines and photo samples. Switching project loads that dataset in every tool; nothing is mixed between projects.</p>
-  <h2 class="sec" style="margin-left:0">Projects on this device</h2>
-  <div id="pjList"></div>
-  <h2 class="sec" style="margin-left:0">Current project</h2>
-  <div class="row">
-    <label class="f"><span>Rename</span><input id="pjRen"></label>
-    <button class="btn" id="pjRenB" style="flex:0 0 auto">Save</button>
-  </div>
-  <button class="btn wide" id="pjDel">Delete the current project and its data</button>
+<div class="pjbar">
+<label class="f" style="margin:0"><span>New project</span><input id="pjName" placeholder="e.g. Val Bedretto 2026"></label>
+<button class="btn" id="pjAdd">Create</button>
+</div>
+<div style="margin:0 0 10px"><span class="chip" id="pjShape">Icons: rounded</span><span class="chip" id="pjDemo">Create demo project</span></div>
+<h2 class="sec" style="margin-left:0">Projects on this device</h2>
+<div id="pjGrid"></div>
+<div id="pjList" hidden></div>
+<p class="note" style="margin:10px 0 0">Tap an icon to open that project. Tap the pencil under an icon to rename it or to give it a photograph, taken with the camera or picked from the gallery. Every project owns its own measurements, sets, structural lines, photo samples and pumping tests.</p>
+<h2 class="sec" style="margin-left:0">Current project</h2>
+<div class="row">
+<label class="f"><span>Rename</span><input id="pjRen"></label>
+<button class="btn" id="pjRenB" style="flex:0 0 auto">Save</button>
+</div>
+<button class="btn wide" id="pjDel">Delete the current project and its data</button>
 </div></section>
 
 <!-- ============ SETTINGS ============ -->
@@ -295,7 +425,13 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
   <p class="note" style="margin:0">Density contours are filled with the viridis ramp by default. Switch the density button to black and white for a hairline publication plate. Monochrome map renders swisstopo tiles in greyscale so the plate stays publication ready. Turn it off when you need the GeoCover lithology colours.</p>
   <h2 class="sec" style="margin-left:0">Session</h2>
   <div class="grid2"><button class="btn" id="btnAwake">Keep screen on: off</button><button class="btn" id="btnDiag">Sensor report</button></div>
-  <h2 class="sec" style="margin-left:0">Danger zone</h2>
+  <h2 class="sec" style="margin-left:0">Demonstration data</h2>
+<div class="grid2"><button class="btn" id="btnDemo">Load demo data here</button><button class="btn" id="btnDemoProj">Create a demo project</button></div>
+<p class="note" style="margin:0">The demonstration dataset fills every tool at once: forty orientation readings in three sets, four structural lines, three photo samples and one complete pumping test, all placed in the Gotthard area so the map has something to show. Nothing is overwritten, the records are simply added to the open project.</p>
+<h2 class="sec" style="margin-left:0">Reports</h2>
+<div class="grid2"><button class="btn" id="btnPdfStereo">Structural report PDF</button><button class="btn" id="btnPdfPump">Pumping test report PDF</button></div>
+<p class="note" style="margin:0">Both reports are laid out automatically on a single A4 page, figures, tables and a written summary assembled on the device from the computed statistics.</p>
+<h2 class="sec" style="margin-left:0">Danger zone</h2>
   <button class="btn wide" id="btnWipe">Erase all measurements, traces and photos</button>
 </div></section>
 
@@ -2210,7 +2346,796 @@ function drawAbout(){
   '<p class="note" style="margin:0">github.com/3m0ra/gneisstools</p>';
 }
 
-/* ================= 18. boot ================= */
+
+/* ================= 17b. single page PDF writer =================
+   the A4 canvas is embedded as a JPEG XObject, so the export is a real
+   one page PDF and no external library is needed                       */
+function pdfA4(cv,title){
+var jpg=cv.toDataURL('image/jpeg',0.88).split(',')[1],bin=atob(jpg);
+var W=595.28,H=841.89,o=[],i;
+o[1]='<< /Type /Catalog /Pages 2 0 R >>';
+o[2]='<< /Type /Pages /Kids [3 0 R] /Count 1 >>';
+o[3]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>';
+var cs='q '+W+' 0 0 '+H+' 0 0 cm /Im0 Do Q';
+o[4]='<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream';
+o[5]='<< /Type /XObject /Subtype /Image /Width '+cv.width+' /Height '+cv.height+
+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+bin.length+' >>\nstream\n'+bin+'\nendstream';
+o[6]='<< /Title ('+String(title||'GneissTools report').replace(/[()\\]/g,'')+') /Producer (GneissTools) /CreationDate (D:'+
+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z) >>';
+var out='%PDF-1.4\n',off=[];
+for(i=1;i<=6;i++){off[i]=out.length;out+=i+' 0 obj\n'+o[i]+'\nendobj\n'}
+var xr=out.length;
+out+='xref\n0 7\n0000000000 65535 f \n';
+for(i=1;i<=6;i++)out+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+out+='trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n'+xr+'\n%%EOF';
+return btoa(out);
+}
+function savePdf(name,cv,title){
+try{dlBase64(name,pdfA4(cv,title),'application/pdf');toast('PDF written: '+name)}
+catch(e){toast('PDF failed: '+e.message)}
+}
+
+/* ================= 17c. demonstration data for every tool =================
+   deterministic, so the demo plate always looks the same                  */
+function demoRnd(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+var DEMOLON=8.47125, DEMOLAT=46.50610;
+function demoRecs(t0){
+var R=demoRnd(20260804),out=[],i;
+var sets=[{dip:36,dd:132,n:16,site:'VS-01',type:'bedding',note:'demo, calcareous schist'},
+{dip:79,dd:306,n:13,site:'VS-02',type:'joint',note:'demo, open joint set'},
+{dip:62,dd:47,n:11,site:'VS-03',type:'foliation',note:'demo, gneissic foliation'}];
+sets.forEach(function(s){for(i=0;i<s.n;i++){
+out.push({id:t0+out.length,mode:'plane',
+dip:+clamp(s.dip+(R()-0.5)*15,2,89).toFixed(1),dd:+(((s.dd+(R()-0.5)*24)%360+360)%360).toFixed(1),
+q:+(0.4+R()*1.7).toFixed(1),site:s.site,type:s.type,note:s.note,decl:2.5,
+lat:+(DEMOLAT+(R()-0.5)*0.011).toFixed(6),lon:+(DEMOLON+(R()-0.5)*0.019).toFixed(6),acc:4+Math.round(R()*9)});
+}});
+for(i=0;i<7;i++)out.push({id:t0+out.length,mode:'line',
+plunge:+clamp(22+(R()-0.5)*12,1,89).toFixed(1),trend:+(((214+(R()-0.5)*20)%360+360)%360).toFixed(1),
+q:+(0.5+R()*1.2).toFixed(1),site:'VS-04',type:'fold axis',note:'demo, minor fold axis',decl:2.5,
+lat:+(DEMOLAT+(R()-0.5)*0.008).toFixed(6),lon:+(DEMOLON+(R()-0.5)*0.014).toFixed(6),acc:6});
+return out;
+}
+function demoFaults(t0){
+var R=demoRnd(77),mk=function(n,a,b,jit){var p=[],i,f;
+for(i=0;i<n;i++){f=i/(n-1);p.push([+(a[0]+(b[0]-a[0])*f+(R()-0.5)*jit).toFixed(6),+(a[1]+(b[1]-a[1])*f+(R()-0.5)*jit*0.6).toFixed(6)])}return p};
+return[
+{id:t0+900,type:'fault',note:'demo, steep sinistral fault',site:'VS-01',pts:mk(7,[DEMOLON-0.010,DEMOLAT-0.005],[DEMOLON+0.011,DEMOLAT+0.006],0.0016)},
+{id:t0+901,type:'thrust',note:'demo, basal thrust',site:'VS-02',pts:mk(8,[DEMOLON-0.012,DEMOLAT+0.004],[DEMOLON+0.010,DEMOLAT-0.003],0.0014)},
+{id:t0+902,type:'contact',note:'demo, schist over gneiss',site:'VS-03',pts:mk(9,[DEMOLON-0.009,DEMOLAT+0.007],[DEMOLON+0.012,DEMOLAT+0.002],0.0012)},
+{id:t0+903,type:'inferred',note:'demo, inferred lineament',site:'VS-04',pts:mk(5,[DEMOLON-0.004,DEMOLAT-0.007],[DEMOLON+0.006,DEMOLAT+0.008],0.0010)}];
+}
+function demoImage(seed,label){
+var cv=document.createElement('canvas');cv.width=420;cv.height=315;
+var x=cv.getContext('2d'),R=demoRnd(seed),i,y;
+var g=x.createLinearGradient(0,0,0,315);g.addColorStop(0,'#8d9aa2');g.addColorStop(1,'#5d554b');
+x.fillStyle=g;x.fillRect(0,0,420,315);
+for(i=0;i<9;i++){y=20+i*34+(R()-0.5)*12;
+x.strokeStyle='rgba(30,25,20,'+(0.18+R()*0.3).toFixed(2)+')';x.lineWidth=2+R()*5;
+x.beginPath();x.moveTo(-10,y);
+for(var xx=0;xx<440;xx+=40)x.lineTo(xx,y+(R()-0.5)*16);
+x.stroke();}
+for(i=0;i<28;i++){x.fillStyle='rgba(240,236,228,'+(0.05+R()*0.18).toFixed(2)+')';
+x.beginPath();x.arc(R()*420,R()*315,3+R()*16,0,6.2832);x.fill()}
+x.fillStyle='rgba(20,20,20,.72)';x.fillRect(10,275,150,30);
+x.fillStyle='#fff';x.font='600 15px Helvetica,Arial,sans-serif';x.fillText(label+' / demo 10 cm',18,296);
+x.strokeStyle='#f2f2f2';x.lineWidth=4;x.beginPath();x.moveTo(300,296);x.lineTo(400,296);x.stroke();
+return cv.toDataURL('image/jpeg',0.7);
+}
+function demoPhotos(t0){
+return[{id:t0+950,lat:+(DEMOLAT+0.0031).toFixed(6),lon:+(DEMOLON-0.0042).toFixed(6),label:'P1',site:'VS-01',note:'demo, bedded schist',img:demoImage(11,'P1')},
+{id:t0+951,lat:+(DEMOLAT-0.0026).toFixed(6),lon:+(DEMOLON+0.0055).toFixed(6),label:'P2',site:'VS-02',note:'demo, fault breccia',img:demoImage(29,'P2')},
+{id:t0+952,lat:+(DEMOLAT+0.0007).toFixed(6),lon:+(DEMOLON+0.0018).toFixed(6),label:'P3',site:'VS-03',note:'demo, gneiss with quartz vein',img:demoImage(53,'P3')}];
+}
+function loadDemo(silent){
+var t0=Date.now(),recs=demoRecs(t0),fl=demoFaults(t0),ph=demoPhotos(t0);
+DATA=DATA.concat(recs);FAULTS=FAULTS.concat(fl);
+UNDOLOCK=true;saveFaults();UNDOLOCK=false;
+ph.forEach(function(p){var img=p.img;delete p.img;PHOTOS.push(p);IDB.put('p'+p.id,img)});
+UNDOLOCK=true;savePhotos();UNDOLOCK=false;
+PT=demoPump();ptSave();
+saveData();
+MAP.lon=DEMOLON;MAP.lat=DEMOLAT;MAP.z=15;saveView();
+$('#fSite').value='VS-01';
+refreshAll();drawThumbs();queueMap();ptSync();ptRefresh();
+if(!silent)toast('Demo data: '+recs.length+' readings, '+fl.length+' traces, '+ph.length+' photos, 1 pumping test');
+}
+function demoProject(){
+var id='p'+Date.now();
+PROJ.list.push({id:id,name:'Demo project '+new Date().toISOString().slice(0,10),created:Date.now(),demo:1});
+PROJ.cur=id;saveProj();loadProject();loadDemo(true);drawProjects();
+toast('Demo project created and opened');
+}
+
+/* ================= 20. tool 03 : pumping test =================
+   time versus drawdown, Cooper-Jacob straight line and a Theis fit of the
+   full well function, giving transmissivity T and storativity S           */
+var PT=null;
+function ptDefault(){return{name:'',Q:null,r:null,b:null,rows:[]}}
+function ptSave(){DB.set(pk('gs_pump'),PT)}
+function ptLoad(){PT=DB.get(pk('gs_pump'),null)||ptDefault();if(!PT.rows)PT.rows=[]}
+
+/* ---------- well function W(u) = E1(u), series below 1, continued fraction above ---------- */
+function W1(u){
+if(!(u>0))return 0;
+if(u>700)return 0;
+if(u<1){var s=-0.5772156649015329-Math.log(u),p=1,i;
+for(i=1;i<=32;i++){p*=-u/i;s+=-p/i}
+return s>0?s:0;}
+var b=u+1,c=1e30,d=1/b,h=d,i2,a,del;
+for(i2=1;i2<=90;i2++){a=-i2*i2;b+=2;d=1/(a*d+b);c=b+a/c;del=c*d;h*=del;if(Math.abs(del-1)<1e-13)break}
+return h*Math.exp(-u);
+}
+function ptTheisS(T,S,Q,r,tmin){
+var td=tmin/1440,u=r*r*S/(4*T*td);
+return Q/(4*Math.PI*T)*W1(u);
+}
+/* ---------- text to numbers: minutes and metres, one pair per line ---------- */
+function ptParse(txt){
+var out=[];
+String(txt||'').split(/[\r\n]+/).forEach(function(l){
+l=l.replace(/^\s+|\s+$/g,'');
+if(!l||/^[a-zA-Z#]/.test(l))return;
+var p=l.split(/[\s,;\t]+/).filter(function(v){return v!==''});
+if(p.length<2)return;
+var t=parseFloat(p[0].replace(',','.')),s=parseFloat(p[1].replace(',','.'));
+if(isFinite(t)&&isFinite(s))out.push({t:t,s:s});
+});
+out.sort(function(a,b){return a.t-b.t});
+return out;
+}
+function ptText2(rows){return rows.map(function(p){return p.t+'  '+p.s}).join('\n')}
+
+/* ---------- Cooper-Jacob straight line, least squares on log time ---------- */
+function ptCJ(rows,Q,r){
+var pts=rows.filter(function(p){return p.t>0&&p.s>0});
+if(pts.length<3||!(Q>0)||!(r>0))return null;
+var use=pts.slice(Math.floor(pts.length*0.3));
+if(use.length<3)use=pts;
+var n=use.length,sx=0,sy=0,sxx=0,sxy=0;
+use.forEach(function(p){var x=Math.log(p.t)/Math.LN10;sx+=x;sy+=p.s;sxx+=x*x;sxy+=x*p.s});
+var den=n*sxx-sx*sx;if(!den)return null;
+var m=(n*sxy-sx*sy)/den,c0=(sy-m*sx)/n;
+if(!(m>0))return null;
+var sst=0,sse=0,ym=sy/n;
+use.forEach(function(p){var x=Math.log(p.t)/Math.LN10,f=m*x+c0;sse+=(p.s-f)*(p.s-f);sst+=(p.s-ym)*(p.s-ym)});
+var t0=Math.pow(10,-c0/m),T=2.303*Q/(4*Math.PI*m),S=2.25*T*(t0/1440)/(r*r);
+return{ds:m,c0:c0,t0:t0,T:T,S:S,n:n,from:use[0].t,r2:sst?1-sse/sst:1,rmse:Math.sqrt(sse/n)};
+}
+/* ---------- Theis fit: pattern search in log T and log S ---------- */
+function ptTheis(rows,Q,r,T0,S0){
+var pts=rows.filter(function(p){return p.t>0});
+if(pts.length<3||!(Q>0)||!(r>0))return null;
+function sse(T,S){var e=0,i;for(i=0;i<pts.length;i++){var d=pts[i].s-ptTheisS(T,S,Q,r,pts[i].t);e+=d*d}return e}
+var lT=Math.log(T0>0?T0:100)/Math.LN10,lS=Math.log(S0>0&&S0<1?S0:1e-4)/Math.LN10;
+var best=sse(Math.pow(10,lT),Math.pow(10,lS)),step=0.7,k,i,j,imp,nT,nS,e;
+for(k=0;k<300;k++){
+imp=false;
+for(i=-1;i<=1;i++)for(j=-1;j<=1;j++){
+if(!i&&!j)continue;
+nT=clamp(lT+i*step,-2,5);nS=clamp(lS+j*step,-8,-0.05);
+e=sse(Math.pow(10,nT),Math.pow(10,nS));
+if(e<best-1e-15){best=e;lT=nT;lS=nS;imp=true}
+}
+if(!imp)step*=0.5;
+if(step<2e-6)break;
+}
+var T=Math.pow(10,lT),S=Math.pow(10,lS),ym=0,sst=0;
+pts.forEach(function(p){ym+=p.s});ym/=pts.length;
+pts.forEach(function(p){sst+=(p.s-ym)*(p.s-ym)});
+var res=pts.map(function(p){return{t:p.t,d:p.s-ptTheisS(T,S,Q,r,p.t)}});
+var umax=r*r*S/(4*T*(pts[0].t/1440)),umin=r*r*S/(4*T*(pts[pts.length-1].t/1440));
+return{T:T,S:S,sse:best,rmse:Math.sqrt(best/pts.length),r2:sst?1-best/sst:1,n:pts.length,res:res,umax:umax,umin:umin};
+}
+var PTFIT={cj:null,th:null};
+function ptCompute(){
+ptLoad();
+PTFIT.cj=ptCJ(PT.rows,PT.Q,PT.r);
+PTFIT.th=PTFIT.cj?ptTheis(PT.rows,PT.Q,PT.r,PTFIT.cj.T,PTFIT.cj.S):ptTheis(PT.rows,PT.Q,PT.r,100,1e-4);
+return PTFIT;
+}
+/* ---------- synthetic but realistic demonstration test ---------- */
+function demoPump(){
+var Q=1200,r=45,T=250,S=2.4e-4,R=demoRnd(4711),rows=[],i;
+var ts=[1,1.5,2,3,4,5,7,10,15,20,30,40,50,70,100,150,200,300,400,600,800,1000,1440];
+for(i=0;i<ts.length;i++){
+var s=ptTheisS(T,S,Q,r,ts[i]);
+rows.push({t:ts[i],s:+Math.max(0,s*(1+(R()-0.5)*0.05)+(R()-0.5)*0.006).toFixed(3)});
+}
+return{name:'Demo test PW-1 / OW-2',Q:Q,r:r,b:28,rows:rows};
+}
+
+/* ---------- plots. observation points, Cooper-Jacob line, Theis curve ---------- */
+var PTC={obs:'#1f6f8b',cj:'#a8432b',th:'#2e7d32',grid:0};
+function lg(v){return Math.log(v)/Math.LN10}
+function ptNoData(x,w,h,msg){
+x.fillStyle=css('--g3');x.font='12px '+FSANS;x.textAlign='center';x.textBaseline='middle';
+x.fillText(msg,w/2,h/2);x.textAlign='left';x.textBaseline='alphabetic';
+}
+function ptDecades(x,fx,x0,x1,T,ph,g2,g4,h,B){
+var d,k,xx;
+x.font='9px '+FMONO;x.textAlign='center';x.textBaseline='top';
+for(d=x0;d<=x1;d++){
+xx=fx(Math.pow(10,d));
+x.strokeStyle=g2;x.lineWidth=0.8;x.beginPath();x.moveTo(xx,T);x.lineTo(xx,T+ph);x.stroke();
+x.fillStyle=g4;x.fillText(Math.pow(10,d)>=1?String(Math.pow(10,d)):Math.pow(10,d).toString(),xx,T+ph+5);
+for(k=2;k<10&&d<x1;k++){var xm=fx(k*Math.pow(10,d));
+x.strokeStyle=g2;x.lineWidth=0.4;x.beginPath();x.moveTo(xm,T+ph);x.lineTo(xm,T+ph-4);x.stroke()}
+}
+x.textAlign='left';x.textBaseline='alphabetic';
+}
+function ptDrawSemi(cv){
+var c=cv||$('#ptSemi');if(!c||!c.width)return;
+var x=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+x.setTransform(DPR,0,0,DPR,0,0);x.clearRect(0,0,w,h);
+var ink=css('--ink'),g2=css('--g2'),g4=css('--g4');
+var L=48,B=34,T=12,Rr=16,pw=w-L-Rr,ph=h-B-T;
+var rows=(PT&&PT.rows)||[],pts=rows.filter(function(p){return p.t>0});
+if(pts.length<2){ptNoData(x,w,h,'Enter time and drawdown pairs on the Data pane');return}
+var x0=Math.floor(lg(pts[0].t)),x1=Math.ceil(lg(pts[pts.length-1].t));
+if(x1<=x0)x1=x0+1;
+var smax=0;pts.forEach(function(p){if(p.s>smax)smax=p.s});smax=smax*1.12||1;
+function fx(t){return L+(lg(t)-x0)/(x1-x0)*pw}
+function fy(s){return T+ph-clamp(s/smax,0,1.2)*ph}
+var i;
+x.strokeStyle=g2;x.lineWidth=0.8;x.fillStyle=g4;x.font='9px '+FMONO;
+x.textAlign='right';x.textBaseline='middle';
+for(i=0;i<=5;i++){var yy=T+ph-ph*i/5;
+x.beginPath();x.moveTo(L,yy);x.lineTo(L+pw,yy);x.stroke();
+x.fillText((smax*i/5).toFixed(2),L-5,yy)}
+ptDecades(x,fx,x0,x1,T,ph,g2,g4,h,B);
+var F=PTFIT.cj;
+if(F){
+x.strokeStyle=PTC.cj;x.lineWidth=2;x.beginPath();
+x.moveTo(fx(Math.pow(10,x0)),fy(F.ds*x0+F.c0));
+x.lineTo(fx(Math.pow(10,x1)),fy(F.ds*x1+F.c0));x.stroke();
+if(F.t0>0&&lg(F.t0)>=x0){var tx=fx(F.t0);
+x.strokeStyle=PTC.cj;x.lineWidth=1.4;x.beginPath();x.moveTo(tx,T+ph);x.lineTo(tx,T+ph-16);x.stroke();
+x.fillStyle=PTC.cj;x.font='600 9px '+FMONO;x.textAlign='center';x.textBaseline='alphabetic';
+x.fillText('t0 '+(F.t0<1?F.t0.toFixed(3):F.t0.toFixed(2))+' min',tx,T+ph-20)}
+}
+var G=PTFIT.th;
+if(G&&PT.Q>0&&PT.r>0){
+x.strokeStyle=PTC.th;x.lineWidth=2;x.beginPath();
+for(i=0;i<=140;i++){var t=Math.pow(10,x0+(x1-x0)*i/140),s=ptTheisS(G.T,G.S,PT.Q,PT.r,t);
+i?x.lineTo(fx(t),fy(s)):x.moveTo(fx(t),fy(s))}
+x.stroke();
+}
+pts.forEach(function(p){x.beginPath();x.arc(fx(p.t),fy(p.s),3.2,0,6.2832);x.fillStyle=PTC.obs;x.fill()});
+x.strokeStyle=ink;x.lineWidth=1;x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
+x.fillStyle=g4;x.font='9px '+FMONO;x.textAlign='left';x.textBaseline='alphabetic';
+x.fillText('time since pumping started, minutes',L,h-4);
+x.save();x.translate(11,T+ph/2);x.rotate(-Math.PI/2);x.textAlign='center';
+x.fillText('drawdown, m',0,0);x.restore();
+var cap=$('#ptSemiCap');
+if(cap)cap.textContent='Cooper-Jacob semi-logarithmic plot. Points, observed drawdown; red, fitted straight line'+(PTFIT.cj?', slope '+PTFIT.cj.ds.toFixed(3)+' m per log cycle':'')+'; green, Theis curve of the best fit.';
+}
+function ptDrawLog(cv){
+var c=cv||$('#ptLog');if(!c||!c.width)return;
+var x=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+x.setTransform(DPR,0,0,DPR,0,0);x.clearRect(0,0,w,h);
+var ink=css('--ink'),g2=css('--g2'),g4=css('--g4');
+var L=48,B=34,T=12,Rr=16,pw=w-L-Rr,ph=h-B-T;
+var rows=(PT&&PT.rows)||[],pts=rows.filter(function(p){return p.t>0&&p.s>0});
+if(pts.length<2){ptNoData(x,w,h,'Two positive drawdown values are needed for the logarithmic plot');return}
+var x0=Math.floor(lg(pts[0].t)),x1=Math.ceil(lg(pts[pts.length-1].t));if(x1<=x0)x1=x0+1;
+var sl=1e9,sh=0;pts.forEach(function(p){if(p.s<sl)sl=p.s;if(p.s>sh)sh=p.s});
+var y0=Math.floor(lg(sl)),y1=Math.ceil(lg(sh));if(y1<=y0)y1=y0+1;
+function fx(t){return L+(lg(t)-x0)/(x1-x0)*pw}
+function fy(s){return T+ph-(lg(s)-y0)/(y1-y0)*ph}
+var d,k;
+x.font='9px '+FMONO;x.textAlign='right';x.textBaseline='middle';
+for(d=y0;d<=y1;d++){var yy=fy(Math.pow(10,d));
+x.strokeStyle=g2;x.lineWidth=0.8;x.beginPath();x.moveTo(L,yy);x.lineTo(L+pw,yy);x.stroke();
+x.fillStyle=g4;x.fillText(String(Math.pow(10,d)),L-5,yy);
+for(k=2;k<10&&d<y1;k++){var ym=fy(k*Math.pow(10,d));
+x.strokeStyle=g2;x.lineWidth=0.4;x.beginPath();x.moveTo(L,ym);x.lineTo(L+5,ym);x.stroke()}}
+ptDecades(x,fx,x0,x1,T,ph,g2,g4,h,B);
+var G=PTFIT.th;
+if(G&&PT.Q>0&&PT.r>0){
+x.strokeStyle=PTC.th;x.lineWidth=2;x.beginPath();var started=0;
+for(k=0;k<=160;k++){var t=Math.pow(10,x0+(x1-x0)*k/160),s=ptTheisS(G.T,G.S,PT.Q,PT.r,t);
+if(!(s>0))continue;started?x.lineTo(fx(t),fy(s)):x.moveTo(fx(t),fy(s));started=1}
+x.stroke();
+}
+pts.forEach(function(p){x.beginPath();x.arc(fx(p.t),fy(p.s),3.2,0,6.2832);x.fillStyle=PTC.obs;x.fill()});
+x.strokeStyle=ink;x.lineWidth=1;x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
+x.fillStyle=g4;x.font='9px '+FMONO;x.textAlign='left';x.textBaseline='alphabetic';
+x.fillText('time, minutes',L,h-4);
+x.save();x.translate(11,T+ph/2);x.rotate(-Math.PI/2);x.textAlign='center';x.fillText('drawdown, m',0,0);x.restore();
+var cap=$('#ptLogCap');
+if(cap)cap.textContent='Theis fit on logarithmic axes'+(PTFIT.th?', T = '+PTFIT.th.T.toFixed(1)+' m2/d, S = '+PTFIT.th.S.toExponential(2)+', rms residual '+PTFIT.th.rmse.toFixed(3)+' m':'')+'.';
+}
+function ptDrawRes(cv){
+var c=cv||$('#ptRes');if(!c||!c.width)return;
+var x=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+x.setTransform(DPR,0,0,DPR,0,0);x.clearRect(0,0,w,h);
+var ink=css('--ink'),g2=css('--g2'),g4=css('--g4');
+var L=48,B=26,T=10,Rr=16,pw=w-L-Rr,ph=h-B-T;
+var G=PTFIT.th;
+if(!G||!G.res.length){ptNoData(x,w,h,'no fit yet');return}
+var x0=Math.floor(lg(G.res[0].t)),x1=Math.ceil(lg(G.res[G.res.length-1].t));if(x1<=x0)x1=x0+1;
+var mx=0;G.res.forEach(function(p){if(Math.abs(p.d)>mx)mx=Math.abs(p.d)});mx=mx*1.2||0.01;
+function fx(t){return L+(lg(t)-x0)/(x1-x0)*pw}
+function fy(d){return T+ph/2-d/mx*(ph/2)}
+x.strokeStyle=g2;x.lineWidth=0.8;x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.stroke();
+x.strokeStyle=ink;x.lineWidth=1;x.beginPath();x.moveTo(L,T+ph/2);x.lineTo(L+pw,T+ph/2);x.stroke();
+G.res.forEach(function(p){var px=fx(p.t),py=fy(p.d);
+x.strokeStyle=PTC.obs;x.lineWidth=1.6;x.beginPath();x.moveTo(px,T+ph/2);x.lineTo(px,py);x.stroke();
+x.beginPath();x.arc(px,py,2.6,0,6.2832);x.fillStyle=PTC.obs;x.fill()});
+x.fillStyle=g4;x.font='9px '+FMONO;x.textAlign='right';x.textBaseline='middle';
+x.fillText(('+'+mx.toFixed(3)),L-5,T+2);x.fillText(('-'+mx.toFixed(3)),L-5,T+ph-2);
+x.textAlign='left';x.textBaseline='alphabetic';x.fillText('residual, m, against log time',L,h-4);
+}
+
+/* ---------- form, results and report ---------- */
+function ptSync(){
+ptLoad();
+$('#ptQ').value=PT.Q==null?'':PT.Q;
+$('#ptR').value=PT.r==null?'':PT.r;
+$('#ptB').value=PT.b==null?'':PT.b;
+$('#ptName').value=PT.name||'';
+$('#ptRows').value=ptText2(PT.rows);
+}
+function ptGrab(){
+ptLoad();
+var q=parseFloat($('#ptQ').value),r=parseFloat($('#ptR').value),b=parseFloat($('#ptB').value);
+PT.Q=isFinite(q)?q:null;PT.r=isFinite(r)?r:null;PT.b=isFinite(b)?b:null;
+PT.name=$('#ptName').value.trim();
+PT.rows=ptParse($('#ptRows').value);
+ptSave();
+}
+function ptK(T){return(PT&&PT.b>0&&T>0)?T/PT.b:null}
+function ptRefresh(){
+ptLoad();ptCompute();
+ptDrawSemi();ptDrawLog();ptDrawRes();ptOutHtml();
+var b=$('#bdgPump');if(b)b.textContent=String((PT.rows||[]).length);
+var n=$('#ptCount');
+if(n)n.textContent=(PT.rows||[]).length+' pairs stored'+(PT.Q>0?', Q = '+PT.Q+' m3/d':', discharge missing')+(PT.r>0?', r = '+PT.r+' m':', distance missing');
+}
+function ptEnter(){ptSync();ptRefresh();setTimeout(sizeCanvases,30)}
+function ptOutHtml(){
+var o=$('#ptOut');if(!o)return;
+var C=PTFIT.cj,G=PTFIT.th,rows=(PT&&PT.rows)||[];
+if(!rows.length){o.innerHTML='<div class="empty">No time and drawdown data yet. Enter the pairs on the Data pane, or load the demo test.</div>';return}
+if(!(PT.Q>0)||!(PT.r>0)){o.innerHTML='<div class="empty">Enter the constant discharge Q and the radial distance r to the observation point.</div>';return}
+function row(k,v){return '<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>'}
+var h='<h2 class="sec" style="margin-left:0">Test</h2>'+
+row('Name',esc(PT.name||'-'))+row('Discharge Q',PT.Q+' m3/day')+row('Distance r',PT.r+' m')+
+row('Observations',rows.length+' pairs, '+rows[0].t+' to '+rows[rows.length-1].t+' min')+
+(PT.b>0?row('Aquifer thickness b',PT.b+' m'):'');
+h+='<h2 class="sec" style="margin-left:0">Cooper-Jacob straight line</h2>';
+if(C){
+h+=row('Drawdown per log cycle ds',C.ds.toFixed(3)+' m')+
+row('Intercept t0',(C.t0<1?C.t0.toFixed(4):C.t0.toFixed(2))+' min')+
+row('Transmissivity T',C.T.toFixed(1)+' m2/day')+
+row('Storativity S',C.S.toExponential(2))+
+(ptK(C.T)?row('Hydraulic conductivity K',ptK(C.T).toFixed(2)+' m/day'):'')+
+row('Points used',C.n+' of '+rows.length+', from '+C.from+' min')+
+row('Coefficient of determination',C.r2.toFixed(4));
+}else h+='<p class="note" style="margin:0">Three or more points with a positive drawdown are needed.</p>';
+h+='<h2 class="sec" style="margin-left:0">Theis fit of the well function</h2>';
+if(G){
+h+=row('Transmissivity T',G.T.toFixed(1)+' m2/day')+
+row('Storativity S',G.S.toExponential(2))+
+(ptK(G.T)?row('Hydraulic conductivity K',ptK(G.T).toFixed(2)+' m/day'):'')+
+row('Root mean square residual',G.rmse.toFixed(4)+' m')+
+row('Coefficient of determination',G.r2.toFixed(4))+
+row('u at the first point',G.umax.toExponential(2))+
+row('u at the last point',G.umin.toExponential(2));
+var tval=25*G.S*PT.r*PT.r/G.T*1440;
+h+=row('Cooper-Jacob valid after',(tval<1?tval.toFixed(2):tval.toFixed(0))+' min (u below 0.01)');
+}else h+='<p class="note" style="margin:0">The Theis fit needs at least three observations.</p>';
+h+='<h2 class="sec" style="margin-left:0">Reading</h2><p class="note" style="margin:0">'+ptNarr().join(' ')+'</p>';
+o.innerHTML=h;
+}
+/* factual sentences assembled from the computed numbers, no interpretation */
+function ptNarr(){
+var C=PTFIT.cj,G=PTFIT.th,rows=(PT&&PT.rows)||[],p=[];
+if(!rows.length||!(PT.Q>0)||!(PT.r>0))return['The test is not yet complete enough to be described.'];
+p.push('Test. A constant discharge of '+PT.Q+' cubic metres per day was maintained and '+rows.length+
+' drawdown readings were taken between '+rows[0].t+' and '+rows[rows.length-1].t+
+' minutes at a radial distance of '+PT.r+' metres; the largest observed drawdown is '+
+Math.max.apply(null,rows.map(function(q){return q.s})).toFixed(3)+' metres.');
+if(C)p.push('Cooper-Jacob. The late time data define a straight line of '+C.ds.toFixed(3)+
+' metres per logarithmic cycle intercepting zero drawdown at '+(C.t0<1?C.t0.toFixed(4):C.t0.toFixed(2))+
+' minutes, which gives a transmissivity of '+C.T.toFixed(1)+' square metres per day and a storativity of '+
+C.S.toExponential(2)+'. The line is fitted to the last '+C.n+' readings with a coefficient of determination of '+C.r2.toFixed(3)+'.');
+if(G){p.push('Theis. Fitting the complete well function to all '+G.n+' readings gives a transmissivity of '+
+G.T.toFixed(1)+' square metres per day and a storativity of '+G.S.toExponential(2)+
+', with a root mean square residual of '+G.rmse.toFixed(4)+' metres and a coefficient of determination of '+G.r2.toFixed(3)+
+'. The dimensionless time parameter u falls from '+G.umax.toExponential(2)+' at the first reading to '+G.umin.toExponential(2)+' at the last.');
+if(C)p.push('Agreement. The two methods differ by '+Math.abs(100*(C.T-G.T)/G.T).toFixed(1)+
+' per cent in transmissivity and by '+Math.abs(100*(C.S-G.S)/G.S).toFixed(1)+' per cent in storativity.');
+if(PT.b>0&&ptK(G.T))p.push('Conductivity. With a saturated thickness of '+PT.b+
+' metres the Theis transmissivity corresponds to a hydraulic conductivity of '+ptK(G.T).toFixed(2)+' metres per day.');
+}
+p.push('Assumptions. The values above hold for a confined, homogeneous and isotropic aquifer of infinite lateral extent, a fully penetrating well of negligible storage and a discharge held constant throughout the test. Departures of the observations from the fitted curves are shown by the residual plot.');
+return p;
+}
+/* ---------- one page A4 report, same idiom as the stereonet report ---------- */
+function ptA4(){
+var W=1240,HT=1754,M=64;
+ptCompute();
+var s1=document.createElement('canvas');s1.width=Math.round(1112*1);s1.height=Math.round(430*1);
+var s2=document.createElement('canvas');s2.width=Math.round(540*1);s2.height=Math.round(400*1);
+var s3=document.createElement('canvas');s3.width=Math.round(540*1);s3.height=Math.round(200*1);
+var keep=DPR,kt=document.body.getAttribute('data-theme');DPR=1;
+document.body.setAttribute('data-theme','light');
+ptDrawSemi(s1);ptDrawLog(s2);ptDrawRes(s3);
+document.body.setAttribute('data-theme',kt);DPR=keep;
+var out=document.createElement('canvas');out.width=W;out.height=HT;
+var x=out.getContext('2d');
+x.fillStyle='#fff';x.fillRect(0,0,W,HT);x.textBaseline='top';
+var y=M,C=PTFIT.cj,G=PTFIT.th,rows=(PT&&PT.rows)||[];
+x.fillStyle='#000';x.font='700 30px '+FSANS;x.fillText('Pumping test report',M,y);y+=40;
+x.font='13px '+FSANS;x.fillStyle='#444';
+x.fillText(curProj().name+' | '+(PT.name||'unnamed test')+' | '+new Date().toISOString().slice(0,16).replace('T',' ')+
+' | Q = '+PT.Q+' m3/d | r = '+PT.r+' m | '+rows.length+' readings'+(PT.b>0?' | b = '+PT.b+' m':''),M,y);
+y+=22;x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.moveTo(M,y);x.lineTo(W-M,y);x.stroke();y+=16;
+x.drawImage(s1,M,y,1112,430);
+x.fillStyle='#444';x.font='11px '+FSANS;
+x.fillText('Fig. 1 Semi-logarithmic plot. Points, observations; red, Cooper-Jacob straight line; green, Theis curve.',M,y+436);
+y+=460;
+x.drawImage(s2,M,y,540,400);
+x.fillText('Fig. 2 Logarithmic plot with the fitted Theis curve.',M,y+404);
+x.drawImage(s3,M+572,y+120,540,200);
+x.fillText('Fig. 3 Residuals of the Theis fit.',M+572,y+324);
+/* estimates table on the right of figure 2 */
+var tx=M+572,ty=y;
+x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 1 Estimates',tx,ty);ty+=22;
+x.font='700 12px '+FMONO;
+var cw=[0,150,300,420];
+['method','T m2/d','S','K m/d'].forEach(function(hd,i){x.fillText(hd,tx+cw[i],ty)});
+ty+=15;x.strokeStyle='#999';x.lineWidth=0.8;x.beginPath();x.moveTo(tx,ty);x.lineTo(tx+540,ty);x.stroke();ty+=6;
+x.font='12px '+FMONO;x.fillStyle='#111';
+if(C){[ 'Cooper-Jacob',C.T.toFixed(1),C.S.toExponential(2),ptK(C.T)?ptK(C.T).toFixed(2):'-'].forEach(function(v,i){x.fillText(v,tx+cw[i],ty)});ty+=17}
+if(G){['Theis',G.T.toFixed(1),G.S.toExponential(2),ptK(G.T)?ptK(G.T).toFixed(2):'-'].forEach(function(v,i){x.fillText(v,tx+cw[i],ty)});ty+=17}
+if(C){x.fillText('ds '+C.ds.toFixed(3)+' m per cycle, t0 '+(C.t0<1?C.t0.toFixed(4):C.t0.toFixed(2))+' min',tx,ty);ty+=17}
+if(G){x.fillText('rms residual '+G.rmse.toFixed(4)+' m, R2 '+G.r2.toFixed(4),tx,ty);ty+=17}
+y+=430;
+var foot=HT-M-46;
+x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Summary of results',M,y);y+=22;
+var paras=ptNarr();
+x.font='13px '+FSANS;x.fillStyle='#111';
+for(var pi=0;pi<paras.length&&y<foot-16;pi++){
+var ln=repWrap(x,paras[pi],W-2*M);
+for(var li=0;li<ln.length&&y<foot-16;li++){x.fillText(ln[li],M,y);y+=19}
+y+=8;
+}
+if(y<foot-70&&rows.length){
+x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 2 Time and drawdown',M,y);y+=20;
+x.font='11px '+FMONO;x.fillStyle='#111';
+var colw=(W-2*M)/5,nr=Math.max(1,Math.floor((foot-14-y)/14)),shown=Math.min(rows.length,nr*5),ai;
+for(ai=0;ai<shown;ai++){
+var ac=Math.floor(ai/nr),ar=ai%nr;
+x.fillText(pad(ai+1,2)+'  '+String(rows[ai].t)+' min  '+rows[ai].s.toFixed(3)+' m',M+ac*colw,y+ar*14);
+}
+y+=Math.min(nr,shown)*14;
+}
+x.strokeStyle='#000';x.lineWidth=0.8;x.beginPath();x.moveTo(M,foot);x.lineTo(W-M,foot);x.stroke();
+x.font='10px '+FSANS;x.fillStyle='#555';
+var fl=repWrap(x,'Methods: Theis (1935) non equilibrium well function W(u) fitted by a pattern search in log T and log S; Cooper and Jacob (1946) semi-logarithmic straight line, T = 2.303 Q / (4 pi ds), S = 2.25 T t0 / r squared. Generated on the device by GneissTools; the text is assembled from the computed statistics and contains no interpretation.',W-2*M);
+var fy=foot+8;for(var fi=0;fi<fl.length&&fi<3;fi++){x.fillText(fl[fi],M,fy);fy+=12}
+return out;
+}
+$('#ptApply').onclick=function(){ptGrab();ptRefresh();setTimeout(sizeCanvases,20);toast((PT.rows||[]).length+' pairs read')};
+$('#ptDemoB').onclick=function(){PT=demoPump();ptSave();ptSync();ptRefresh();setTimeout(sizeCanvases,20);toast('Demo pumping test loaded')};
+$('#ptClear').onclick=function(){PT=ptDefault();ptSave();ptSync();ptRefresh();toast('Pumping test cleared')};
+$('#ptCsv').onclick=function(){
+if(!PT.rows.length){toast('Nothing to export');return}
+dl('gneisstools-pumptest-'+stamp()+'.csv','time_min,drawdown_m\n'+PT.rows.map(function(p){return p.t+','+p.s}).join('\n'),'text/csv');
+};
+$('#ptPng').onclick=function(){
+if(!PT.rows.length){toast('Nothing to export');return}
+try{dlBase64('gneisstools-pumptest-'+stamp()+'.png',ptA4().toDataURL('image/png').split(',')[1],'image/png')}
+catch(e){toast('Export failed: '+e.message)}
+};
+$('#ptPdf').onclick=function(){
+if(!PT.rows.length){toast('Nothing to report');return}
+savePdf('gneisstools-pumptest-'+stamp()+'.pdf',ptA4(),'GneissTools pumping test report');
+};
+
+/* ================= 21. map symbology: solid single colour shapes =================
+   every annotation is now drawn as one solid stroke or one filled shape.
+   the white casing that used to be laid under the lines, the dashed variants
+   and the outlines around the symbols are all gone                          */
+function lineDash(ty){return[]}
+function lineColor(ty){return ty==='contact'?PAL.contact:FAULTRED}
+function halo(x,fn,wide,thin){
+x.lineCap='round';x.lineJoin='round';
+x.lineWidth=thin;fn();
+}
+function lab(x,t,px,py){
+x.font='600 10px '+FMONO;x.textAlign='left';x.textBaseline='alphabetic';
+x.fillStyle=css('--ink');x.fillText(t,px,py);
+}
+function dipSymbol(x,px,py,dip,dd,mode,trend,plunge,sel){
+var col=css('--ink');
+x.lineCap='round';x.lineJoin='round';x.setLineDash([]);
+if(mode==='line'){
+var a=trend*D2R,L=13;
+x.strokeStyle=PAL.line;x.lineWidth=2.2;
+x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.sin(a)*L,py-Math.cos(a)*L);x.stroke();
+x.fillStyle=PAL.line;
+x.beginPath();
+x.moveTo(px+Math.sin(a)*L,py-Math.cos(a)*L);
+x.lineTo(px+Math.sin(a)*L-Math.sin(a-0.42)*5,py-Math.cos(a)*L+Math.cos(a-0.42)*5);
+x.lineTo(px+Math.sin(a)*L-Math.sin(a+0.42)*5,py-Math.cos(a)*L+Math.cos(a+0.42)*5);
+x.closePath();x.fill();
+x.beginPath();x.arc(px,py,2.8,0,6.2832);x.fillStyle=PAL.line;x.fill();
+lab(x,pad(plunge,2),px+6,py+11);
+if(sel){x.strokeStyle=PAL.sel;x.lineWidth=2;x.beginPath();x.arc(px,py,17,0,6.2832);x.stroke()}
+return;
+}
+var st=strikeOf(dd)*D2R,L2=15,a2=dd*D2R,T=dip<5?4:8;
+x.strokeStyle=col;x.lineWidth=2.4;
+x.beginPath();
+x.moveTo(px-Math.sin(st)*L2,py+Math.cos(st)*L2);
+x.lineTo(px+Math.sin(st)*L2,py-Math.cos(st)*L2);
+x.stroke();
+x.lineWidth=2.2;
+x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.sin(a2)*T,py-Math.cos(a2)*T);x.stroke();
+if(dip>=88){x.beginPath();x.moveTo(px-Math.sin(a2)*T,py+Math.cos(a2)*T);x.lineTo(px,py);x.stroke()}
+lab(x,pad(dip,2),px+Math.sin(a2)*(T+8)-4,py-Math.cos(a2)*(T+8)+4);
+if(sel){x.strokeStyle=PAL.sel;x.lineWidth=2;x.beginPath();x.arc(px,py,19,0,6.2832);x.stroke()}
+}
+function decorate(x,pts,type){
+var col=type==='contact'?PAL.contact:FAULTRED,i,step=22;
+x.setLineDash([]);x.lineCap='butt';x.lineJoin='miter';
+for(i=0;i<pts.length-1;i++){
+var a=toScreen(pts[i][0],pts[i][1]),b=toScreen(pts[i+1][0],pts[i+1][1]);
+var len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(len<1)continue;
+var ux=(b[0]-a[0])/len,uy=(b[1]-a[1])/len,nx=-uy,ny=ux,d;
+for(d=step/2;d<len;d+=step){
+var mx=a[0]+ux*d,my=a[1]+uy*d;
+x.strokeStyle=col;x.fillStyle=col;x.lineWidth=2;
+if(type==='thrust'){
+x.beginPath();x.moveTo(mx,my);x.lineTo(mx+nx*7-ux*4,my+ny*7-uy*4);x.lineTo(mx+nx*7+ux*4,my+ny*7+uy*4);
+x.closePath();x.fill();
+}else if(type==='normal'){
+x.beginPath();x.moveTo(mx,my);x.lineTo(mx+nx*7,my+ny*7);x.stroke();
+}
+}
+}
+}
+function drawOverlays(x){
+var ink=css('--ink');
+x.setLineDash([]);x.lineCap='round';x.lineJoin='round';
+FAULTS.forEach(function(t){
+var col=t.type==='contact'?PAL.contact:FAULTRED,sel=MAP.sel&&MAP.sel.kind==='fault'&&MAP.sel.id===t.id;
+if(sel){x.strokeStyle=PAL.sel;x.globalAlpha=0.28;x.lineWidth=9;faultPath(x,t.pts);x.globalAlpha=1}
+x.strokeStyle=col;x.lineWidth=t.type==='contact'?2.2:2.8;faultPath(x,t.pts);
+decorate(x,t.pts,t.type);
+x.lineCap='round';x.lineJoin='round';
+});
+if(MAP.draft&&MAP.draft.pts.length){
+var dc=MAP.draft.type==='contact'?PAL.contact:FAULTRED;
+x.strokeStyle=dc;x.lineWidth=2.2;faultPath(x,MAP.draft.pts);
+MAP.draft.pts.forEach(function(p){var s=toScreen(p[0],p[1]);
+x.beginPath();x.arc(s[0],s[1],3.4,0,6.2832);x.fillStyle=dc;x.fill()});
+}
+PHOTOS.forEach(function(p){
+var s=toScreen(p.lon,p.lat);
+x.fillStyle=PAL.photo;x.beginPath();x.rect(s[0]-6,s[1]-6,12,12);x.fill();
+if(p.label)lab(x,p.label,s[0]+9,s[1]+4);
+});
+DATA.forEach(function(r){
+if(r.lat==null)return;
+var s=toScreen(r.lon,r.lat);
+if(s[0]<-40||s[0]>MAP.w+40||s[1]<-40||s[1]>MAP.h+40)return;
+dipSymbol(x,s[0],s[1],r.dip,r.dd,r.mode,r.trend,r.plunge,MAP.sel&&MAP.sel.kind==='rec'&&MAP.sel.id===r.id);
+});
+if(FIX){
+var s2=toScreen(FIX.lon,FIX.lat);
+var res=156543.03392*Math.cos(MAP.lat*D2R)/Math.pow(2,MAP.z);
+var rr=clamp(FIX.acc/res,4,150);
+x.setLineDash([]);x.globalAlpha=0.16;x.fillStyle=PAL.gps;
+x.beginPath();x.arc(s2[0],s2[1],rr,0,6.2832);x.fill();x.globalAlpha=1;
+x.strokeStyle=PAL.gps;x.lineWidth=1.6;x.beginPath();x.arc(s2[0],s2[1],rr,0,6.2832);x.stroke();
+x.beginPath();x.arc(s2[0],s2[1],5,0,6.2832);x.fillStyle=PAL.gps;x.fill();
+}
+if(MAP.tool==='dip'||MAP.tool==='photo'){
+x.strokeStyle=ink;x.lineWidth=1.6;
+x.beginPath();x.moveTo(MAP.w/2-11,MAP.h/2);x.lineTo(MAP.w/2+11,MAP.h/2);
+x.moveTo(MAP.w/2,MAP.h/2-11);x.lineTo(MAP.w/2,MAP.h/2+11);x.stroke();
+}
+}
+
+/* ================= 22. projects: icon grid, renaming, custom images ================= */
+var PJSHAPE=DB.get('gs_pjshape','round');
+function applyPjShape(){
+document.body.classList.toggle('pjround',PJSHAPE==='round');
+var b=$('#pjShape');
+if(b){b.textContent='Icons: '+(PJSHAPE==='round'?'round':'square');b.classList.toggle('on',PJSHAPE==='round')}
+}
+function pjColor(id){var h=0,i;for(i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))%360;return 'hsl('+h+',40%,40%)'}
+function pjInitials(n){
+var p=String(n||'?').replace(/^\s+|\s+$/g,'').split(/\s+/);
+return((p[0]||'?').charAt(0)+(p[1]?p[1].charAt(0):'')).toUpperCase();
+}
+function pickImage(cb,camera){
+var inp=document.createElement('input');
+inp.type='file';inp.accept='image/*';
+if(camera)inp.setAttribute('capture','environment');
+inp.style.position='fixed';inp.style.left='-9999px';document.body.appendChild(inp);
+inp.onchange=function(){
+var f=inp.files&&inp.files[0];
+if(!f){document.body.removeChild(inp);cb(null);return}
+var rd=new FileReader();
+rd.onload=function(){shrink(rd.result,640,function(u){cb(u);document.body.removeChild(inp)})};
+rd.onerror=function(){document.body.removeChild(inp);cb(null)};
+rd.readAsDataURL(f);
+};
+inp.click();
+}
+function drawProjects(){
+var g=$('#pjGrid');if(!g)return;
+applyPjShape();
+g.innerHTML=PROJ.list.map(function(p){
+var c=projCounts(p.id),on=p.id===PROJ.cur;
+return '<div class="pjc'+(on?' on':'')+'" data-pj="'+p.id+'">'+
+'<div class="ic" data-open="'+p.id+'"><span style="background:'+pjColor(p.id)+'">'+esc(pjInitials(p.name))+'</span></div>'+
+(on?'<span class="cur">open</span>':'')+
+'<em>'+esc(p.name)+'</em><small>'+c.d+' / '+c.f+' / '+c.p+'</small>'+
+'<span class="chip" data-edit="'+p.id+'" style="margin:4px 0 0;padding:2px 8px">rename</span>'+
+'</div>';
+}).join('');
+PROJ.list.forEach(function(p){
+IDB.get('pi'+p.id).then(function(u){
+if(!u)return;
+var e=g.querySelector('[data-pj="'+p.id+'"] .ic');
+if(e)e.innerHTML='<img alt="'+esc(p.name)+'" src="'+u+'">';
+});
+});
+$$('[data-open]',g).forEach(function(b){b.onclick=function(){
+var id=b.getAttribute('data-open');
+if(id===PROJ.cur){pjSheet(id);return}
+useProject(id);drawProjects();drawHome();
+}});
+$$('[data-edit]',g).forEach(function(b){b.onclick=function(e){e.stopPropagation();pjSheet(b.getAttribute('data-edit'))}});
+$('#pjRen').value=curProj().name;
+$('#pjDel').disabled=PROJ.list.length<2;
+}
+function pjSheet(id){
+var p=PROJ.list.filter(function(q){return q.id===id})[0];if(!p)return;
+var c=projCounts(id);
+sheet('Project',
+'<div class="row"><label class="f"><span>Name</span><input id="pjSN" value="'+esc(p.name)+'"></label></div>'+
+'<div class="grid2"><button class="btn" id="pjCam">Photograph an icon</button><button class="btn" id="pjGal">Pick from gallery</button></div>'+
+'<div class="grid2" style="margin-top:8px"><button class="btn" id="pjNoIc">Plain icon</button><button class="btn" id="pjOpen">'+(id===PROJ.cur?'Already open':'Open project')+'</button></div>'+
+'<div class="kv" style="margin-top:10px"><span>Readings / lines / photos</span><b>'+c.d+' / '+c.f+' / '+c.p+'</b></div>'+
+'<div class="kv"><span>Created</span><b>'+new Date(p.created).toISOString().slice(0,10)+'</b></div>'+
+'<div class="grid2" style="margin-top:12px"><button class="btn" id="pjClose">Close</button><button class="btn on" id="pjSaveN">Save name</button></div>',
+function(){
+$('#pjClose').onclick=closeSheet;
+$('#pjSaveN').onclick=function(){
+var v=$('#pjSN').value.replace(/^\s+|\s+$/g,'');
+if(!v){toast('Give the project a name');return}
+p.name=v;saveProj();drawProjects();drawHome();closeSheet();toast('Renamed to '+v);
+};
+$('#pjOpen').onclick=function(){if(id!==PROJ.cur){useProject(id);drawProjects();drawHome()}closeSheet()};
+$('#pjCam').onclick=function(){pjIcon(id,true)};
+$('#pjGal').onclick=function(){pjIcon(id,false)};
+$('#pjNoIc').onclick=function(){IDB.del('pi'+id);p.icon=0;saveProj();drawProjects();closeSheet();toast('Icon set back to the initials')};
+});
+}
+function pjIcon(id,camera){
+var p=PROJ.list.filter(function(q){return q.id===id})[0];if(!p)return;
+pickImage(function(u){
+if(!u){toast('No image chosen');return}
+IDB.put('pi'+id,u).then(function(){
+p.icon=1;saveProj();drawProjects();drawHome();closeSheet();toast('Project icon set');
+}).catch(function(){toast('Could not store the image')});
+},camera);
+}
+$('#pjShape').onclick=function(){PJSHAPE=PJSHAPE==='round'?'square':'round';DB.set('gs_pjshape',PJSHAPE);applyPjShape()};
+$('#pjDemo').onclick=function(){demoProject()};
+
+/* ================= 23. home screen, tiles and session ================= */
+function drawHome(){
+var last=DATA[DATA.length-1],b;
+b=$('#heroTag');if(b)b.textContent=curProj().name;
+b=$('#bdgStereo');if(b)b.textContent=String(DATA.length);
+b=$('#bdgMap');if(b)b.textContent=String(FAULTS.length+PHOTOS.length);
+b=$('#bdgPump');if(b)b.textContent=String(PT&&PT.rows?PT.rows.length:0);
+b=$('#bdgData');if(b)b.textContent=String(DATA.length+FAULTS.length+PHOTOS.length);
+var st=$('#homeStat');if(!st)return;
+st.innerHTML=
+'<div class="kv"><span>Project</span><b>'+esc(curProj().name)+'</b></div>'+
+'<div class="kv"><span>Measurements</span><b>'+DATA.length+'</b></div>'+
+'<div class="kv"><span>Sets resolved</span><b>'+SETS.length+'</b></div>'+
+'<div class="kv"><span>Structural lines / photo samples</span><b>'+FAULTS.length+' / '+PHOTOS.length+'</b></div>'+
+'<div class="kv"><span>Pumping test</span><b>'+(PT&&PT.rows&&PT.rows.length?PT.rows.length+' readings'+(PTFIT.th?', T '+PTFIT.th.T.toFixed(0)+' m2/d':''):'no data')+'</b></div>'+
+'<div class="kv"><span>Last reading</span><b>'+(last?fmtRec(last)+' '+esc(last.type):'none')+'</b></div>'+
+'<div class="kv"><span>Sensor</span><b>'+(S.live?esc(S.src):'not available')+'</b></div>'+
+'<div class="kv"><span>Position</span><b>'+(FIX?FIX.lat.toFixed(5)+', '+FIX.lon.toFixed(5):'no fix')+'</b></div>';
+}
+$('#chipDemo').onclick=function(){loadDemo()};
+$('#chipRep').onclick=function(){
+if(DATA.length)savePdf('gneisstools-report-'+stamp()+'.pdf',drawA4(),'GneissTools structural report');
+else if(PT&&PT.rows&&PT.rows.length)savePdf('gneisstools-pumptest-'+stamp()+'.pdf',ptA4(),'GneissTools pumping test report');
+else toast('Load the demo data first, there is nothing to report');
+};
+
+/* ================= 24. router, canvases and refresh, extended ================= */
+ROUTES.pump={t:'Pumping test',s:'Tool 03 / Theis and Cooper-Jacob',sc:'sc-pump',
+seg:[['pn-ptdata','Data'],['pn-ptplot','Plot'],['pn-ptres','Results']],pane:'pn-ptdata',
+enter:function(){ptEnter()}};
+function sizeCanvases(){
+if(fit($('#dial'),1))drawDial();
+if(fit($('#net'),1))drawNet();
+if(fit($('#rose'),0.62))drawRose();
+if(fit($('#hist'),0.5))drawHist();
+if(fit($('#ptSemi'),0.66))ptDrawSemi();
+if(fit($('#ptLog'),0.66))ptDrawLog();
+if(fit($('#ptRes'),0.34))ptDrawRes();
+sizeMap();
+}
+function refreshAll(){
+computeSets();drawTable();drawNet();drawRose();drawHist();drawSets();
+ptRefresh();drawHome();drawThumbs();drawFaultList();syncUndo();
+}
+function loadProject(){
+DATA=DB.get(pk('gs_data'),[]);FAULTS=DB.get(pk('gs_faults'),[]);PHOTOS=DB.get(pk('gs_photos'),[]);ATT=DB.get(pk('gs_att'),[]);
+ptLoad();
+SEL={};SETS=[];UNDO=[];PREVSTATE=snapNow();
+if(typeof MAP!=='undefined'){MAP.sel=null;MAP.draft=null}
+refreshAll();syncUndo();queueMap();
+if(cur()==='pump')ptSync();
+}
+
+/* ================= 25. reports, demo data and documentation hooks ================= */
+$('#btnRepPdf').onclick=function(){
+if(!DATA.length){toast('Nothing to report');return}
+savePdf('gneisstools-report-'+stamp()+'.pdf',drawA4(),'GneissTools structural report');
+};
+$('#btnRepPdf2').onclick=function(){
+if(!DATA.length){toast('Nothing to report');return}
+savePdf('gneisstools-report-'+stamp()+'.pdf',drawA4(),'GneissTools structural report');
+};
+$('#btnDemo3').onclick=function(){loadDemo()};
+$('#btnDemo').onclick=function(){loadDemo()};
+$('#btnDemoProj').onclick=function(){demoProject()};
+$('#btnPdfStereo').onclick=function(){
+if(!DATA.length){toast('No measurements yet');return}
+savePdf('gneisstools-report-'+stamp()+'.pdf',drawA4(),'GneissTools structural report');
+};
+$('#btnPdfPump').onclick=function(){
+ptLoad();
+if(!PT.rows.length){toast('No pumping test data yet');return}
+savePdf('gneisstools-pumptest-'+stamp()+'.pdf',ptA4(),'GneissTools pumping test report');
+};
+DOCS.push({t:'Pumping test',s:'Tool 03, T and S',h:
+'<h3>1. The test</h3><p>Pump the well at a constant rate and read the drawdown in an observation well at a known radial distance. Enter the discharge in cubic metres per day, the distance in metres and, if you know it, the saturated thickness so the app can also report the hydraulic conductivity.</p>'+
+'<h3>2. The readings</h3><p>Type one pair per line, elapsed time in minutes first, then drawdown in metres. Press Compute. Load demo test fills a synthetic but realistic record if you only want to see how the tool behaves.</p>'+
+'<div class="fig">1  0.28<br>2  0.42<br>5  0.61</div>'+
+'<h3>3. Cooper-Jacob</h3><p>The Plot pane draws drawdown against the logarithm of time. A straight line is fitted to the late data, where the well function is close to its logarithmic approximation. The slope gives the transmissivity and the intercept of zero drawdown gives the storativity.</p>'+
+'<h3>4. Theis</h3><p>The full well function is then fitted to every reading by a search in log T and log S. The Results pane reports both estimates, the residuals and the range of the dimensionless parameter u, and states after how long the Cooper-Jacob approximation becomes valid.</p>'+
+'<h3>5. Report</h3><p>Export one-page PDF report writes an A4 sheet with both plots, the residuals, a table of the estimates and a written summary assembled from the numbers.</p>'});
+DOCS.push({t:'Projects and demo data',s:'Organising the work',h:
+'<h3>Projects</h3><p>The first entry of the main menu holds the projects as a grid of icons. Tap an icon to open that project, tap rename underneath it to change its name or to give it a photograph taken with the camera or picked from the gallery. The icon shape can be switched between round and square.</p>'+
+'<h3>Separate datasets</h3><p>Measurements, extracted sets, structural lines, photo samples and pumping tests belong to one project only, and nothing is mixed between them.</p>'+
+'<h3>Demo data</h3><p>General settings, Demonstration data fills every tool of the open project at once, or creates a separate demo project. Each tool can then be explored, and both one-page reports can be exported, without a single manual entry.</p>'});
+var _aboutOrig=drawAbout;
+drawAbout=function(){
+_aboutOrig();
+var e=$('#aboutBody');if(!e)return;
+ptLoad();
+e.insertAdjacentHTML('afterbegin',
+'<div class="kv"><span>Instruments</span><b>Stereonet, GeoCover field map, pumping test</b></div>'+
+'<div class="kv"><span>Pumping test records</span><b>'+(PT.rows?PT.rows.length:0)+'</b></div>');
+e.insertAdjacentHTML('beforeend',
+'<h2 class="sec" style="margin-left:0">Hydrogeology</h2>'+
+'<p class="note" style="margin:0">Transmissivity and storativity are estimated by the Cooper-Jacob semi-logarithmic straight line, T = 2.303 Q / (4 pi ds) and S = 2.25 T t0 / r squared, and by a least squares fit of the Theis well function W(u) with u = r squared S / (4 T t). Both assume a confined, homogeneous and isotropic aquifer of infinite extent, a fully penetrating well and a constant discharge.</p>'+
+'<h2 class="sec" style="margin-left:0">Further references</h2>'+
+'<p class="note" style="margin:0">Theis, C. V. (1935) The relation between the lowering of the piezometric surface and the rate and duration of discharge of a well using ground-water storage. Transactions of the American Geophysical Union 16, 519-524. Cooper, H. H. and Jacob, C. E. (1946) A generalized graphical method for evaluating formation constants and summarizing well-field history. Transactions of the American Geophysical Union 27, 526-534. Schmidt, W. (1925) Gefuegestatistik. Tschermaks Mineralogische und Petrographische Mitteilungen 38, 392-423. Vollmer, F. W. (1995) C program for automatic contouring of spherical orientation data. Computers and Geosciences 21, 31-49.</p>'+
+'<h2 class="sec" style="margin-left:0">Reports</h2>'+
+'<p class="note" style="margin:0">Both the structural and the hydraulic report are laid out on a single A4 page and written to the Downloads folder as a PDF or a PNG. The wording is assembled on the device from the computed statistics and describes the results only.</p>');
+};
+ptLoad();applyPjShape();
+
+/* ================= 26. boot ================= */
 setMode('plane');
 applyTheme();
 syncSettings();
