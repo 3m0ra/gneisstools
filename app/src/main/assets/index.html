@@ -250,6 +250,9 @@ figure.plate canvas{max-width:100%}
 <div class="tile t4" data-go="data">
 <svg viewBox="0 0 40 40"><rect x="6" y="6" width="28" height="28" rx="3" fill="none" stroke="#3f7d3f" stroke-width="2"/><path d="M6 15 H34 M6 24 H34 M16 6 V34" stroke="#3f7d3f" stroke-width="1.4"/><circle cx="26" cy="29" r="3" fill="#a8432b"/></svg>
 <b>Data</b><i>Table, photos, traces, export</i><span class="bdg" id="bdgData">0</span></div>
+<div class="tile t3" data-go="piez" style="grid-column:1/-1">
+<svg viewBox="0 0 40 40"><path d="M3 13 C11 10 19 16 37 11" fill="none" stroke="#2a9dbf" stroke-width="2.2"/><path d="M3 21 C11 18 19 24 37 19" fill="none" stroke="#2a9dbf" stroke-width="1.6"/><path d="M3 29 C11 26 19 32 37 27" fill="none" stroke="#2a9dbf" stroke-width="1.2"/><circle cx="14" cy="14.8" r="2.6" fill="#124559"/><circle cx="27" cy="20.8" r="2.6" fill="#124559"/><path d="M18 36 L31 32.6" stroke="#a8432b" stroke-width="2"/><path d="M31 32.6 l-4.2 -2 M31 32.6 l-3.4 3.2" stroke="#a8432b" stroke-width="2" fill="none"/></svg>
+<b>Piezometric map</b><i>Water table, equipotentials, flow</i><span class="bdg" id="bdgPiez">0</span></div>
 </div>
 <div class="pad" style="padding-top:10px;padding-bottom:0">
 <span class="chip" data-go="tools">All instruments &#8250;</span><span class="chip" id="chipDemo">Load demo data</span><span class="chip" id="chipRep">One-page PDF report</span>
@@ -259,7 +262,7 @@ figure.plate canvas{max-width:100%}
 <ol class="menu">
 <li data-go="projects"><span class="dot" style="background:var(--geoBlue)">01</span><span class="lab"><b>Projects</b><i>Create, rename, illustrate and switch field projects</i></span><span class="chev">&#8250;</span></li>
 <li data-go="settings"><span class="dot" style="background:var(--geoOchre)">02</span><span class="lab"><b>General settings</b><i>Projection, declination, theme, sensors, demo data</i></span><span class="chev">&#8250;</span></li>
-<li data-go="tutorials"><span class="dot" style="background:var(--geoGreen)">03</span><span class="lab"><b>Tutorials</b><i>Six guided field workflows</i></span><span class="chev">&#8250;</span></li>
+<li data-go="tutorials"><span class="dot" style="background:var(--geoGreen)">03</span><span class="lab"><b>Tutorials</b><i>Seven guided field workflows</i></span><span class="chev">&#8250;</span></li>
 <li data-go="about"><span class="dot" style="background:var(--geoViolet)">04</span><span class="lab"><b>About</b><i>Version, methods, data sources, licence</i></span><span class="chev">&#8250;</span></li>
 </ol>
 
@@ -279,8 +282,9 @@ figure.plate canvas{max-width:100%}
 <li data-go="stereo"><span class="dot" style="background:var(--geoBlue)">01</span><span class="lab"><b>Stereonet</b><i>Measure planes and lineations, plot poles, contour density, cluster sets</i></span><span class="chev">&#8250;</span></li>
 <li data-go="map"><span class="dot" style="background:var(--geoOchre)">02</span><span class="lab"><b>Field map &middot; GeoCover</b><i>Dip symbols, fault traces and photo samples on the swisstopo vector geological map</i></span><span class="chev">&#8250;</span></li>
 <li data-go="pump"><span class="dot" style="background:var(--water)">03</span><span class="lab"><b>Pumping test</b><i>Time versus drawdown, Theis and Cooper-Jacob estimates of transmissivity and storativity</i></span><span class="chev">&#8250;</span></li>
+<li data-go="piez"><span class="dot" style="background:var(--geoDeep)">04</span><span class="lab"><b>Piezometric map</b><i>Observation points, swisstopo DEM elevations, equipotential lines and groundwater flow direction</i></span><span class="chev">&#8250;</span></li>
 </ol>
-<p class="note">The structural tools write into the same dataset: a dip reading taken with the stereonet can be dropped on the map, and a dip annotated on the map is plotted on the stereonet. The pumping test keeps its own hydraulic dataset inside the same project.</p>
+<p class="note">The structural tools write into the same dataset: a dip reading taken with the stereonet can be dropped on the map, and a dip annotated on the map is plotted on the stereonet. The pumping test keeps its own hydraulic dataset inside the same project. The piezometric map keeps its own set of observation points there as well, and draws its equipotential lines straight onto the field map.</p>
 </section>
 
 <!-- ============ TOOL 01 : STEREONET ============ -->
@@ -354,6 +358,7 @@ figure.plate canvas{max-width:100%}
     <button id="tDip" title="Add dip symbol">&#9679;</button>
     <button id="tFault" title="Draw fault trace">&#8599;</button>
     <button id="tPhoto" title="Photo sample">&#9635;</button>
+  <button id="tWell" title="Piezometric observation point">&#9673;</button>
     <button id="tGps" title="Follow my position">&#8982;</button>
     <button id="tCentre" title="Centre on my position">&#9678;</button>
     <button id="tUndo" title="Undo last annotation">&#8630;</button>
@@ -402,6 +407,65 @@ figure.plate canvas{max-width:100%}
 <div id="ptOut"></div>
 <h2 class="sec" style="margin-left:0">Method</h2>
 <p class="note" style="margin:0">Cooper-Jacob fits a straight line to drawdown against the logarithm of time by least squares, T = 2.303 Q / (4 pi ds) and S = 2.25 T t0 / r squared, where ds is the drawdown per log cycle and t0 the intercept of zero drawdown. Theis fits the full well function W(u), u = r squared S / (4 T t), by a Levenberg-Marquardt search in log T and log S started from the Cooper-Jacob estimate. Both assume a confined, homogeneous, isotropic aquifer of infinite extent, a fully penetrating well and a constant discharge.</p>
+</div></div>
+</section>
+
+
+<!-- ============ TOOL 04 : PIEZOMETRIC MAP ============ -->
+<section class="screen" id="sc-piez">
+
+<div class="pane on" id="pn-pzpts"><div class="pad">
+<div class="row"><label class="f"><span>Aquifer / site</span><input id="pzUnit" placeholder="e.g. Rhone alluvial plain"></label></div>
+<h2 class="sec" style="margin-left:0">New observation point</h2>
+<div class="row">
+<label class="f"><span>Name</span><input id="pzName" placeholder="e.g. Pz-1"></label>
+<label class="f"><span>Depth to water table, m</span><input id="pzDepth" type="number" step="any" inputmode="decimal" placeholder="e.g. 3.20"></label>
+</div>
+<div class="row">
+<label class="f"><span>Latitude, degrees N</span><input id="pzLat" type="number" step="any" inputmode="decimal" placeholder="46.19050"></label>
+<label class="f"><span>Longitude, degrees E</span><input id="pzLon" type="number" step="any" inputmode="decimal" placeholder="7.24500"></label>
+</div>
+<div class="grid2" style="margin-top:9px">
+<button class="btn" id="pzAdd">Add point</button>
+<button class="btn" id="pzHere">Use my GPS position</button>
+<button class="btn" id="pzCtr">Take the map centre</button>
+<button class="btn" id="pzPin">Pinpoint on the field map</button>
+</div>
+<h2 class="sec" style="margin-left:0">Ground elevation</h2>
+<p class="note" style="margin:0 0 8px">The ground surface elevation Z is read from the swisstopo digital elevation model, so the hydraulic head is H = Z minus the measured depth to the water table. A value typed by hand is kept and marked as manual.</p>
+<button class="btn wide" id="pzDem">Fetch swisstopo DEM elevations</button>
+<div id="pzCount" class="stab"></div>
+<h2 class="sec" style="margin-left:0">Observation points</h2>
+<div id="pzList"></div>
+<div class="grid2" style="margin-top:9px">
+<button class="btn" id="pzDemo">Load demo valley</button>
+<button class="btn" id="pzClear">Clear points</button>
+<button class="btn" id="pzCsv">Export CSV</button>
+<button class="btn" id="pzGeo">Export GeoJSON</button>
+</div>
+</div></div>
+
+<div class="pane" id="pn-pzmap"><div class="pad">
+<figure class="plate"><canvas id="pzPlate"></canvas><figcaption id="pzCap">Piezometric map: equipotential lines of the interpolated water table.</figcaption></figure>
+<div class="row">
+<label class="f"><span>Interpolation</span><select id="pzMeth"><option value="idw">Inverse distance weighting</option><option value="tin">Delaunay triangulation, linear</option></select></label>
+<label class="f"><span>IDW power</span><select id="pzPow"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+</div>
+<div class="row">
+<label class="f"><span>Contour interval, m</span><input id="pzInt" type="number" step="any" inputmode="decimal"></label>
+<label class="f"><span>Conductivity K, m/day</span><input id="pzK" type="number" step="any" inputmode="decimal" placeholder="optional"></label>
+</div>
+<div class="row"><label class="f"><span>Effective porosity</span><input id="pzNe" type="number" step="any" inputmode="decimal" placeholder="optional, e.g. 0.15"></label></div>
+<div class="grid2"><button class="btn" id="pzVec">Flow vectors: on</button><button class="btn" id="pzShow">Draw on the field map: on</button></div>
+<button class="btn wide" id="pzOpen">Open the field map on these points</button>
+<button class="btn wide" id="pzPng">Export plate as PNG</button>
+<button class="btn wide" id="pzPdf">Export one-page PDF report</button>
+</div></div>
+
+<div class="pane" id="pn-pzres"><div class="pad">
+<div id="pzOut"></div>
+<h2 class="sec" style="margin-left:0">Method</h2>
+<p class="note" style="margin:0">Every point carries a ground elevation Z, read from the swisstopo digital elevation model, and a measured depth to the water table d, so the hydraulic head is H = Z - d. The head field is interpolated on a regular grid, either by inverse distance weighting with the chosen power or by linear interpolation inside a Delaunay triangulation of the points, and the equipotential lines are traced through that grid by marching squares. The regional gradient is the least squares plane fitted to the heads: its steepest descent gives the hydraulic gradient i and the flow direction, quoted as an azimuth from true north. Local vectors are the gradient of the interpolated grid. When a hydraulic conductivity and an effective porosity are given, the Darcy velocity q = K i and the mean pore velocity v = q / ne are printed as well. A single continuous isotropic aquifer is assumed, with all heads measured in that aquifer and at the same time.</p>
 </div></div>
 </section>
 
@@ -3355,6 +3419,673 @@ var lastPaint=0;
  lastPaint=ts;
  if(cur()==='stereo'&&ROUTES.stereo.pane==='pn-measure'){updateReadout();drawDial();syncGeoBtn()}
 })(0);
+
+/* ================= 28. tool 04 : piezometric map =================
+observation points carrying the measured depth to the water table, the
+ground elevation read from the swisstopo digital elevation model, the
+hydraulic head H = Z - d, equipotential lines interpolated by inverse
+distance weighting or by a Delaunay triangulation, and the groundwater
+flow direction taken from the gradient of the interpolated surface */
+var PZ=null,PZM=null,PZSIG='@';
+function pzDefault(){return{unit:'',pts:[],method:'idw',power:2,interval:0.25,vectors:1,show:1,K:null,ne:null}}
+function pzSave(){DB.set(pk('gs_piez'),PZ);PZSIG='@'}
+function pzLoad(){
+  PZ=DB.get(pk('gs_piez'),null)||pzDefault();
+  if(!PZ.pts)PZ.pts=[];
+  if(PZ.method!=='tin')PZ.method='idw';
+  if(!(PZ.power>0))PZ.power=2;
+  if(!(PZ.interval>0))PZ.interval=0.25;
+  if(PZ.vectors==null)PZ.vectors=1;
+  if(PZ.show==null)PZ.show=1;
+}
+function pzH(p){return(p&&isFinite(p.z)&&isFinite(p.depth))?+(p.z-p.depth).toFixed(3):null}
+function pzNodes(){
+  pzLoad();
+  var out=[];
+  PZ.pts.forEach(function(p){
+    var h=pzH(p);
+    if(h!=null&&isFinite(p.lon)&&isFinite(p.lat))out.push({id:p.id,name:p.name,lon:p.lon,lat:p.lat,h:h,z:p.z,depth:p.depth});
+  });
+  return out;
+}
+/* local metric frame, centred on the points: a piezometric map is always local */
+function pzFrame(ns){
+  var lo=0,la=0,i;
+  for(i=0;i<ns.length;i++){lo+=ns[i].lon;la+=ns[i].lat}
+  lo/=(ns.length||1);la/=(ns.length||1);
+  return{lon0:lo,lat0:la,mx:111320*Math.cos(la*D2R),my:110540};
+}
+function pzXY(F,lon,lat){return[(lon-F.lon0)*F.mx,(lat-F.lat0)*F.my]}
+function pzLL(F,x,y){return[F.lon0+x/F.mx,F.lat0+y/F.my]}
+/* ---------- inverse distance weighting, Shepard ---------- */
+function pzIdw(ns,x,y,pw){
+  var num=0,den=0,i,d2,w;
+  for(i=0;i<ns.length;i++){
+    d2=(x-ns[i].x)*(x-ns[i].x)+(y-ns[i].y)*(y-ns[i].y);
+    if(d2<0.01)return ns[i].h;
+    w=1/Math.pow(d2,pw/2);num+=w*ns[i].h;den+=w;
+  }
+  return den?num/den:null;
+}
+/* ---------- least squares plane: the regional hydraulic gradient ---------- */
+function pzPlane(ns){
+  var n=ns.length,i,p,sx=0,sy=0,sh=0,sxx=0,sxy=0,syy=0,sxh=0,syh=0;
+  if(n<3)return null;
+  for(i=0;i<n;i++){p=ns[i];sx+=p.x;sy+=p.y;sh+=p.h;sxx+=p.x*p.x;sxy+=p.x*p.y;syy+=p.y*p.y;sxh+=p.x*p.h;syh+=p.y*p.h}
+  var c11=sxx-sx*sx/n,c12=sxy-sx*sy/n,c22=syy-sy*sy/n;
+  var d1=sxh-sx*sh/n,d2=syh-sy*sh/n,det=c11*c22-c12*c12;
+  if(!det)return null;
+  var b=(d1*c22-d2*c12)/det,c=(d2*c11-d1*c12)/det,a=(sh-b*sx-c*sy)/n;
+  var sse=0,sst=0,hm=sh/n,f;
+  for(i=0;i<n;i++){f=a+b*ns[i].x+c*ns[i].y;sse+=(ns[i].h-f)*(ns[i].h-f);sst+=(ns[i].h-hm)*(ns[i].h-hm)}
+  return{a:a,b:b,c:c,i:Math.hypot(b,c),az:(Math.atan2(-b,-c)*R2D+360)%360,
+    rmse:Math.sqrt(sse/n),r2:sst?1-sse/sst:1};
+}
+/* ---------- Delaunay triangulation, Bowyer-Watson, and linear TIN reading ---------- */
+function pzCircum(pts,t){
+  var a=pts[t[0]],b=pts[t[1]],c=pts[t[2]];
+  var d=2*(a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y));
+  if(!d)return null;
+  var aa=a.x*a.x+a.y*a.y,bb=b.x*b.x+b.y*b.y,cc=c.x*c.x+c.y*c.y;
+  var ux=(aa*(b.y-c.y)+bb*(c.y-a.y)+cc*(a.y-b.y))/d;
+  var uy=(aa*(c.x-b.x)+bb*(a.x-c.x)+cc*(b.x-a.x))/d;
+  return{x:ux,y:uy,r2:(ux-a.x)*(ux-a.x)+(uy-a.y)*(uy-a.y)};
+}
+function pzDelaunay(ns){
+  var n=ns.length,i,j;
+  if(n<3)return[];
+  var minx=1e18,miny=1e18,maxx=-1e18,maxy=-1e18;
+  for(i=0;i<n;i++){minx=Math.min(minx,ns[i].x);maxx=Math.max(maxx,ns[i].x);miny=Math.min(miny,ns[i].y);maxy=Math.max(maxy,ns[i].y)}
+  var dm=Math.max(maxx-minx,maxy-miny,1)*24,cx=(minx+maxx)/2,cy=(miny+maxy)/2;
+  var pts=ns.map(function(p){return{x:p.x,y:p.y}});
+  pts.push({x:cx-dm,y:cy-dm},{x:cx+dm,y:cy-dm},{x:cx,y:cy+dm});
+  var tris=[[n,n+1,n+2]],bad,good,edges,keep,cc,dx,dy;
+  for(i=0;i<n;i++){
+    bad=[];good=[];
+    for(j=0;j<tris.length;j++){
+      cc=pzCircum(pts,tris[j]);
+      if(!cc){good.push(tris[j]);continue}
+      dx=pts[i].x-cc.x;dy=pts[i].y-cc.y;
+      if(dx*dx+dy*dy<=cc.r2*1.000001)bad.push(tris[j]);else good.push(tris[j]);
+    }
+    edges=[];
+    bad.forEach(function(t){edges.push([t[0],t[1]],[t[1],t[2]],[t[2],t[0]])});
+    keep=[];
+    edges.forEach(function(e,k){
+      var shared=false;
+      edges.forEach(function(f,m){if(m!==k&&((e[0]===f[0]&&e[1]===f[1])||(e[0]===f[1]&&e[1]===f[0])))shared=true});
+      if(!shared)keep.push(e);
+    });
+    tris=good;
+    keep.forEach(function(e){tris.push([e[0],e[1],i])});
+  }
+  return tris.filter(function(t){return t[0]<n&&t[1]<n&&t[2]<n});
+}
+function pzTinAt(ns,tris,x,y){
+  var i,A,B,C,d,l1,l2,l3;
+  for(i=0;i<tris.length;i++){
+    A=ns[tris[i][0]];B=ns[tris[i][1]];C=ns[tris[i][2]];
+    d=(B.y-C.y)*(A.x-C.x)+(C.x-B.x)*(A.y-C.y);
+    if(!d)continue;
+    l1=((B.y-C.y)*(x-C.x)+(C.x-B.x)*(y-C.y))/d;
+    l2=((C.y-A.y)*(x-C.x)+(A.x-C.x)*(y-C.y))/d;
+    l3=1-l1-l2;
+    if(l1>=-1e-9&&l2>=-1e-9&&l3>=-1e-9)return l1*A.h+l2*B.h+l3*C.h;
+  }
+  return null;
+}
+
+/* ---------- grid, marching squares equipotentials and flow vectors ---------- */
+function pzIp(L,xa,ya,va,xb,yb,vb){var t=(vb===va)?0.5:(L-va)/(vb-va);return[xa+(xb-xa)*t,ya+(yb-ya)*t]}
+function pzContour(G,levels){
+  var out=[],N=G.n,i,j,k,L,list,v0,v1,v2,v3,p;
+  function V(a,b){return G.v[b*(N+1)+a]}
+  function X(a){return G.x0+a*G.dx}
+  function Y(b){return G.y0+b*G.dy}
+  for(k=0;k<levels.length;k++){
+    L=levels[k];list=[];
+    for(j=0;j<N;j++)for(i=0;i<N;i++){
+      v0=V(i,j);v1=V(i+1,j);v2=V(i+1,j+1);v3=V(i,j+1);
+      if(!isFinite(v0)||!isFinite(v1)||!isFinite(v2)||!isFinite(v3))continue;
+      p=[];
+      if((v0<L)!==(v1<L))p.push(pzIp(L,X(i),Y(j),v0,X(i+1),Y(j),v1));
+      if((v1<L)!==(v2<L))p.push(pzIp(L,X(i+1),Y(j),v1,X(i+1),Y(j+1),v2));
+      if((v2<L)!==(v3<L))p.push(pzIp(L,X(i+1),Y(j+1),v2,X(i),Y(j+1),v3));
+      if((v3<L)!==(v0<L))p.push(pzIp(L,X(i),Y(j+1),v3,X(i),Y(j),v0));
+      if(p.length>=2)list.push([p[0],p[1]]);
+      if(p.length===4)list.push([p[2],p[3]]);
+    }
+    if(list.length)out.push({level:L,segs:list});
+  }
+  return out;
+}
+function pzVectors(G){
+  var out=[],N=G.n,step=Math.max(4,Math.round(N/8)),i,j,a,b,c,d,gx,gy,m;
+  function V(p,q){return G.v[q*(N+1)+p]}
+  for(j=step;j<N;j+=step)for(i=step;i<N;i+=step){
+    a=V(i+1,j);b=V(i-1,j);c=V(i,j+1);d=V(i,j-1);
+    if(!isFinite(a)||!isFinite(b)||!isFinite(c)||!isFinite(d))continue;
+    gx=(a-b)/(2*G.dx);gy=(c-d)/(2*G.dy);m=Math.hypot(gx,gy);
+    if(!(m>1e-12))continue;
+    out.push({x:G.x0+i*G.dx,y:G.y0+j*G.dy,ux:-gx/m,uy:-gy/m,i:m,az:(Math.atan2(-gx,-gy)*R2D+360)%360});
+  }
+  return out;
+}
+/* the whole interpolation is cached: it depends on the points and the settings only,
+   never on the map view, so panning the field map stays cheap */
+function pzModel(){
+  pzLoad();
+  var ns=pzNodes(),i,j,x,y,h;
+  var sig=PZ.method+'|'+PZ.power+'|'+PZ.interval+'|'+ns.map(function(p){return p.lon+','+p.lat+','+p.h}).join(';');
+  if(PZM&&sig===PZSIG)return PZM;
+  PZSIG=sig;
+  if(ns.length<3){PZM=null;return null}
+  var F=pzFrame(ns);
+  ns.forEach(function(p){var q=pzXY(F,p.lon,p.lat);p.x=q[0];p.y=q[1]});
+  var minx=1e18,miny=1e18,maxx=-1e18,maxy=-1e18,hmin=1e18,hmax=-1e18;
+  ns.forEach(function(p){
+    if(p.x<minx)minx=p.x;if(p.x>maxx)maxx=p.x;
+    if(p.y<miny)miny=p.y;if(p.y>maxy)maxy=p.y;
+    if(p.h<hmin)hmin=p.h;if(p.h>hmax)hmax=p.h;
+  });
+  var ex=Math.max(maxx-minx,60),ey=Math.max(maxy-miny,60),pad=0.15;
+  minx-=ex*pad;maxx+=ex*pad;miny-=ey*pad;maxy+=ey*pad;
+  var N=64,G={x0:minx,y0:miny,dx:(maxx-minx)/N,dy:(maxy-miny)/N,n:N,v:[]};
+  var tris=PZ.method==='tin'?pzDelaunay(ns):null;
+  for(j=0;j<=N;j++)for(i=0;i<=N;i++){
+    x=G.x0+i*G.dx;y=G.y0+j*G.dy;
+    h=tris?pzTinAt(ns,tris,x,y):pzIdw(ns,x,y,PZ.power);
+    G.v[j*(N+1)+i]=(h==null)?NaN:h;
+  }
+  var iv=PZ.interval,levels=[],lv=Math.ceil(hmin/iv)*iv,guard=0;
+  while(lv<=hmax+1e-9&&guard++<400){levels.push(+lv.toFixed(4));lv+=iv}
+  PZM={F:F,ns:ns,G:G,tris:tris,levels:levels,segs:pzContour(G,levels),
+    plane:pzPlane(ns),vec:pzVectors(G),hmin:hmin,hmax:hmax,iv:iv};
+  return PZM;
+}
+function pzDarcy(){
+  var M=pzModel();
+  if(!M||!M.plane)return{q:null,v:null};
+  var q=(PZ.K>0)?PZ.K*M.plane.i:null;
+  return{q:q,v:(q!=null&&PZ.ne>0)?q/PZ.ne:null};
+}
+/* ---------- swisstopo digital elevation model, official REST height service ---------- */
+var PZDEM='https://api3.geo.admin.ch/rest/services/height';
+function pzFetchZ(p){
+  var u=PZDEM+'?easting='+p.lon.toFixed(6)+'&northing='+p.lat.toFixed(6)+'&sr=4326&elevation_model=DTM2';
+  return fetch(u).then(function(r){return r.json()}).then(function(j){
+    var z=parseFloat(j&&j.height);
+    if(!isFinite(z))throw new Error('no height');
+    p.z=+z.toFixed(2);p.zsrc='swisstopo DTM2';
+    return p;
+  });
+}
+function pzFetchAll(force){
+  pzLoad();
+  var todo=PZ.pts.filter(function(p){return isFinite(p.lon)&&isFinite(p.lat)&&(force||!isFinite(p.z)||p.zsrc==='demo')});
+  if(!todo.length){toast('Every point already has a ground elevation');return}
+  toast('Reading the swisstopo DEM for '+todo.length+' points');
+  var ok=0,bad=0;
+  todo.reduce(function(chain,p){
+    return chain.then(function(){return pzFetchZ(p).then(function(){ok++}).catch(function(){bad++})});
+  },Promise.resolve()).then(function(){
+    pzSave();pzRefresh();queueMap();
+    toast(ok+' elevations read from the swisstopo DEM'+(bad?', '+bad+' failed':''));
+  });
+}
+/* ---------- demonstration dataset: five wells in the Rhone alluvial plain, Valais ---------- */
+function demoPiez(){
+  var t=Date.now();
+  return{unit:'Rhone alluvial plain, Vetroz VS',method:'idw',power:2,interval:0.25,
+    vectors:1,show:1,K:35,ne:0.15,
+    pts:[
+      {id:t+1,name:'Pz-1',lon:7.2270,lat:46.1955,z:479.90,depth:3.22,zsrc:'demo',note:'gravel, 12 m thick'},
+      {id:t+2,name:'Pz-2',lon:7.2450,lat:46.1905,z:481.59,depth:2.90,zsrc:'demo',note:'sandy gravel'},
+      {id:t+3,name:'Pz-3',lon:7.2610,lat:46.1860,z:484.26,depth:3.80,zsrc:'demo',note:'gravel, near the valley side'},
+      {id:t+4,name:'Pz-4',lon:7.2380,lat:46.1840,z:481.43,depth:4.10,zsrc:'demo',note:'gravel under 2 m of silt'},
+      {id:t+5,name:'Pz-5',lon:7.2520,lat:46.1975,z:482.65,depth:2.60,zsrc:'demo',note:'gravel, close to the river'}
+    ]};
+}
+
+/* ---------- symbology: hairline black and white, publication ready ---------- */
+function pzArrow(x,X,Y,dx,dy,len,w){
+  var m=Math.hypot(dx,dy)||1,ux=dx/m,uy=dy/m,ex=X+ux*len,ey=Y+uy*len,a=Math.atan2(uy,ux);
+  x.lineWidth=w;x.lineCap='round';
+  x.beginPath();x.moveTo(X,Y);x.lineTo(ex,ey);x.stroke();
+  x.beginPath();x.moveTo(ex,ey);
+  x.lineTo(ex-Math.cos(a-0.42)*len*0.34,ey-Math.sin(a-0.42)*len*0.34);
+  x.moveTo(ex,ey);
+  x.lineTo(ex-Math.cos(a+0.42)*len*0.34,ey-Math.sin(a+0.42)*len*0.34);
+  x.stroke();
+}
+function pzWellSymbol(x,X,Y,name,h,sel){
+  var ink=css('--ink'),paper=css('--paper');
+  x.beginPath();x.arc(X,Y,5,0,6.2832);x.fillStyle=paper;x.fill();
+  x.strokeStyle=ink;x.lineWidth=1.6;x.stroke();
+  x.beginPath();x.arc(X,Y,1.7,0,6.2832);x.fillStyle=ink;x.fill();
+  if(name)lab(x,String(name),X+8,Y-1);
+  if(h!=null)lab(x,h.toFixed(2),X+8,Y+10);
+  if(sel){x.strokeStyle=ink;x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.arc(X,Y,14,0,6.2832);x.stroke();x.setLineDash([])}
+}
+/* ---------- the plate: plan view, own metric frame, no tiles ---------- */
+function pzDrawPlate(cv){
+  var c=cv||$('#pzPlate');if(!c||!c.width)return;
+  var x=c.getContext('2d'),w=c.width/DPR,h=c.height/DPR;
+  x.setTransform(DPR,0,0,DPR,0,0);x.clearRect(0,0,w,h);
+  var M=pzModel();
+  if(!M){ptNoData(x,w,h,'Three points with a head are needed for a piezometric map');return}
+  var ink=css('--ink'),g2=css('--g2'),g4=css('--g4');
+  var G=M.G,ex=G.dx*G.n,ey=G.dy*G.n,pad=24;
+  var s=Math.min((w-2*pad)/ex,(h-2*pad)/ey);
+  var ox=(w-ex*s)/2,oy=(h-ey*s)/2;
+  function fx(X){return ox+(X-G.x0)*s}
+  function fy(Y){return oy+ey*s-(Y-G.y0)*s}
+  x.strokeStyle=g2;x.lineWidth=0.8;x.strokeRect(ox,oy,ex*s,ey*s);
+  /* equipotentials, every fifth line heavier and labelled */
+  M.segs.forEach(function(L){
+    var k=Math.round(L.level/M.iv),major=(k%5===0);
+    x.strokeStyle=COLOR?PAL.contact:ink;x.lineWidth=major?1.5:0.7;
+    x.beginPath();
+    L.segs.forEach(function(g){x.moveTo(fx(g[0][0]),fy(g[0][1]));x.lineTo(fx(g[1][0]),fy(g[1][1]))});
+    x.stroke();
+    if(major&&L.segs.length){
+      var g=L.segs[Math.floor(L.segs.length/2)];
+      lab(x,L.level.toFixed(2),fx(g[0][0])+3,fy(g[0][1])-3);
+    }
+  });
+  /* local flow vectors, pointing down gradient */
+  if(PZ.vectors){
+    x.strokeStyle=COLOR?FAULTRED:ink;
+    M.vec.forEach(function(v){pzArrow(x,fx(v.x),fy(v.y),v.ux,-v.uy,15,1.1)});
+  }
+  M.ns.forEach(function(p){pzWellSymbol(x,fx(p.x),fy(p.y),p.name,p.h,0)});
+  /* north arrow and metric scale bar */
+  x.strokeStyle=ink;pzArrow(x,w-18,30,0,-1,18,1.4);lab(x,'N',w-24,10);
+  var target=Math.min(ex*0.35,(w-2*pad)/s*0.35),pw10=Math.pow(10,Math.floor(Math.log(target)/Math.LN10));
+  var nice=[1,2,5,10].map(function(f){return f*pw10}).reduce(function(a,b){return Math.abs(b-target)<Math.abs(a-target)?b:a});
+  var bx=ox+8,by=oy+ey*s-10,bw=nice*s;
+  x.strokeStyle=ink;x.lineWidth=1.4;
+  x.beginPath();x.moveTo(bx,by);x.lineTo(bx+bw,by);x.moveTo(bx,by-4);x.lineTo(bx,by+4);x.moveTo(bx+bw,by-4);x.lineTo(bx+bw,by+4);x.stroke();
+  lab(x,(nice>=1000?(nice/1000)+' km':nice+' m'),bx+bw/2-10,by-7);
+  var cap=$('#pzCap');
+  if(cap&&M.plane)cap.textContent='Piezometric map of '+(PZ.unit||'the observed aquifer')+'. Equipotential lines every '+
+    M.iv+' m of hydraulic head, '+(PZ.method==='tin'?'linear interpolation in a Delaunay triangulation':'inverse distance weighting, power '+PZ.power)+
+    '; arrows, local flow direction; regional gradient '+(M.plane.i*1000).toFixed(2)+' per mille towards '+pad(M.plane.az,3)+' degrees.';
+}
+/* ---------- the same layer, drawn over the swisstopo field map ---------- */
+function pzMapLayer(x){
+  pzLoad();
+  if(!PZ.show)return;
+  var M=pzModel();
+  var ink=css('--ink');
+  if(M){
+    M.segs.forEach(function(L){
+      var k=Math.round(L.level/M.iv),major=(k%5===0);
+      x.strokeStyle=COLOR?PAL.contact:ink;x.lineWidth=major?1.6:0.8;
+      x.beginPath();
+      L.segs.forEach(function(g){
+        var a=pzLL(M.F,g[0][0],g[0][1]),b=pzLL(M.F,g[1][0],g[1][1]);
+        var sa=toScreen(a[0],a[1]),sb=toScreen(b[0],b[1]);
+        x.moveTo(sa[0],sa[1]);x.lineTo(sb[0],sb[1]);
+      });
+      x.stroke();
+    });
+    if(PZ.vectors){
+      x.strokeStyle=COLOR?FAULTRED:ink;
+      M.vec.forEach(function(v){
+        var g=pzLL(M.F,v.x,v.y),s=toScreen(g[0],g[1]);
+        if(s[0]<-30||s[0]>MAP.w+30||s[1]<-30||s[1]>MAP.h+30)return;
+        pzArrow(x,s[0],s[1],v.ux,-v.uy,16,1.2);
+      });
+    }
+  }
+  PZ.pts.forEach(function(p){
+    if(!isFinite(p.lon)||!isFinite(p.lat))return;
+    var s=toScreen(p.lon,p.lat);
+    if(s[0]<-40||s[0]>MAP.w+40||s[1]<-40||s[1]>MAP.h+40)return;
+    pzWellSymbol(x,s[0],s[1],p.name,pzH(p),PZ.selid===p.id);
+  });
+  if(MAP.tool==='well'){
+    x.strokeStyle=ink;x.lineWidth=1;
+    x.beginPath();x.moveTo(MAP.w/2-11,MAP.h/2);x.lineTo(MAP.w/2+11,MAP.h/2);
+    x.moveTo(MAP.w/2,MAP.h/2-11);x.lineTo(MAP.w/2,MAP.h/2+11);x.stroke();
+  }
+}
+/* ---------- the sheet that records or edits one observation point ---------- */
+function pzSheet(lon,lat,exist){
+  pzLoad();
+  var e=exist||null;
+  sheet(e?'Observation point '+esc(e.name||''):'New observation point',
+    '<div class="row"><label class="f"><span>Name</span><input id="psN" value="'+esc(e?e.name:'Pz-'+(PZ.pts.length+1))+'"></label>'+
+    '<label class="f"><span>Depth to water table, m</span><input id="psD" type="number" step="any" inputmode="decimal" value="'+(e&&isFinite(e.depth)?e.depth:'')+'"></label></div>'+
+    '<div class="row"><label class="f"><span>Ground elevation Z, m</span><input id="psZ" type="number" step="any" inputmode="decimal" value="'+(e&&isFinite(e.z)?e.z:'')+'"></label>'+
+    '<label class="f"><span>Note</span><input id="psNo" value="'+esc(e?(e.note||''):(MAP.litho||''))+'"></label></div>'+
+    '<div class="row"><button class="btn wide" id="psDem">Read the elevation from the swisstopo DEM</button></div>'+
+    '<div class="kv"><span>Position</span><b>'+lat.toFixed(5)+' N, '+lon.toFixed(5)+' E</b></div>'+
+    '<div class="kv"><span>Head H = Z - d</span><b id="psH">'+(e&&pzH(e)!=null?pzH(e).toFixed(2)+' m':'-')+'</b></div>'+
+    '<div class="grid2" style="margin-top:12px"><button class="btn" id="psX">'+(e?'Delete':'Cancel')+'</button><button class="btn on" id="psS">Save</button></div>',
+    function(){
+      function head(){
+        var z=parseFloat($('#psZ').value),d=parseFloat($('#psD').value);
+        $('#psH').textContent=(isFinite(z)&&isFinite(d))?(z-d).toFixed(2)+' m':'-';
+      }
+      $('#psZ').oninput=head;$('#psD').oninput=head;
+      $('#psDem').onclick=function(){
+        var t={lon:lon,lat:lat};
+        $('#psDem').textContent='Reading the swisstopo DEM';
+        pzFetchZ(t).then(function(){$('#psZ').value=t.z;$('#psDem').textContent='Elevation '+t.z+' m, swisstopo DTM2';head()})
+          .catch(function(){$('#psDem').textContent='swisstopo could not be reached, type Z by hand'});
+      };
+      $('#psX').onclick=function(){
+        if(e){PZ.pts=PZ.pts.filter(function(q){return q.id!==e.id});pzSave();pzRefresh();closeSheet();PZ.selid=null;drawMap();toast('Point deleted')}
+        else closeSheet();
+      };
+      $('#psS').onclick=function(){
+        var d=parseFloat($('#psD').value),z=parseFloat($('#psZ').value);
+        if(!isFinite(d)){toast('Enter the depth to the water table');return}
+        var p=e||{id:Date.now()};
+        p.name=$('#psN').value.trim()||('Pz-'+(PZ.pts.length+1));
+        p.depth=d;p.note=$('#psNo').value.trim();
+        p.lon=+lon.toFixed(6);p.lat=+lat.toFixed(6);
+        if(isFinite(z)){if(p.z!==z&&p.zsrc!=='swisstopo DTM2')p.zsrc='manual';p.z=z}
+        if(!e)PZ.pts.push(p);
+        pzSave();
+        if(!isFinite(p.z))pzFetchZ(p).then(function(){pzSave();pzRefresh();queueMap()}).catch(function(){toast('Ground elevation still missing, the DEM could not be read')});
+        pzRefresh();closeSheet();MAP.tool='pan';syncRail();drawMap();
+        toast('Observation point '+p.name+' stored');
+      };
+    });
+}
+
+/* ---------- the point list, the form and the results ---------- */
+function pzList(){
+  var o=$('#pzList');if(!o)return;
+  pzLoad();
+  if(!PZ.pts.length){o.innerHTML='<div class="empty">No observation point yet. Add one here, pinpoint it on the field map, or load the demo valley.</div>';return}
+  o.innerHTML=PZ.pts.map(function(p){
+    var h=pzH(p);
+    return '<div class="kv"><span>'+esc(p.name||'point')+'<br>'+
+      (isFinite(p.z)?('Z '+p.z.toFixed(2)+' m, '+esc(p.zsrc||'manual')):'Z missing')+
+      ', d '+(isFinite(p.depth)?p.depth.toFixed(2)+' m':'-')+'</span>'+
+      '<b>'+(h!=null?'H '+h.toFixed(2)+' m':'no head')+
+      ' <button class="btn" data-pz="'+p.id+'" style="padding:2px 8px;margin-left:6px">edit</button></b></div>';
+  }).join('');
+  $$('[data-pz]',o).forEach(function(b){
+    b.onclick=function(){
+      var id=+b.getAttribute('data-pz'),p=PZ.pts.filter(function(q){return q.id===id})[0];
+      if(p)pzSheet(p.lon,p.lat,p);
+    };
+  });
+}
+function pzSync(){
+  pzLoad();
+  var e;
+  if(e=$('#pzUnit'))e.value=PZ.unit||'';
+  if(e=$('#pzMeth'))e.value=PZ.method;
+  if(e=$('#pzPow'))e.value=String(PZ.power);
+  if(e=$('#pzInt'))e.value=PZ.interval;
+  if(e=$('#pzK'))e.value=PZ.K==null?'':PZ.K;
+  if(e=$('#pzNe'))e.value=PZ.ne==null?'':PZ.ne;
+  if(e=$('#pzVec'))e.textContent='Flow vectors: '+(PZ.vectors?'on':'off');
+  if(e=$('#pzShow'))e.textContent='Draw on the field map: '+(PZ.show?'on':'off');
+  if(e=$('#pzVec'))e.classList.toggle('on',!!PZ.vectors);
+  if(e=$('#pzShow'))e.classList.toggle('on',!!PZ.show);
+}
+function pzGrab(){
+  pzLoad();
+  var k=parseFloat($('#pzK').value),ne=parseFloat($('#pzNe').value),iv=parseFloat($('#pzInt').value);
+  PZ.unit=$('#pzUnit')?$('#pzUnit').value.trim():PZ.unit;
+  PZ.method=$('#pzMeth').value==='tin'?'tin':'idw';
+  PZ.power=clamp(parseFloat($('#pzPow').value)||2,1,3);
+  PZ.interval=iv>0?iv:0.25;
+  PZ.K=isFinite(k)?k:null;PZ.ne=isFinite(ne)?ne:null;
+  pzSave();
+}
+function pzOutHtml(){
+  var o=$('#pzOut');if(!o)return;
+  pzLoad();
+  var ns=pzNodes();
+  if(ns.length<3){o.innerHTML='<div class="empty">'+(PZ.pts.length?'At least three points with a ground elevation and a depth to the water table are needed.':'No observation point yet.')+'</div>';return}
+  var M=pzModel(),D=pzDarcy();
+  function row(k,v){return '<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>'}
+  var h='<h2 class="sec" style="margin-left:0">Piezometry</h2>'+
+    row('Aquifer / site',esc(PZ.unit||'-'))+
+    row('Observation points',ns.length+' of '+PZ.pts.length+' usable')+
+    row('Head range',M.hmin.toFixed(2)+' to '+M.hmax.toFixed(2)+' m, span '+(M.hmax-M.hmin).toFixed(2)+' m')+
+    row('Interpolation',PZ.method==='tin'?'Delaunay triangulation, linear':'Inverse distance weighting, power '+PZ.power)+
+    row('Contour interval',M.iv+' m, '+M.levels.length+' equipotential lines');
+  if(M.plane){
+    h+='<h2 class="sec" style="margin-left:0">Regional gradient</h2>'+
+      row('Hydraulic gradient i',M.plane.i.toExponential(3)+' m/m, '+(M.plane.i*1000).toFixed(2)+' per mille')+
+      row('Flow direction',pad(M.plane.az,3)+' degrees from true north')+
+      row('Plane fit',' R2 '+M.plane.r2.toFixed(4)+', rms residual '+M.plane.rmse.toFixed(3)+' m');
+    if(D.q!=null)h+=row('Darcy velocity q = K i',D.q.toFixed(3)+' m/day');
+    if(D.v!=null)h+=row('Mean pore velocity v = q / ne',D.v.toFixed(3)+' m/day');
+  }
+  h+='<h2 class="sec" style="margin-left:0">Points</h2>'+
+    ns.map(function(p){
+      return row(esc(p.name||'point')+' &middot; '+p.lat.toFixed(5)+', '+p.lon.toFixed(5),
+        'Z '+p.z.toFixed(2)+' m, d '+p.depth.toFixed(2)+' m, H '+p.h.toFixed(2)+' m');
+    }).join('');
+  o.innerHTML=h;
+}
+function pzNarr(){
+  var M=pzModel(),D=pzDarcy(),out=[];
+  if(!M)return['No result. Fewer than three observation points carry both a ground elevation and a depth to the water table.'];
+  out.push('Dataset. '+M.ns.length+' observation points in '+(PZ.unit||'the surveyed aquifer')+
+    ' give hydraulic heads between '+M.hmin.toFixed(2)+' and '+M.hmax.toFixed(2)+
+    ' m, a span of '+(M.hmax-M.hmin).toFixed(2)+' m. Ground elevations are taken from the swisstopo digital elevation model and the head of each point is the elevation less the measured depth to the water table.');
+  out.push('Surface. The head field is interpolated by '+(PZ.method==='tin'?'linear interpolation inside a Delaunay triangulation of the points':'inverse distance weighting with power '+PZ.power)+
+    ' on a 64 by 64 grid, and '+M.levels.length+' equipotential lines are traced at an interval of '+M.iv+' m.');
+  if(M.plane)out.push('Gradient. The least squares plane fitted to the heads has a gradient of '+M.plane.i.toExponential(3)+
+    ' m per m, that is '+(M.plane.i*1000).toFixed(2)+' per mille, with steepest descent towards '+pad(M.plane.az,3)+
+    ' degrees from true north; the plane explains the heads with an R2 of '+M.plane.r2.toFixed(4)+' and a root mean square residual of '+M.plane.rmse.toFixed(3)+' m.');
+  if(D.q!=null)out.push('Velocity. With a hydraulic conductivity of '+PZ.K+' m per day the Darcy velocity is '+D.q.toFixed(3)+' m per day'+
+    (D.v!=null?', and an effective porosity of '+PZ.ne+' gives a mean pore velocity of '+D.v.toFixed(3)+' m per day':'')+'.');
+  out.push('Assumptions. One continuous, isotropic aquifer is assumed, with every head measured in that aquifer at the same time, so the equipotential lines and the flow directions describe the observed heads only and no interpretation is offered.');
+  return out;
+}
+function pzRefresh(){
+  pzLoad();pzDrawPlate();pzList();pzOutHtml();
+  var b=$('#bdgPiez');if(b)b.textContent=String(PZ.pts.length);
+  var n=$('#pzCount');
+  if(n){
+    var ns=pzNodes();
+    n.textContent=PZ.pts.length+' points stored, '+ns.length+' with a head'+
+      (PZ.pts.filter(function(p){return !isFinite(p.z)}).length?', '+PZ.pts.filter(function(p){return !isFinite(p.z)}).length+' without a ground elevation':'');
+  }
+}
+function pzEnter(){pzSync();pzRefresh();setTimeout(sizeCanvases,30)}
+function pzCentroid(){
+  var ns=pzNodes();if(!ns.length)return null;
+  var lo=0,la=0;ns.forEach(function(p){lo+=p.lon;la+=p.lat});
+  return[lo/ns.length,la/ns.length];
+}
+/* ---------- one page A4 report ---------- */
+function pzA4(){
+  var M=pzModel(),D=pzDarcy();
+  var p1=document.createElement('canvas');p1.width=A4CW;p1.height=Math.round(A4CW*0.62);
+  var keep=DPR,kt=document.body.getAttribute('data-theme');DPR=1;
+  document.body.setAttribute('data-theme','light');
+  pzDrawPlate(p1);
+  document.body.setAttribute('data-theme',kt);DPR=keep;
+  var out=document.createElement('canvas');out.width=A4W;out.height=A4H;
+  var x=out.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,A4W,A4H);x.textBaseline='top';
+  var ns=M?M.ns:[];
+  var y=repHeader(x,'Piezometric map report','Water table, equipotential lines and flow direction',[
+    ['Project',curProj().name],
+    ['Issued',new Date().toISOString().slice(0,16).replace('T',' ')],
+    ['Aquifer',PZ.unit||'not named'],
+    ['Points',String(ns.length)],
+    ['Interpolation',PZ.method==='tin'?'Delaunay linear':'IDW power '+PZ.power],
+    ['Interval',M?M.iv+' m':'-'],
+    ['Gradient',(M&&M.plane)?(M.plane.i*1000).toFixed(2)+' per mille':'-'],
+    ['Flow',(M&&M.plane)?pad(M.plane.az,3)+' degrees':'-']]);
+  y=repSection(x,'1','Piezometric map',y);
+  x.drawImage(p1,A4M,y,p1.width,p1.height);
+  y=repCap(x,'Figure 1. Equipotential lines of the interpolated water table, circles the observation points with their head in metres, arrows the local flow direction down gradient.',A4M,y+p1.height+a4p(4),A4CW)+a4p(10);
+  y=repSection(x,'2','Observation points',y);
+  var cw=[0,a4p(150),a4p(250),a4p(330),a4p(410)],hd=['Point','Z m','Depth m','Head m','Source'],i;
+  x.font=a4fs(8,'700');x.fillStyle='#6a6a6a';
+  for(i=0;i<hd.length;i++)x.fillText(hd[i].toUpperCase(),A4M+cw[i],y);
+  y+=a4p(11);repRule(x,y,0);y+=a4p(6);
+  x.font=a4fm(9);x.fillStyle='#111';
+  ns.forEach(function(p){
+    var src=(PZ.pts.filter(function(q){return q.id===p.id})[0]||{}).zsrc||'manual';
+    [String(p.name||'-'),p.z.toFixed(2),p.depth.toFixed(2),p.h.toFixed(2),src].forEach(function(v,j){x.fillText(v,A4M+cw[j],y)});
+    y+=a4p(11);
+  });
+  y+=a4p(8);
+  y=repSection(x,'3','Results',y);
+  y=repProse(x,pzNarr(),y,repFootTop()-a4p(14));
+  repFooter(x,'Ground elevations are read from the swisstopo digital elevation model through the official REST height service of map.geo.admin.ch; their terms of use apply. Heads are interpolated by inverse distance weighting or by linear interpolation in a Delaunay triangulation, equipotential lines are traced by marching squares, and the regional gradient is the least squares plane fitted to the heads. Assembled on the device from the computed values; the wording describes the results and offers no interpretation.');
+  return out;
+}
+
+/* ---------- buttons, exports and the field map hooks ---------- */
+function pzAddManual(lon,lat){
+  pzLoad();
+  var d=parseFloat($('#pzDepth').value);
+  if(!isFinite(lon)||!isFinite(lat)){toast('Enter a latitude and a longitude');return}
+  if(!isFinite(d)){toast('Enter the depth to the water table');return}
+  var p={id:Date.now(),name:$('#pzName').value.trim()||('Pz-'+(PZ.pts.length+1)),
+    lon:+lon.toFixed(6),lat:+lat.toFixed(6),depth:d,note:''};
+  PZ.pts.push(p);pzSave();pzRefresh();
+  $('#pzName').value='';$('#pzDepth').value='';
+  pzFetchZ(p).then(function(){pzSave();pzRefresh();queueMap();toast(p.name+': Z '+p.z+' m from the swisstopo DEM, H '+pzH(p).toFixed(2)+' m')})
+    .catch(function(){toast(p.name+' stored, the DEM could not be read. Type the elevation by hand.')});
+}
+$('#pzAdd').onclick=function(){pzAddManual(parseFloat($('#pzLon').value),parseFloat($('#pzLat').value))};
+$('#pzHere').onclick=function(){
+  startGps();
+  if(!FIX){toast('No GPS fix yet');return}
+  $('#pzLat').value=FIX.lat.toFixed(6);$('#pzLon').value=FIX.lon.toFixed(6);
+  toast('Position taken, accuracy '+FIX.acc.toFixed(0)+' m');
+};
+$('#pzCtr').onclick=function(){$('#pzLat').value=MAP.lat.toFixed(6);$('#pzLon').value=MAP.lon.toFixed(6);toast('Map centre taken')};
+$('#pzPin').onclick=function(){MAP.tool='well';go('map');setTimeout(function(){syncRail();drawMap()},60);toast('Tap the observation point on the map')};
+$('#pzDem').onclick=function(){pzFetchAll(1)};
+$('#pzDemo').onclick=function(){PZ=demoPiez();pzSave();pzSync();pzRefresh();setTimeout(sizeCanvases,20);toast('Demo valley loaded: five wells in the Rhone alluvial plain')};
+$('#pzClear').onclick=function(){PZ=pzDefault();pzSave();pzSync();pzRefresh();queueMap();toast('Piezometric points cleared')};
+$('#pzCsv').onclick=function(){
+  pzLoad();
+  if(!PZ.pts.length){toast('Nothing to export');return}
+  var rows=PZ.pts.map(function(p){
+    var h=pzH(p);
+    return [p.name||'',p.lat,p.lon,isFinite(p.z)?p.z:'',isFinite(p.depth)?p.depth:'',h==null?'':h,p.zsrc||'manual',(p.note||'').replace(/[,;]/g,' ')].join(',');
+  });
+  dl('gneisstools-piezometry-'+stamp()+'.csv','name,lat,lon,ground_z_m,depth_to_water_m,head_m,z_source,note\n'+rows.join('\n'),'text/csv');
+};
+$('#pzGeo').onclick=function(){
+  pzLoad();
+  if(!PZ.pts.length){toast('Nothing to export');return}
+  var M=pzModel(),fs=PZ.pts.map(function(p){
+    return{type:'Feature',geometry:{type:'Point',coordinates:[p.lon,p.lat]},
+      properties:{name:p.name,ground_z_m:isFinite(p.z)?p.z:null,depth_to_water_m:p.depth,head_m:pzH(p),z_source:p.zsrc||'manual',note:p.note||''}};
+  });
+  if(M)M.segs.forEach(function(L){
+    L.segs.forEach(function(g){
+      var a=pzLL(M.F,g[0][0],g[0][1]),b=pzLL(M.F,g[1][0],g[1][1]);
+      fs.push({type:'Feature',geometry:{type:'LineString',coordinates:[[+a[0].toFixed(6),+a[1].toFixed(6)],[+b[0].toFixed(6),+b[1].toFixed(6)]]},
+        properties:{equipotential_m:L.level}});
+    });
+  });
+  dl('gneisstools-piezometry-'+stamp()+'.geojson',JSON.stringify({type:'FeatureCollection',features:fs}),'application/geo+json');
+};
+$('#pzMeth').onchange=function(){pzGrab();pzRefresh();queueMap()};
+$('#pzPow').onchange=function(){pzGrab();pzRefresh();queueMap()};
+$('#pzInt').onchange=function(){pzGrab();pzRefresh();queueMap()};
+$('#pzK').onchange=function(){pzGrab();pzRefresh()};
+$('#pzNe').onchange=function(){pzGrab();pzRefresh()};
+$('#pzUnit').onchange=function(){pzGrab();pzRefresh()};
+$('#pzVec').onclick=function(){pzLoad();PZ.vectors=PZ.vectors?0:1;pzSave();pzSync();pzRefresh();queueMap()};
+$('#pzShow').onclick=function(){pzLoad();PZ.show=PZ.show?0:1;pzSave();pzSync();queueMap();toast('Piezometric layer '+(PZ.show?'on':'off')+' on the field map')};
+$('#pzOpen').onclick=function(){
+  var c=pzCentroid();
+  pzLoad();PZ.show=1;pzSave();pzSync();
+  if(c){MAP.lon=c[0];MAP.lat=c[1];MAP.z=Math.max(MAP.z,14.5);saveView()}
+  go('map');
+};
+$('#pzPng').onclick=function(){
+  if(pzNodes().length<3){toast('Three points with a head are needed');return}
+  try{dlBase64('gneisstools-piezometry-'+stamp()+'.png',pzA4().toDataURL('image/png').split(',')[1],'image/png')}
+  catch(e){toast('Export failed: '+e.message)}
+};
+$('#pzPdf').onclick=function(){
+  if(pzNodes().length<3){toast('Three points with a head are needed');return}
+  savePdf('gneisstools-piezometry-'+stamp()+'.pdf',pzA4(),'GneissTools piezometric map report');
+};
+/* the field map gains one more tool: tap to place an observation point */
+$('#tWell').onclick=function(){
+  MAP.tool=MAP.tool==='well'?'pan':'well';
+  if(MAP.draft)finishFault();
+  syncRail();drawMap();
+};
+var _pzTap=tap;
+tap=function(px,py){
+  if(MAP.tool==='well'){var g=toGeo(px,py);pzSheet(g[0],g[1]);return}
+  pzLoad();
+  var hitp=null,bd=22;
+  if(PZ.show)PZ.pts.forEach(function(p){
+    if(!isFinite(p.lon))return;
+    var s=toScreen(p.lon,p.lat),d=Math.hypot(s[0]-px,s[1]-py);
+    if(d<bd){bd=d;hitp=p}
+  });
+  if(hitp){PZ.selid=hitp.id;drawMap();pzSheet(hitp.lon,hitp.lat,hitp);return}
+  _pzTap(px,py);
+};
+var _pzOverlays=drawOverlays;
+drawOverlays=function(x){_pzOverlays(x);try{pzMapLayer(x)}catch(e){}};
+var _pzRail=syncRail;
+syncRail=function(){
+  _pzRail();
+  var b=$('#tWell');if(b)b.classList.toggle('on',MAP.tool==='well');
+  if(MAP.tool==='well'){
+    var e=$('#mapHint');
+    if(e)e.textContent='Tap the observation point. Enter the depth to the water table; the ground elevation is read from the swisstopo DEM.';
+  }
+};
+/* ---------- router, canvases, project and demo hooks ---------- */
+ROUTES.piez={t:'Piezometric map',s:'Tool 04 / water table and flow',sc:'sc-piez',
+  seg:[['pn-pzpts','Points'],['pn-pzmap','Map'],['pn-pzres','Results']],pane:'pn-pzpts',
+  enter:function(){pzEnter()}};
+var _pzSize=sizeCanvases;
+sizeCanvases=function(){_pzSize();if(fit($('#pzPlate'),0.8))pzDrawPlate()};
+var _pzRefreshAll=refreshAll;
+refreshAll=function(){_pzRefreshAll();try{pzRefresh()}catch(e){}};
+var _pzLoadProject=loadProject;
+loadProject=function(){_pzLoadProject();PZM=null;PZSIG='@';pzLoad();pzSync();pzRefresh();queueMap()};
+var _pzLoadDemo=loadDemo;
+loadDemo=function(silent){_pzLoadDemo(silent);PZ=demoPiez();pzSave();pzSync();pzRefresh();queueMap()};
+var _pzHome=drawHome;
+drawHome=function(){
+  _pzHome();
+  pzLoad();
+  var b=$('#bdgPiez');if(b)b.textContent=String(PZ.pts.length);
+  var st=$('#homeStat');if(!st)return;
+  var M=null;try{M=pzModel()}catch(e){}
+  st.insertAdjacentHTML('beforeend','<div class="kv"><span>Piezometric map</span><b>'+
+    (PZ.pts.length?PZ.pts.length+' points'+((M&&M.plane)?', i '+(M.plane.i*1000).toFixed(2)+' per mille towards '+pad(M.plane.az,3):''):'no data')+'</b></div>');
+};
+var _pzAbout=drawAbout;
+drawAbout=function(){
+  _pzAbout();
+  var e=$('#aboutBody');if(!e)return;
+  pzLoad();
+  e.insertAdjacentHTML('beforeend',
+    '<h2 class="sec" style="margin-left:0">Piezometry</h2>'+
+    '<p class="note" style="margin:0">Hydraulic heads are computed as H = Z - d, the ground elevation of the swisstopo digital elevation model less the measured depth to the water table, the elevation being read through the official REST height service of api3.geo.admin.ch. The head field is interpolated by inverse distance weighting or by linear interpolation in a Delaunay triangulation, equipotential lines are traced by marching squares and the regional hydraulic gradient is the least squares plane fitted to the heads, the flow direction being its steepest descent.</p>'+
+    '<p class="note" style="margin:8px 0 0">Shepard, D. (1968) A two-dimensional interpolation function for irregularly spaced data. Proceedings of the 23rd ACM National Conference, 517-524. Delaunay, B. (1934) Sur la sphere vide. Bulletin de l Academie des Sciences de l URSS 6, 793-800. Freeze, R. A. and Cherry, J. A. (1979) Groundwater. Prentice Hall, Englewood Cliffs.</p>');
+};
+DOCS.push({t:'Piezometric map',s:'Tool 04, water table and flow',h:
+  '<h3>1. The points</h3><p>Each observation well is one point with a measured depth to the water table. Enter the coordinates by hand, take the map centre, take the GPS position, or press Pinpoint on the field map and tap the well on the swisstopo map.</p>'+
+  '<h3>2. The ground elevation</h3><p>The elevation of the ground surface is read from the swisstopo digital elevation model, so the hydraulic head is the elevation less the depth to the water table. Fetch swisstopo DEM elevations refreshes every point; a value typed by hand is kept and marked as manual.</p>'+
+  '<h3>3. The map</h3><p>The Map pane interpolates the heads, either by inverse distance weighting or inside a Delaunay triangulation, and draws the equipotential lines at the chosen interval with the local flow vectors. The same layer is drawn over the field map, so the piezometry sits on the topographic sheet and the geological map.</p>'+
+  '<h3>4. The results</h3><p>The Results pane prints the head range, the regional hydraulic gradient with its flow azimuth and the quality of the fitted plane. Give a hydraulic conductivity and an effective porosity and the Darcy velocity and the mean pore velocity are printed as well.</p>'+
+  '<h3>5. Demonstration</h3><p>Load demo valley fills five wells in the Rhone alluvial plain near Vetroz, ready to contour, so the tool can be tried without a single measurement.</p>'});
+pzLoad();pzSync();pzRefresh();
+
 </script>
 </body>
 </html>
