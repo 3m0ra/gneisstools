@@ -207,6 +207,7 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
     <figure class="plate" style="margin-top:14px"><canvas id="rose"></canvas><figcaption>Strike rose, 10&deg; sectors, frequency scaled to the outer circle.</figcaption></figure>
     <figure class="plate"><canvas id="hist"></canvas><figcaption>Dip-angle histogram, 10&deg; classes.</figcaption></figure>
     <button class="btn wide" id="btnPng">Export plate as PNG</button>
+    <button class="btn wide" id="btnRep">Export one-page A4 report</button>
   </div></div>
 
   <div class="pane" id="pn-sets"><div class="pad">
@@ -264,8 +265,8 @@ body.bigtype label.f span,body.bigtype h2.sec{font-size:11px}
   <h2 class="sec" style="margin-left:0">Small circle (cone)</h2>
   <div class="row"><label class="f"><span>Half apical angle, degrees: <b id="coneV">10</b></span><input id="cone" type="range" min="2" max="60" step="1"></label></div>
   <h2 class="sec" style="margin-left:0">Appearance</h2>
-  <div class="grid2"><button class="btn" id="btnTheme">Theme: paper</button><button class="btn on" id="btnMono">Monochrome map</button></div>
-  <p class="note" style="margin:0">Monochrome map renders swisstopo tiles in greyscale so the plate stays publication ready. Turn it off when you need the GeoCover lithology colours.</p>
+  <div class="grid2"><button class="btn" id="btnTheme">Theme: paper</button><button class="btn on" id="btnMono">Monochrome map</button><button class="btn on" id="btnDgrad">Density: colour</button></div>
+  <p class="note" style="margin:0">Density contours are filled with the viridis ramp by default. Switch the density button to black and white for a hairline publication plate. Monochrome map renders swisstopo tiles in greyscale so the plate stays publication ready. Turn it off when you need the GeoCover lithology colours.</p>
   <h2 class="sec" style="margin-left:0">Session</h2>
   <div class="grid2"><button class="btn" id="btnAwake">Keep screen on: off</button><button class="btn" id="btnDiag">Sensor report</button></div>
   <h2 class="sec" style="margin-left:0">Danger zone</h2>
@@ -332,6 +333,7 @@ var WULFF=DB.get('gs_wulff',0), MONO=DB.get('gs_mono',1), THEME=DB.get('gs_theme
 var COLOR=DB.get('gs_color',0), UISCALE=DB.get('gs_uiscale',100), FONTSCALE=DB.get('gs_fontscale',100);
 var TERZ=DB.get('gs_terz',0), TERZT=DB.get('gs_terzt',0), TERZP=DB.get('gs_terzp',90), TERZMAX=DB.get('gs_terzmax',10);
 var GEOTAG=DB.get('gs_geotag',0);
+var DGRAD=DB.get('gs_dgrad',1), SMOOTH=DB.get('gs_smooth',0.22);
 
 /* ---------- graphics palette. a canvas cannot resolve CSS custom properties ---------- */
 var FMONO='ui-monospace,Menlo,Consolas,monospace', FSANS='-apple-system,Helvetica,Arial,sans-serif';
@@ -420,19 +422,31 @@ function fisher(vs,m){
 }
 
 /* ================= 3. sensors ================= */
-var S={live:false,z:null,y:null,absolute:false,src:'',n:0,buf:[],tries:[]};
-function feed(z,y,absolute,src){
+var S={live:false,z:null,y:null,sz:null,sy:null,absolute:false,src:'',n:0,buf:[],tries:[],pri:0,tsrc:0};
+function feed(z,y,absolute,src,pri){
  if(!z||!y||!isFinite(z[0])||!isFinite(y[0]))return;
- S.live=true;S.z=norm(z);S.y=norm(y);S.absolute=absolute;S.src=src;S.n++;
- S.buf.push({z:S.z,y:S.y,t:performance.now()});
+ var now=performance.now();pri=pri||1;if(absolute)pri+=10;
+ /* one source at a time: a relative feed must not fight an absolute one, that alternation is what made the readout jump */
+ if(pri<S.pri&&now-S.tsrc<3000)return;
+ if(pri>S.pri||now-S.tsrc>=3000){S.pri=pri;S.absolute=!!absolute;S.src=src;S.sz=null;S.sy=null;S.buf.length=0}
+ S.tsrc=now;S.live=true;S.n++;
+ var zn=norm(z),yn=norm(y);
+ S.z=zn;S.y=yn;S.sz=lowpass(S.sz,zn);S.sy=lowpass(S.sy,yn);
+ S.buf.push({z:zn,y:yn,t:now});
  if(S.buf.length>80)S.buf.shift();
+}
+/* axial low-pass: the sign is aligned first, so the filter never flips the vector */
+function lowpass(prev,v){
+ if(!prev)return v.slice();
+ var s=dot(prev,v)<0?-1:1,a=SMOOTH;
+ return norm([prev[0]*(1-a)+v[0]*s*a,prev[1]*(1-a)+v[1]*s*a,prev[2]*(1-a)+v[2]*s*a]);
 }
 function onOri(e){
  if(e.alpha==null||e.beta==null||e.gamma==null)return;
  var al=e.webkitCompassHeading!=null?360-e.webkitCompassHeading:e.alpha;
  var A=axes(al,e.beta,e.gamma);
  feed(A.z,A.y,!!(e.absolute||e.webkitCompassHeading!=null),
-  (e.type==='deviceorientationabsolute'?'DeviceOrientation absolute':'DeviceOrientation '+(e.absolute?'absolute':'relative')));
+  (e.type==='deviceorientationabsolute'?'DeviceOrientation absolute':'DeviceOrientation '+(e.absolute?'absolute':'relative')),e.type==='deviceorientationabsolute'?3:2);
 }
 function tryOrientationSensor(){
  if(!('AbsoluteOrientationSensor' in window)&&!('RelativeOrientationSensor' in window)){S.tries.push('OrientationSensor: not supported');return}
@@ -440,7 +454,7 @@ function tryOrientationSensor(){
  try{
   var s=new (abs?AbsoluteOrientationSensor:RelativeOrientationSensor)({frequency:30,referenceFrame:'device'});
   s.onreading=function(){var q=s.quaternion,x=q[0],y=q[1],z=q[2],w=q[3];
-   feed([2*(x*z+y*w),2*(y*z-x*w),1-2*(x*x+y*y)],[2*(x*y-z*w),1-2*(x*x+z*z),2*(y*z+x*w)],abs,'OrientationSensor '+(abs?'absolute':'relative'))};
+   feed([2*(x*z+y*w),2*(y*z-x*w),1-2*(x*x+y*y)],[2*(x*y-z*w),1-2*(x*x+z*z),2*(y*z+x*w)],abs,'OrientationSensor '+(abs?'absolute':'relative'),2)};
   s.onerror=function(e){S.tries.push('OrientationSensor: '+(e.error?e.error.name:'error'))};
   s.start();S.tries.push('OrientationSensor: started');
  }catch(e){S.tries.push('OrientationSensor: '+e.name)}
@@ -453,7 +467,7 @@ function tryRawSensors(){
   if(m){north=norm([m[0]-dot(m,up)*up[0],m[1]-dot(m,up)*up[1],m[2]-dot(m,up)*up[2]])}
   if(!north)north=norm(Math.abs(up[2])<0.9?cross([0,0,1],up):cross([0,1,0],up));
   var east=norm(cross(north,up));
-  feed([east[2],north[2],up[2]],[east[1],north[1],up[1]],!!m,m?'Accelerometer and magnetometer':'Accelerometer only, no north');
+  feed([east[2],north[2],up[2]],[east[1],north[1],up[1]],!!m,m?'Accelerometer and magnetometer':'Accelerometer only, no north',1);
  }
  try{var ac=new Accelerometer({frequency:30});ac.onreading=function(){a=[ac.x,ac.y,ac.z];build()};
   ac.onerror=function(e){S.tries.push('Accelerometer: '+(e.error?e.error.name:'error'))};ac.start();S.tries.push('Accelerometer: started');
@@ -479,7 +493,7 @@ function jitter(){
  var mx=0;vs.forEach(function(v){var a=Math.acos(clamp(Math.abs(dot(norm(v),m)),-1,1))*R2D;if(a>mx)mx=a});
  return mx;
 }
-function currentVec(){return MODE==='line'?S.y:S.z}
+function currentVec(){return MODE==='line'?(S.sy||S.y):(S.sz||S.z)}
 
 /* ================= 4. router ================= */
 var ROUTES={
@@ -595,34 +609,44 @@ function drawDial(){
  }
  var v=FROZEN||currentVec();
  if(!v){ctx.fillStyle=g3;ctx.font='11px '+FSANS;ctx.fillText('no sensor data',cx,cy);return}
- var o=tp(v),t=(o.t+DECL+360)%360,rad2=t*D2R;
+ var o=tp(v),t=(o.t+DECL+360)%360,RD=R*0.90;
+ /* light plunge graticule so the great circle can be read */
+ ctx.strokeStyle=g3;ctx.lineWidth=0.6;
+ for(var gp=30;gp<90;gp+=30){
+  var grr=WULFF?RD*Math.tan((90-gp)/2*D2R):RD*Math.SQRT2*Math.sin((90-gp)/2*D2R);
+  ctx.beginPath();ctx.arc(cx,cy,grr,0,6.2832);ctx.stroke();
+ }
+ ctx.font='600 13px '+FMONO;ctx.textAlign='center';ctx.textBaseline='top';
  if(MODE==='plane'){
-  var pl=poleToPlane(t,o.p),st=strikeOf(pl.dd)*D2R;
-  /* strike line */
-  ctx.strokeStyle=ink;ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(cx-Math.sin(st)*R*0.92,cy+Math.cos(st)*R*0.92);
-  ctx.lineTo(cx+Math.sin(st)*R*0.92,cy-Math.cos(st)*R*0.92);ctx.stroke();
-  /* dip arrow, length proportional to dip */
-  var dr=R*0.18+R*0.62*(pl.dip/90),dd=pl.dd*D2R;
-  ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.sin(dd)*dr,cy-Math.cos(dd)*dr);ctx.stroke();
-  arrowHead(ctx,cx+Math.sin(dd)*dr,cy-Math.cos(dd)*dr,dd,6);
-  ctx.fillStyle=ink;ctx.font='600 13px '+FMONO;ctx.textAlign='left';
-  ctx.fillText(fmtPlane({dip:pl.dip,dd:pl.dd}),cx+Math.sin(dd)*(dr+12),cy-Math.cos(dd)*(dr+12));
-  /* levelling bubble: how far the phone is from the plane */
+  var pl=poleToPlane(t,o.p);
+  /* great circle of the plane, lower hemisphere */
+  ctx.strokeStyle=ink;ctx.lineWidth=1.7;
+  greatCircle(pl.dip,pl.dd,RD).forEach(function(sg){
+   ctx.beginPath();sg.forEach(function(p,i){i?ctx.lineTo(cx+p[0],cy+p[1]):ctx.moveTo(cx+p[0],cy+p[1])});ctx.stroke();
+  });
+  /* pole of the plane */
+  var pp=proj(vecFromTP(t,o.p),RD);
+  ctx.beginPath();ctx.arc(cx+pp[0],cy+pp[1],4.2,0,6.2832);ctx.fillStyle=ink;ctx.fill();
+  ctx.strokeStyle=paper;ctx.lineWidth=1.1;ctx.stroke();
+  dialTag(ctx,cx,cy+RD*0.70,fmtPlane({dip:pl.dip,dd:pl.dd}));
  }else{
-  var lr=R*0.18+R*0.62*Math.cos(o.p*D2R);
-  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);
-  ctx.lineTo(cx+Math.sin(rad2)*lr,cy-Math.cos(rad2)*lr);ctx.stroke();
-  arrowHead(ctx,cx+Math.sin(rad2)*lr,cy-Math.cos(rad2)*lr,rad2,6);
-  ctx.beginPath();ctx.arc(cx,cy,3,0,6.2832);ctx.fillStyle=ink;ctx.fill();
-  ctx.font='600 13px '+FMONO;ctx.textAlign='left';
-  ctx.fillText(fmtLine({plunge:o.p,trend:t}),cx+Math.sin(rad2)*(lr+12),cy-Math.cos(rad2)*(lr+12));
+  /* lineation: its own point in the lower hemisphere */
+  var lp2=proj(vecFromTP(t,o.p),RD);
+  ctx.beginPath();ctx.arc(cx+lp2[0],cy+lp2[1],4.6,0,6.2832);ctx.fillStyle=ink;ctx.fill();
+  ctx.strokeStyle=paper;ctx.lineWidth=1.1;ctx.stroke();
+  dialTag(ctx,cx,cy+RD*0.70,fmtLine({plunge:o.p,trend:t}));
  }
  /* inclinometer bar */
  var inc=Math.acos(clamp(Math.abs(S.z?S.z[2]:0),0,1))*R2D;
  ctx.strokeStyle=g2;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(12,h-8);ctx.lineTo(w-12,h-8);ctx.stroke();
  ctx.strokeStyle=ink;ctx.lineWidth=3;var px=12+(w-24)*clamp(inc/90,0,1);
  ctx.beginPath();ctx.moveTo(px-6,h-8);ctx.lineTo(px+6,h-8);ctx.stroke();
+}
+/* readout tag on an opaque patch, so it never sits on the great circle */
+function dialTag(ctx,x,y,txt){
+ var w=ctx.measureText(txt).width;
+ ctx.fillStyle=css('--paper');ctx.fillRect(x-w/2-5,y-3,w+10,17);
+ ctx.fillStyle=css('--ink');ctx.fillText(txt,x,y);
 }
 function arrowHead(ctx,x,y,rad,s){
  ctx.beginPath();
@@ -828,6 +852,39 @@ function contour(g,N,lev){
  return segs;
 }
 
+/* ---------- density colour ramp: viridis, the default scheme of most plotting libraries ---------- */
+var VIRIDIS=[[68,1,84],[72,40,120],[62,74,137],[49,104,142],[38,130,142],[31,158,137],[53,183,121],[109,205,89],[180,222,44],[253,231,37]];
+function ramp(f,al){
+ f=clamp(f,0,1);
+ var x=f*(VIRIDIS.length-1),i=Math.floor(x),j=Math.min(i+1,VIRIDIS.length-1),t=x-i;
+ var a=VIRIDIS[i],b=VIRIDIS[j];
+ /* the opacity follows the value, so the low ground stays light and the poles keep readable */
+ return 'rgba('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+','+(al==null?1:clamp(al,0,1)).toFixed(3)+')';
+}
+function rampA(f){return ramp(f,0.10+0.90*clamp(f,0,1))}
+/* the density grid as a smoothly interpolated raster: no cell seams, no moire */
+function densRaster(D){
+ var N=D.N,cv=document.createElement('canvas');cv.width=N;cv.height=N;
+ var c2=cv.getContext('2d'),im=c2.createImageData(N,N),p=im.data,i,f,x,j,t,a,b;
+ for(i=0;i<N*N;i++){
+  var dv=D.g[i];
+  if(isNaN(dv)){p[i*4+3]=0;continue}
+  f=clamp(dv/(D.max||1),0,1);x=f*(VIRIDIS.length-1);j=Math.floor(x);t=x-j;
+  a=VIRIDIS[j];b=VIRIDIS[Math.min(j+1,VIRIDIS.length-1)];
+  p[i*4]=Math.round(a[0]+(b[0]-a[0])*t);p[i*4+1]=Math.round(a[1]+(b[1]-a[1])*t);p[i*4+2]=Math.round(a[2]+(b[2]-a[2])*t);
+  p[i*4+3]=Math.round(255*(0.10+0.90*f));
+ }
+ c2.putImageData(im,0,0);return cv;
+}
+/* vertical scale bar for the density fill, per cent of the maximum */
+function densBar(ctx,x,y,w,h){
+ var i,ink=css('--ink');
+ ctx.fillStyle=css('--paper');ctx.fillRect(x,y,w,h);
+ for(i=0;i<h;i++){ctx.fillStyle=rampA(1-i/(h-1));ctx.fillRect(x,y+i,w,1)}
+ ctx.strokeStyle=ink;ctx.lineWidth=0.6;ctx.strokeRect(x,y,w,h);
+ ctx.fillStyle=ink;ctx.font='8px '+FMONO;ctx.textAlign='left';ctx.textBaseline='middle';
+ ctx.fillText('100',x+w+3,y+3);ctx.fillText('%max',x+w+3,y+h/2);ctx.fillText('0',x+w+3,y+h-3);
+}
 /* ================= 11. stereonet plate ================= */
 function netFrame(ctx,cx,cy,R,w){
  var ink=css('--ink'),g2=css('--g2'),g3=css('--g3');
@@ -863,17 +920,25 @@ function drawNet(){
   var D=density(vs,46,R);
   ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.clip();
   var levs=[0.2,0.4,0.6,0.8];
+  if(DGRAD){
+   /* continuous fill of the counting-circle grid, contour lines drawn on top */
+   var half=R/(D.N-1),span=2*R+2*half;
+   ctx.imageSmoothingEnabled=true;
+   ctx.drawImage(densRaster(D),cx-R-half,cy-R-half,span,span);
+  }
   levs.forEach(function(f,i){
    var segs=contour(D.g,D.N,f*D.max);
-   ctx.strokeStyle=COLOR?PAL.dens[i]:ink;ctx.lineWidth=(COLOR?1.1:0.6)+i*0.45;ctx.beginPath();
+   ctx.strokeStyle=DGRAD?'rgba(15,15,15,0.72)':(COLOR?PAL.dens[i]:ink);
+   ctx.lineWidth=(DGRAD?0.9:(COLOR?1.1:0.6))+i*(DGRAD?0.22:0.45);ctx.beginPath();
    segs.forEach(function(s){
     ctx.moveTo(cx+(s[0][0]/(D.N-1)*2-1)*R,cy+(s[0][1]/(D.N-1)*2-1)*R);
     ctx.lineTo(cx+(s[1][0]/(D.N-1)*2-1)*R,cy+(s[1][1]/(D.N-1)*2-1)*R);
    });ctx.stroke();
   });
   ctx.restore();
+  if(DGRAD)densBar(ctx,10,cy-R*0.45,9,Math.max(60,R*0.9));
   $('#netCap').textContent='Lower hemisphere, '+(WULFF?'equal angle (Wulff)':'equal area (Schmidt)')+
-   '. Contours at 20, 40, 60 and 80 per cent of the maximum counting-circle density (half-angle '+D.alpha.toFixed(1)+' deg, n='+vs.length+(TERZ?', Terzaghi weighted n='+D.wn.toFixed(1)+', scanline '+pad(TERZP,2)+'-'+pad(TERZT,3)+', w max '+TERZMAX:'')+').';
+   '. Kamb (1959) counting-circle density, counting area set for an expected count of 3 sigma, half-angle '+D.alpha.toFixed(1)+' deg. '+(DGRAD?'Viridis fill and contours':'Contours')+' at 20, 40, 60 and 80 per cent of the maximum (n='+vs.length+(TERZ?', Terzaghi weighted n='+D.wn.toFixed(1)+', scanline '+pad(TERZP,2)+'-'+pad(TERZT,3)+', w max '+TERZMAX:'')+').';
  }else{
   $('#netCap').textContent='Lower hemisphere, '+(WULFF?'equal angle (Wulff)':'equal area (Schmidt)')+
    '. n='+DATA.length+' ('+planes.length+' planes, '+lines.length+' lineations).';
@@ -1115,11 +1180,134 @@ $('#btnPng').onclick=function(){
  x.fillText('GneissTools stereographic plate',18,28);
  x.font='11px Helvetica,Arial,sans-serif';x.fillStyle='#555';
  x.fillText((WULFF?'Equal angle':'Equal area')+', lower hemisphere / n='+DATA.length+' / declination '+DECL+' deg / '+new Date().toISOString().slice(0,10),18,44);
- x.filter=COLOR?(THEME==='dark'?'invert(1)':'none'):(THEME==='dark'?'grayscale(1) invert(1)':'grayscale(1)');
+ x.filter=(COLOR||DGRAD)?(THEME==='dark'?'invert(1)':'none'):(THEME==='dark'?'grayscale(1) invert(1)':'grayscale(1)');
  for(i=0;i<src.length;i++){x.drawImage(src[i],0,0,src[i].width,src[i].height,18,y,W-36,hs[i]);y+=hs[i]+gap}
  x.filter='none';x.fillStyle='#777';x.font='10px Helvetica,Arial,sans-serif';
  x.fillText('Produced with GneissTools, github.com/3m0ra/gneisstools',18,out.height-10);
  dlBase64('gneisstools-plate-'+stamp()+'.png',out.toDataURL('image/png').split(',')[1],'image/png');
+};
+
+/* ================= 14b. one-page A4 report ================= */
+function repWrap(x,txt,maxw){
+ var w=String(txt).split(' '),ln=[],cu='',i,t;
+ for(i=0;i<w.length;i++){t=cu?cu+' '+w[i]:w[i];if(x.measureText(t).width>maxw&&cu){ln.push(cu);cu=w[i]}else cu=t}
+ if(cu)ln.push(cu);return ln;
+}
+function circMean(deg){
+ var sx=0,sy=0;deg.forEach(function(d){sx+=Math.sin(d*D2R);sy+=Math.cos(d*D2R)});
+ var m=Math.atan2(sx,sy)*R2D;if(m<0)m+=360;
+ return{m:m,r:Math.hypot(sx,sy)/(deg.length||1)};
+}
+function repStats(){
+ var planes=DATA.filter(function(r){return r.mode!=='line'}),lines=DATA.filter(function(r){return r.mode==='line'});
+ var dips=planes.map(function(r){return r.dip}),dds=planes.map(function(r){return r.dd});
+ var mean=dips.length?dips.reduce(function(a,b){return a+b},0)/dips.length:0;
+ var sd=dips.length>1?Math.sqrt(dips.reduce(function(a,b){return a+(b-mean)*(b-mean)},0)/(dips.length-1)):0;
+ var sites={},i;DATA.forEach(function(r){if(r.site)sites[r.site]=1});
+ var ids=DATA.map(function(r){return r.id}).sort();
+ var bins=new Array(18).fill(0),bmax=0,bi=0;
+ planes.forEach(function(r){var s=strikeOf(r.dd)%180,k=Math.floor(s/10)%18;bins[k]++});
+ for(i=0;i<18;i++)if(bins[i]>bmax){bmax=bins[i];bi=i}
+ var vsP=planes.map(recVec),dmax=null,E=0,sg=0,dm=0,alpha=0;
+ if(vsP.length>2){
+  var D=density(vsP,46,1),best=-1,bx=0,by=0,gx,gy,v2;
+  for(gy=0;gy<D.N;gy++)for(gx=0;gx<D.N;gx++){v2=D.g[gy*D.N+gx];if(!isNaN(v2)&&v2>best){best=v2;bx=gx;by=gy}}
+  var vv=unproj((bx/(D.N-1)*2-1),(by/(D.N-1)*2-1),1);
+  if(vv)dmax=tp(vv);
+  var nw=D.wn||vsP.length;E=nw*9/(nw+9);sg=Math.sqrt(Math.max(E,1e-6));dm=D.max;alpha=D.alpha;
+ }
+ return{np:planes.length,nl:lines.length,dipMin:dips.length?Math.min.apply(null,dips):0,dipMax:dips.length?Math.max.apply(null,dips):0,
+  dipMean:mean,dipSd:sd,ddMean:circMean(dds),sites:Object.keys(sites).length,
+  first:ids.length?new Date(ids[0]).toISOString().slice(0,10):'-',last:ids.length?new Date(ids[ids.length-1]).toISOString().slice(0,10):'-',
+  roseBin:bi*10,roseN:bmax,dmax:dmax,dsig:sg?(dm-E)/sg:0,dalpha:alpha};
+}
+/* factual sentences only: what was measured and what the plots show, no interpretation */
+function repText(S1){
+ var p=[],i,j;
+ p.push('Dataset. The project holds '+DATA.length+' orientation records, '+S1.np+' planes and '+S1.nl+' lineations, collected between '+S1.first+' and '+S1.last+' over '+(S1.sites||1)+' station'+((S1.sites||1)===1?'':'s')+'. Azimuths are true north, corrected by a declination of '+DECL+' degrees, and all plots use the lower hemisphere of the '+(WULFF?'equal-angle (Wulff)':'equal-area (Schmidt)')+' projection.');
+ if(S1.np){
+  p.push('Attitude distribution. Dip spans '+S1.dipMin.toFixed(0)+' to '+S1.dipMax.toFixed(0)+' degrees with a mean of '+S1.dipMean.toFixed(1)+' and a standard deviation of '+S1.dipSd.toFixed(1)+' degrees. The vector mean dip direction is '+S1.ddMean.m.toFixed(0)+' degrees with a resultant length of '+S1.ddMean.r.toFixed(2)+'. In the strike rose the most populated 10-degree sector is '+pad(S1.roseBin,3)+' to '+pad(S1.roseBin+10,3)+' degrees with '+S1.roseN+' planes.');
+  if(S1.dmax)p.push('Pole density. The Kamb counting circle, half-angle '+S1.dalpha.toFixed(1)+' degrees, places the density maximum at a pole of '+pad(S1.dmax.p,2)+' degrees plunge towards '+pad(S1.dmax.t,3)+' degrees, that is a plane of '+fmtPlane(poleToPlane(S1.dmax.t,S1.dmax.p))+'. The maximum stands '+S1.dsig.toFixed(1)+' standard deviations above the count expected from a uniform distribution. Contours are drawn at 20, 40, 60 and 80 per cent of that maximum.');
+ }
+ if(SETS.length){
+  var tot=SETS.reduce(function(a,b){return a+b.n},0),parts=[];
+  for(i=0;i<SETS.length;i++){var s=SETS[i];parts.push('set '+(i+1)+', '+fmtPlane(s)+', n = '+s.n+' ('+(100*s.n/tot).toFixed(0)+' per cent), Fisher k = '+(s.k?s.k.toFixed(1):'-')+', confidence cone '+(s.a95?s.a95.toFixed(1)+' degrees':'-'))}
+  p.push('Sets. Axial k-means '+(K?'with '+K+' set'+(K===1?'':'s')+' requested by the user':'with the number of sets chosen by the silhouette score')+' resolves '+SETS.length+' set'+(SETS.length===1?'':'s')+': '+parts.join('; ')+'.');
+  if(SETS.length>1){
+   var iv=[];
+   for(i=0;i<SETS.length;i++)for(j=i+1;j<SETS.length;j++){
+    var L1=norm(cross(planeToPole(SETS[i].dip,SETS[i].dd),planeToPole(SETS[j].dip,SETS[j].dd))),o=tp(L1);
+    iv.push('sets '+(i+1)+' and '+(j+1)+' along '+pad(o.p,2)+' / '+pad(o.t,3));
+   }
+   p.push('Intersections. Pairwise intersection lines, plunge / trend: '+iv.join('; ')+'.');
+  }
+ }else if(S1.np>2){p.push('Sets. Clustering returned no set for this dataset.');}
+ if(TERZ)p.push('Weighting. Terzaghi weighting is active for a scanline of '+pad(TERZP,2)+' / '+pad(TERZT,3)+' with the weight capped at '+TERZMAX+'; weighted counts are used for the density grid and for the set populations.');
+ if(FAULTS.length||PHOTOS.length)p.push('Field annotation. The project also carries '+FAULTS.length+' mapped structural line'+(FAULTS.length===1?'':'s')+' and '+PHOTOS.length+' photo sample'+(PHOTOS.length===1?'':'s')+'.');
+ return p;
+}
+function drawA4(){
+ var W=1240,HT=1754,M=64;
+ var keepD=LAYERS.density,keepP=LAYERS.poles;
+ LAYERS.density=1;LAYERS.poles=1;
+ computeSets();drawNet();drawRose();drawHist();
+ var S1=repStats(),out=document.createElement('canvas');
+ out.width=W;out.height=HT;
+ var x=out.getContext('2d');
+ x.fillStyle='#fff';x.fillRect(0,0,W,HT);x.textBaseline='top';
+ var y=M;
+ x.fillStyle='#000';x.font='700 30px '+FSANS;x.fillText('Fracture data report',M,y);y+=40;
+ x.font='13px '+FSANS;x.fillStyle='#444';
+ x.fillText(curProj().name+'   |   '+new Date().toISOString().slice(0,16).replace('T',' ')+'   |   n = '+DATA.length+' ('+S1.np+' planes, '+S1.nl+' lineations)   |   '+(WULFF?'equal angle':'equal area')+', lower hemisphere   |   declination '+DECL+' deg',M,y);
+ y+=22;x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.moveTo(M,y);x.lineTo(W-M,y);x.stroke();y+=16;
+ var netC=$('#net'),roseC=$('#rose'),histC=$('#hist');
+ var lw=600,rw=W-2*M-lw-26,lx=M,rx=M+lw+26,ry=y,nh=0;
+ if(netC.width){nh=Math.round(lw*netC.height/netC.width);x.drawImage(netC,0,0,netC.width,netC.height,lx,y,lw,nh)}
+ if(roseC.width){var rh=Math.round(rw*roseC.height/roseC.width);x.drawImage(roseC,0,0,roseC.width,roseC.height,rx,ry,rw,rh);ry+=rh+26}
+ if(histC.width){var h2=Math.round(rw*histC.height/histC.width);x.drawImage(histC,0,0,histC.width,histC.height,rx,ry,rw,h2);ry+=h2}
+ x.font='11px '+FSANS;x.fillStyle='#444';
+ x.fillText('Fig. 1  Poles and Kamb counting-circle density.',lx,y+nh+6);
+ x.fillText('Fig. 2  Strike rose, 10 deg sectors.   Fig. 3  Dip histogram, 10 deg classes.',rx,ry+6);
+ y=Math.max(y+nh,ry)+30;
+ /* set table */
+ x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 1  Extracted sets',M,y);y+=22;
+ var cols=[0,110,190,300,470,580,700],hdr=['Set','n','per cent','mean dip / dip dir','strike','Fisher k','cone 95 %'];
+ x.font='700 12px '+FMONO;
+ for(var ci=0;ci<hdr.length;ci++)x.fillText(hdr[ci],M+cols[ci],y);
+ y+=16;x.strokeStyle='#999';x.lineWidth=0.8;x.beginPath();x.moveTo(M,y);x.lineTo(W-M,y);x.stroke();y+=6;
+ x.font='12px '+FMONO;
+ if(SETS.length){
+  var tot=SETS.reduce(function(a,b){return a+b.n},0);
+  SETS.forEach(function(s,i){
+   var row=[String(i+1),String(s.n),(100*s.n/tot).toFixed(0),fmtPlane(s),pad(strikeOf(s.dd),3),(s.k?s.k.toFixed(1):'-'),(s.a95?s.a95.toFixed(1)+' deg':'-')];
+   for(var k2=0;k2<row.length;k2++)x.fillText(row[k2],M+cols[k2],y);
+   y+=18;
+  });
+ }else{x.fillText('no set extracted',M,y);y+=18}
+ y+=18;
+ /* narrative */
+ x.font='700 15px '+FSANS;x.fillText('Summary of results',M,y);y+=22;
+ var foot=HT-M-46,paras=repText(S1);
+ x.font='13px '+FSANS;x.fillStyle='#111';
+ for(var pi=0;pi<paras.length&&y<foot-16;pi++){
+  var ln=repWrap(x,paras[pi],W-2*M);
+  for(var li=0;li<ln.length&&y<foot-16;li++){x.fillText(ln[li],M,y);y+=19}
+  y+=8;
+ }
+ /* footer */
+ x.strokeStyle='#000';x.lineWidth=0.8;x.beginPath();x.moveTo(M,foot);x.lineTo(W-M,foot);x.stroke();
+ x.font='10px '+FSANS;x.fillStyle='#555';
+ var fl=repWrap(x,'Methods: Kamb (1959) counting circle, expected count 3 sigma, cos(alpha) = 1 - 9 / (9 + n); axial k-means with silhouette selection (Rousseeuw 1987); Fisher (1953) spherical statistics for the mean, k and the 95 per cent cone; Terzaghi (1965) weighting when enabled. Generated on the device by GneissTools; the text is assembled from the computed statistics and contains no interpretation.',W-2*M);
+ var fy=foot+8;for(var fi=0;fi<fl.length&&fi<3;fi++){x.fillText(fl[fi],M,fy);fy+=12}
+ LAYERS.density=keepD;LAYERS.poles=keepP;drawNet();
+ return out;
+}
+$('#btnRep').onclick=function(){
+ if(!DATA.length){toast('Nothing to report');return}
+ try{
+  var c=drawA4();
+  dlBase64('gneisstools-report-'+stamp()+'.png',c.toDataURL('image/png').split(',')[1],'image/png');
+ }catch(e){toast('Report failed: '+e.message)}
 };
 
 /* ================= 15. tool 02 : GeoCover field map ================= */
@@ -1741,6 +1929,8 @@ function syncSettings(){
  $('#btnTheme').textContent='Theme: '+(THEME==='dark'?'night':'paper');
  $('#btnTheme').classList.toggle('on',THEME==='dark');
  $('#btnMono').classList.toggle('on',!!MONO);
+ $('#btnDgrad').textContent='Density: '+(DGRAD?'colour':'black and white');
+ $('#btnDgrad').classList.toggle('on',!!DGRAD);
  $('#btnAwake').textContent='Keep screen on: '+(AWAKE?'on':'off');
  $('#btnAwake').classList.toggle('on',AWAKE);
  $('#kSel').value=String(K);
@@ -1751,6 +1941,7 @@ $('#decl').onchange=function(){DECL=parseFloat(this.value)||0;DB.set('gs_decl',D
 $('#cone').oninput=function(){CONE=+this.value;$('#coneV').textContent=CONE;DB.set('gs_cone',CONE);drawNet()};
 $('#btnTheme').onclick=function(){THEME=THEME==='dark'?'light':'dark';DB.set('gs_theme',THEME);applyTheme();syncSettings()};
 $('#btnMono').onclick=function(){MONO=MONO?0:1;DB.set('gs_mono',MONO);syncSettings();queueMap()};
+$('#btnDgrad').onclick=function(){DGRAD=DGRAD?0:1;DB.set('gs_dgrad',DGRAD);syncSettings();drawNet()};
 $('#btnAwake').onclick=function(){
  AWAKE=!AWAKE;
  if(window.AndroidExport&&AndroidExport.keepAwake){try{AndroidExport.keepAwake(AWAKE)}catch(e){}}
@@ -1834,7 +2025,7 @@ function drawAbout(){
   '<div class="kv"><span>Build</span><b>'+esc(ver)+'</b></div>'+
   '<div class="kv"><span>Tools</span><b>Stereonet, GeoCover field map</b></div>'+
   '<div class="kv"><span>Records on device</span><b>'+DATA.length+' / '+FAULTS.length+' / '+PHOTOS.length+'</b></div>'+
-  '<h2 class="sec" style="margin-left:0">Data sources</h2>'+
+  '<h2 class="sec" style="margin-left:0">Methods</h2>'+'<p class="note" style="margin:0">Pole density is counted with the Kamb counting circle: the counting area is set so that the expected count of a uniform distribution equals three standard deviations, cos(alpha) = 1 - 9 / (9 + n), and the resulting grid is contoured at 20, 40, 60 and 80 per cent of its maximum. Sets are extracted by axial k-means, the number of sets being chosen by the silhouette score. Mean orientation, the concentration parameter k and the 95 per cent confidence cone follow Fisher statistics for a sphere. Optional Terzaghi weighting corrects the orientation bias of a scanline survey.</p>'+'<h2 class="sec" style="margin-left:0">References</h2>'+'<p class="note" style="margin:0">Kamb, W. B. (1959) Ice petrofabric observations from Blue Glacier, Washington, in relation to theory and experiment. Journal of Geophysical Research 64, 1891-1909. Fisher, R. A. (1953) Dispersion on a sphere. Proceedings of the Royal Society A 217, 295-305. Terzaghi, R. D. (1965) Sources of error in joint surveys. Geotechnique 15, 287-304. Rousseeuw, P. J. (1987) Silhouettes: a graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics 20, 53-65.</p>'+'<h2 class="sec" style="margin-left:0">Data sources</h2>'+
   '<p class="note" style="margin:0">Basemaps and the GeoCover vector geological map are served by swisstopo through wmts.geo.admin.ch and api3.geo.admin.ch. Their terms of use apply. Orientation data are computed on the device from the accelerometer and magnetometer.</p>'+
   '<h2 class="sec" style="margin-left:0">Conventions</h2>'+
   '<p class="note" style="margin:0">Planes are stored as dip and dip direction. Lineations are stored as plunge and trend. Azimuths are true north after the declination correction. All plots use the lower hemisphere.</p>'+
