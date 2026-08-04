@@ -1,4 +1,4 @@
-# GeoTools
+# GneissTools
 
 A field toolkit for structural geology and hydrogeology, shipped as a single Android APK.
 Black-and-white, publication-ready graphics; everything works offline except the map tiles.
@@ -9,9 +9,9 @@ Black-and-white, publication-ready graphics; everything works offline except the
 
 <div align="center">
 
-### [&#11015;&#65039; DOWNLOAD THE APK &#11015;&#65039;](https://github.com/3m0ra/gneisstools/releases/latest/download/GeoTools-release.apk)
+### [&#11015;&#65039; DOWNLOAD THE APK &#11015;&#65039;](https://github.com/3m0ra/gneisstools/releases/latest/download/GneissTools-release.apk)
 
-[![Download GeoTools APK](https://img.shields.io/badge/GeoTools-Download%20latest%20APK-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/3m0ra/gneisstools/releases/latest/download/GeoTools-release.apk)
+[![Download GneissTools APK](https://img.shields.io/badge/GneissTools-Download%20latest%20APK-000000?style=for-the-badge&logo=android&logoColor=white)](https://github.com/3m0ra/gneisstools/releases/latest/download/GneissTools-release.apk)
 
 **One tap. No account, no store, no build tools.**
 
@@ -21,15 +21,15 @@ Black-and-white, publication-ready graphics; everything works offline except the
 
 | | Step | What to do |
 |---|---|---|
-| 1 | **Download** | Open the button above **on your Android phone**. The file is *GeoTools-release.apk*. |
+| 1 | **Download** | Open the button above **on your Android phone**. The file is *GneissTools-release.apk*. |
 | 2 | **Allow the install** | Android will warn about an unknown source. Choose **Settings**, enable **Allow from this source**, then go back. |
-| 3 | **Open GeoTools** | Grant **location** when asked, and allow the **camera** the first time you store a photo sample. |
+| 3 | **Open GneissTools** | Grant **location** when asked, and allow the **camera** the first time you store a photo sample. |
 
 That link always points at the newest build. If the download does not start, use the alternatives:
 
 - **All builds and release notes:** [Releases](https://github.com/3m0ra/gneisstools/releases/latest)
-- **Debug variant** (verbose, for troubleshooting): [GeoTools-debug.apk](https://github.com/3m0ra/gneisstools/releases/latest/download/GeoTools-debug.apk)
-- **Per-commit artifacts:** [Actions](https://github.com/3m0ra/gneisstools/actions) &rarr; latest *Build APK* run &rarr; **Artifacts** &rarr; *GeoTools-apk*
+- **Debug variant** (verbose, for troubleshooting): [GneissTools-debug.apk](https://github.com/3m0ra/gneisstools/releases/latest/download/GneissTools-debug.apk)
+- **Per-commit artifacts:** [Actions](https://github.com/3m0ra/gneisstools/actions) &rarr; latest *Build APK* run &rarr; **Artifacts** &rarr; *GneissTools-apk*
 
 Both APKs are signed with the Android debug key, so they install straight away but cannot be published on the Play Store. To distribute your own build, create a keystore and replace the signingConfig in app/build.gradle.kts.
 
@@ -37,7 +37,7 @@ Both APKs are signed with the Android debug key, so they install straight away b
 
 ## Projects
 
-Every field project owns its own dataset: measurements, extracted sets, structural lines and photo samples are stored separately and nothing is mixed between projects. Create, open and rename projects from the first entry of the main menu; the active project is shown on the home screen and printed in the header of the A4 report.
+Every field project owns its own dataset: measurements, extracted sets, structural lines and photo samples are stored separately and nothing is mixed between projects. A circular project carousel sits on the home screen between the title block and the instruments: swipe it with an inertial, snapping scroll and tap a disc to switch project. Projects can also be created, opened and renamed from the first entry of the main menu; the active project is shown on the home screen and printed in the header of the A4 report.
 
 ## What is inside
 
@@ -129,3 +129,7 @@ Pole density is counted with the Kamb counting circle, the counting area being s
 
 Planes are stored as dip and dip direction, lineations as plunge and trend, azimuths as true north after the magnetic declination correction entered in General settings. All plots use the lower hemisphere.
 Basemaps and the GeoCover vector geological map are served by **swisstopo** (wmts.geo.admin.ch, api3.geo.admin.ch); their terms of use apply. Orientation data are computed on the device.
+
+## Credits
+
+GneissTools is developed by **3m0ra**. Every exported sheet carries the line *done with GneissTools by 3m0ra* in its footer, and the credit is repeated at the foot of the home screen.
