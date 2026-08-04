@@ -165,6 +165,30 @@ body:not(.pjround) .pjc .ic{border-radius:16px}
 .chip{display:inline-block;margin:0 5px 5px 0;padding:4px 9px;border-radius:12px;border:1px solid var(--ink);font:600 10px/1.3 var(--sans)}
 .chip.on{background:var(--ink);color:var(--paper)}
 
+/* ================= 27. project carousel, home credit, layout guards ================= */
+#pjRail{position:relative;border-bottom:1px solid var(--g2);background:var(--g05);padding:2px 0 2px}
+#pjTrack{display:flex;align-items:flex-start;gap:15px;margin:0;padding:10px 50% 6px;list-style:none;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+#pjTrack::-webkit-scrollbar{display:none}
+.pjs{flex:0 0 auto;width:21vw;max-width:98px;padding:0;border:0;background:none;color:var(--ink);text-align:center;scroll-snap-align:center}
+.pjs .disc{position:relative;display:block;width:100%;padding-top:100%;border:1px solid var(--ink);border-radius:50%;overflow:hidden;background:var(--g1);transform:scale(.80);opacity:.5;transition:transform .3s cubic-bezier(.22,.9,.28,1),opacity .3s,box-shadow .3s}
+.pjs .disc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pjs .disc>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 20px/1 var(--sans);color:#fff}
+.pjs em{display:block;font-style:normal;font:600 10px/1.3 var(--sans);color:var(--g4);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s}
+.pjs.near .disc{transform:scale(.9);opacity:.78}
+.pjs.on .disc{transform:scale(1);opacity:1;box-shadow:0 0 0 3px var(--geoBlue)}
+.pjs.on em{color:var(--ink);font-weight:700}
+#pjHint{margin:0 14px 6px;font:400 10px/1.3 var(--sans);color:var(--g3);text-align:center}
+#homeFoot{margin-top:6px;padding:16px 14px 30px;border-top:1px solid var(--g2);text-align:center}
+#homeFoot b{display:block;font:700 12px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase}
+#homeFoot span{display:block;font:400 11px/1.5 var(--sans);color:var(--g4);margin-top:4px}
+/* layout guards: no element may sit on top of another */
+.heroTxt{left:10px;right:10px;bottom:8px;padding:8px 10px 7px;border-radius:10px;background:linear-gradient(to top,rgba(255,255,255,.94),rgba(255,255,255,.66) 72%,rgba(255,255,255,0))}
+body[data-theme=dark] .heroTxt{background:linear-gradient(to top,rgba(0,0,0,.92),rgba(0,0,0,.6) 72%,rgba(0,0,0,0))}
+.tile b{padding-right:44px}
+.pjc{padding-bottom:2px}
+.pjc .cur{position:static;display:inline-block;transform:none;margin:6px 0 0}
+#toast{bottom:92px}
+figure.plate canvas{max-width:100%}
 </style>
 </head>
 <body data-theme="light">
@@ -207,6 +231,11 @@ body:not(.pjround) .pjc .ic{border-radius:16px}
 </div>
 <div class="strip"><i style="background:var(--geoBlue)"></i><i style="background:var(--water)"></i><i style="background:var(--geoGreen)"></i><i style="background:var(--geoOchre)"></i><i style="background:var(--geoRust)"></i><i style="background:var(--geoViolet)"></i></div>
 
+<div id="pjRail" aria-label="Projects">
+<div id="pjTrack" role="tablist"></div>
+<p id="pjHint">Slide the discs, tap one to open that project</p>
+</div>
+
 <h2 class="sec">Instruments</h2>
 <div class="tiles">
 <div class="tile t1" data-go="stereo">
@@ -236,6 +265,12 @@ body:not(.pjround) .pjc .ic{border-radius:16px}
 
 <h2 class="sec">Current session</h2>
 <div class="pad" style="padding-top:0" id="homeStat"></div>
+
+<footer id="homeFoot">
+<b>Developed by 3m0ra</b>
+<span>GneissTools, structural geology and hydrogeology measured in the field</span>
+<span id="homeFootNote">done with GneissTools by 3m0ra</span>
+</footer>
 </section>
 
 <!-- ============ TOOLS SUBMENU ============ -->
@@ -1440,7 +1475,86 @@ $('#btnPng').onclick=function(){
  dlBase64('gneisstools-plate-'+stamp()+'.png',out.toDataURL('image/png').split(',')[1],'image/png');
 };
 
-/* ================= 14b. one-page A4 report ================= */
+/* ================= 14b. one-page A4 report =================
+   1240 x 1754 px is A4 at 150 dpi. Every size below is stated in
+   typographic points and converted once, so the sheet reads like print:
+   11 pt body text, 20 mm margins, numbered sections, one page. */
+var A4W=1240,A4H=1754,A4PT=1240/595.28;
+function a4p(n){return Math.round(n*A4PT)}
+var A4M=a4p(56),A4MT=a4p(44),A4MB=a4p(40),A4CW=A4W-2*a4p(56),A4LH=a4p(15);
+function a4fs(sz,w){return (w?w+' ':'')+a4p(sz)+'px '+FSANS}
+function a4fm(sz,w){return (w?w+' ':'')+a4p(sz)+'px '+FMONO}
+function repFootTop(){return A4H-A4MB-a4p(40)}
+function repRule(x,y,heavy){x.strokeStyle=heavy?'#000':'#bcbcbc';x.lineWidth=heavy?1.4:0.8;x.beginPath();x.moveTo(A4M,y+0.5);x.lineTo(A4W-A4M,y+0.5);x.stroke()}
+function repHeader(x,title,sub,facts){
+var y=A4MT,i,c,tx,cw=A4CW/2,half=Math.ceil(facts.length/2),cy=[0,0];
+x.textBaseline='top';
+x.fillStyle='#000';x.font=a4fs(19,'700');x.fillText(title,A4M,y);y+=a4p(20);
+if(sub){x.font=a4fs(9.5);x.fillStyle='#555';x.fillText(sub,A4M,y);y+=a4p(12)}
+y+=a4p(3);repRule(x,y,1);y+=a4p(8);
+cy[0]=y;cy[1]=y;
+for(i=0;i<facts.length;i++){
+c=i<half?0:1;tx=A4M+c*cw;
+x.font=a4fs(8);x.fillStyle='#6a6a6a';x.fillText(String(facts[i][0]).toUpperCase(),tx,cy[c]+a4p(1));
+x.font=a4fs(9,'600');x.fillStyle='#000';x.fillText(String(facts[i][1]),tx+a4p(76),cy[c]);
+cy[c]+=a4p(11.5);
+}
+y=Math.max(cy[0],cy[1])+a4p(2);repRule(x,y,0);
+return y+a4p(10);
+}
+function repSection(x,n,ttl,y){
+x.fillStyle='#000';x.font=a4fs(11,'700');
+x.fillText(n+'.   '+String(ttl).toUpperCase(),A4M,y);
+y+=a4p(13);repRule(x,y,0);return y+a4p(8);
+}
+function repCap(x,t,X,y,w){
+var ln=repWrap(x,t,w),i,yy=y;
+x.fillStyle='#555';x.font=a4fs(8);
+for(i=0;i<ln.length;i++){x.fillText(ln[i],X,yy);yy+=a4p(9.5)}
+return yy;
+}
+/* 11 pt prose set in two columns, every paragraph opening with a bold run-in title */
+function repProse(x,paras,y,maxy){
+var g=a4p(18),cw=Math.floor((A4CW-g)/2),toks=[],i,t,k,h;
+for(i=0;i<paras.length;i++){
+t=String(paras[i]);k=t.indexOf('. ');h='';
+if(k>0&&k<36){h=t.slice(0,k);t=t.slice(k+2)}
+if(h){h.split(/\s+/).forEach(function(w){if(w)toks.push({w:w,b:1})});toks.push({w:'\u2014',b:1})}
+t.split(/\s+/).forEach(function(w){if(w)toks.push({w:w,b:0})});
+toks.push({br:1});
+}
+var col=0,X=A4M,cx=A4M,cy=y,deep=y,tk,ww;
+for(i=0;i<toks.length;i++){
+tk=toks[i];
+if(tk.br){
+cx=X;cy+=A4LH+a4p(4);
+if(cy+A4LH>maxy){if(col){cy=maxy;break}col=1;X=A4M+cw+g;cx=X;cy=y;deep=maxy}
+continue;
+}
+x.font=tk.b?a4fs(11,'700'):a4fs(11);x.fillStyle=tk.b?'#000':'#1b1b1b';
+ww=x.measureText(tk.w+' ').width;
+if(cx+ww>X+cw&&cx>X){
+cx=X;cy+=A4LH;
+if(cy+A4LH>maxy){if(col){cy=maxy;break}col=1;X=A4M+cw+g;cx=X;cy=y;deep=maxy}
+}
+x.fillText(tk.w,cx,cy);cx+=ww;
+}
+return Math.max(deep,cy+A4LH);
+}
+function repFooter(x,note){
+var y=repFootTop(),ln,i;
+repRule(x,y,1);y+=a4p(6);
+x.font=a4fs(7.5);x.fillStyle='#6a6a6a';
+ln=repWrap(x,note,A4CW);
+for(i=0;i<ln.length&&i<3;i++){x.fillText(ln[i],A4M,y);y+=a4p(8.6)}
+y=A4H-A4MB-a4p(11);
+x.textAlign='left';x.font=a4fs(7.5);x.fillStyle='#7a7a7a';
+x.fillText('github.com/3m0ra/gneisstools',A4M,y+a4p(2));
+x.textAlign='right';x.fillText('A4, single page',A4W-A4M,y+a4p(2));
+x.textAlign='center';x.font=a4fs(10,'700');x.fillStyle='#000';
+x.fillText('done with GneissTools by 3m0ra',A4W/2,y);
+x.textAlign='left';
+}
 function repWrap(x,txt,maxw){
  var w=String(txt).split(' '),ln=[],cu='',i,t;
  for(i=0;i<w.length;i++){t=cu?cu+' '+w[i]:w[i];if(x.measureText(t).width>maxw&&cu){ln.push(cu);cu=w[i]}else cu=t}
@@ -1500,73 +1614,76 @@ function repText(S1){
  return p;
 }
 function drawA4(){
- var W=1240,HT=1754,M=64;
- var keepD=LAYERS.density,keepP=LAYERS.poles;
- LAYERS.density=1;LAYERS.poles=1;
- computeSets();drawNet();drawRose();drawHist();
- var S1=repStats(),out=document.createElement('canvas');
- out.width=W;out.height=HT;
- var x=out.getContext('2d');
- x.fillStyle='#fff';x.fillRect(0,0,W,HT);x.textBaseline='top';
- var y=M;
- x.fillStyle='#000';x.font='700 30px '+FSANS;x.fillText('Fracture data report',M,y);y+=40;
- x.font='13px '+FSANS;x.fillStyle='#444';
- x.fillText(curProj().name+'   |   '+new Date().toISOString().slice(0,16).replace('T',' ')+'   |   n = '+DATA.length+' ('+S1.np+' planes, '+S1.nl+' lineations)   |   '+(WULFF?'equal angle':'equal area')+', lower hemisphere   |   declination '+DECL+' deg',M,y);
- y+=22;x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.moveTo(M,y);x.lineTo(W-M,y);x.stroke();y+=16;
- var netC=$('#net'),roseC=$('#rose'),histC=$('#hist');
- var lw=650,rw=W-2*M-lw-30,lx=M,rx=M+lw+30,ry=y,nh=0;
- x.font='11px '+FSANS;
- if(netC.width){nh=Math.round(lw*netC.height/netC.width);x.drawImage(netC,0,0,netC.width,netC.height,lx,y,lw,nh);
-  x.fillStyle='#444';x.fillText('Fig. 1  Poles and '+DMETHNAME[DMETH]+' density contours.',lx,y+nh+9)}
- if(roseC.width){var rh=Math.round(rw*roseC.height/roseC.width);x.drawImage(roseC,0,0,roseC.width,roseC.height,rx,ry,rw,rh);
-  x.fillStyle='#444';x.fillText('Fig. 2  Strike rose, 10 deg sectors.',rx,ry+rh+9);ry+=rh+32}
- if(histC.width){var h2=Math.round(rw*histC.height/histC.width);x.drawImage(histC,0,0,histC.width,histC.height,rx,ry,rw,h2);
-  x.fillStyle='#444';x.fillText('Fig. 3  Dip histogram, 10 deg classes.',rx,ry+h2+9);ry+=h2}
- y=Math.max(y+nh+20,ry+20)+26;
- /* set table */
- x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 1  Extracted sets',M,y);y+=22;
- var cols=[0,110,190,300,470,580,700],hdr=['Set','n','per cent','mean dip / dip dir','strike','Fisher k','cone 95 %'];
- x.font='700 12px '+FMONO;
- for(var ci=0;ci<hdr.length;ci++)x.fillText(hdr[ci],M+cols[ci],y);
- y+=16;x.strokeStyle='#999';x.lineWidth=0.8;x.beginPath();x.moveTo(M,y);x.lineTo(W-M,y);x.stroke();y+=6;
- x.font='12px '+FMONO;
- if(SETS.length){
-  var tot=SETS.reduce(function(a,b){return a+b.n},0);
-  SETS.forEach(function(s,i){
-   var row=[String(i+1),String(s.n),(100*s.n/tot).toFixed(0),fmtPlane(s),pad(strikeOf(s.dd),3),(s.k?s.k.toFixed(1):'-'),(s.a95?s.a95.toFixed(1)+' deg':'-')];
-   for(var k2=0;k2<row.length;k2++)x.fillText(row[k2],M+cols[k2],y);
-   y+=18;
-  });
- }else{x.fillText('no set extracted',M,y);y+=18}
- y+=18;
- /* narrative */
- x.font='700 15px '+FSANS;x.fillText('Summary of results',M,y);y+=22;
- var foot=HT-M-46,paras=repText(S1);
- x.font='13px '+FSANS;x.fillStyle='#111';
- for(var pi=0;pi<paras.length&&y<foot-16;pi++){
-  var ln=repWrap(x,paras[pi],W-2*M);
-  for(var li=0;li<ln.length&&y<foot-16;li++){x.fillText(ln[li],M,y);y+=19}
-  y+=8;
- }
- /* appendix: the readings themselves, as many as the page can carry */
- if(y<foot-90&&DATA.length){
-  x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 2  Measurements',M,y);y+=22;
-  x.font='11px '+FMONO;x.fillStyle='#111';
-  var colw=(W-2*M)/4,rows=Math.max(1,Math.floor((foot-16-y)/15)),shown=Math.min(DATA.length,rows*4),ai;
-  for(ai=0;ai<shown;ai++){
-   var ar=DATA[ai],ac=Math.floor(ai/rows),arw=ai%rows;
-   x.fillText(pad(ai+1,3)+' '+fmtRec(ar)+(ar.mode==='line'?' L':'  ')+' '+String(ar.type||'').slice(0,9)+' '+String(ar.site||'-').slice(0,6),M+ac*colw,y+arw*15);
-  }
-  y+=Math.min(rows,shown)*15+4;
-  if(shown<DATA.length){x.font='11px '+FSANS;x.fillStyle='#555';x.fillText('and '+(DATA.length-shown)+' further readings, all of them in the CSV and GeoJSON exports.',M,Math.min(y,foot-14))}
- }
- /* footer */
- x.strokeStyle='#000';x.lineWidth=0.8;x.beginPath();x.moveTo(M,foot);x.lineTo(W-M,foot);x.stroke();
- x.font='10px '+FSANS;x.fillStyle='#555';
- var fl=repWrap(x,'Methods: pole density by the '+DMETHNAME[DMETH]+' estimator (Schmidt 1925, counting circle of 1 per cent of the hemisphere; Kamb 1959, counting circle for an expected count of 3 sigma; Fisher kernel after Vollmer 1995), contoured at 20, 40, 60 and 80 per cent of the maximum; axial k-means with silhouette selection (Rousseeuw 1987); Fisher (1953) spherical statistics for the mean, k and the 95 per cent cone; Terzaghi (1965) weighting when enabled. Generated on the device by GneissTools; the text is assembled from the computed statistics and contains no interpretation.',W-2*M);
- var fy=foot+8;for(var fi=0;fi<fl.length&&fi<3;fi++){x.fillText(fl[fi],M,fy);fy+=12}
- LAYERS.density=keepD;LAYERS.poles=keepP;drawNet();
- return out;
+var keepD=LAYERS.density,keepP=LAYERS.poles;
+LAYERS.density=1;LAYERS.poles=1;
+computeSets();drawNet();drawRose();drawHist();
+var S1=repStats(),out=document.createElement('canvas');
+out.width=A4W;out.height=A4H;
+var x=out.getContext('2d');
+x.fillStyle='#fff';x.fillRect(0,0,A4W,A4H);x.textBaseline='top';
+var y=repHeader(x,'Structural geology report','Orientation survey, pole density and set extraction',[
+['Project',curProj().name],
+['Issued',new Date().toISOString().slice(0,16).replace('T',' ')],
+['Readings','n = '+DATA.length+'   '+S1.np+' planes, '+S1.nl+' lineations'],
+['Stations',String(S1.sites||1)],
+['Projection',(WULFF?'Equal angle, Wulff':'Equal area, Schmidt')+', lower hemisphere'],
+['Declination',DECL+' deg, east positive'],
+['Survey',S1.first+' to '+S1.last],
+['Density',DMETHNAME[DMETH]]]);
+/* 1. plates */
+y=repSection(x,'1','Graphical analysis',y);
+var netC=$('#net'),roseC=$('#rose'),histC=$('#hist');
+var g=a4p(20),lw=Math.round(A4CW*0.53),rw=A4CW-lw-g,lx=A4M,rx=A4M+lw+g,ly=y,ry=y,nh,rh,hh;
+if(netC.width){
+nh=Math.round(lw*netC.height/netC.width);
+x.drawImage(netC,0,0,netC.width,netC.height,lx,ly,lw,nh);
+ly=repCap(x,'Figure 1.   Lower-hemisphere stereogram: poles of '+S1.np+' planes with '+DMETHNAME[DMETH]+' density contours at 20, 40, 60 and 80 per cent of the maximum.',lx,ly+nh+a4p(4),lw);
+}
+if(roseC.width){
+rh=Math.round(rw*roseC.height/roseC.width);
+x.drawImage(roseC,0,0,roseC.width,roseC.height,rx,ry,rw,rh);
+ry=repCap(x,'Figure 2.   Strike rose, 10 degree sectors.',rx,ry+rh+a4p(4),rw)+a4p(7);
+}
+if(histC.width){
+hh=Math.round(rw*histC.height/histC.width);
+x.drawImage(histC,0,0,histC.width,histC.height,rx,ry,rw,hh);
+ry=repCap(x,'Figure 3.   Dip-angle histogram, 10 degree classes.',rx,ry+hh+a4p(4),rw);
+}
+y=Math.max(ly,ry)+a4p(12);
+/* 2. set table */
+y=repSection(x,'2','Extracted sets',y);
+var cols=[0,a4p(44),a4p(86),a4p(150),a4p(250),a4p(320),a4p(392)],hdr=['Set','n','Per cent','Dip / dip dir','Strike','Fisher k','Cone 95 pc'],ci;
+x.font=a4fs(8,'700');x.fillStyle='#6a6a6a';
+for(ci=0;ci<hdr.length;ci++)x.fillText(hdr[ci].toUpperCase(),A4M+cols[ci],y);
+y+=a4p(11);repRule(x,y,0);y+=a4p(6);
+x.font=a4fm(9.5);x.fillStyle='#111';
+if(SETS.length){
+var tot=SETS.reduce(function(a,b){return a+b.n},0);
+SETS.forEach(function(s,i){
+var row=[String(i+1),String(s.n),(100*s.n/tot).toFixed(0),fmtPlane(s),pad(strikeOf(s.dd),3),(s.k?s.k.toFixed(1):'-'),(s.a95?s.a95.toFixed(1)+' deg':'-')],k2;
+for(k2=0;k2<row.length;k2++)x.fillText(row[k2],A4M+cols[k2],y);
+y+=a4p(12);
+});
+}else{x.font=a4fs(9.5);x.fillText('No set could be extracted from this dataset.',A4M,y);y+=a4p(12)}
+y+=a4p(8);
+/* 3. narrative */
+y=repSection(x,'3','Results',y);
+y=repProse(x,repText(S1),y,repFootTop()-a4p(14));
+/* 4. appendix, only when the page still has room */
+if(repFootTop()-y>a4p(56)&&DATA.length){
+y=repSection(x,'4','Appendix: individual readings',y);
+x.font=a4fm(8);x.fillStyle='#111';
+var colw=A4CW/5,lh=a4p(9.6),nr=Math.max(1,Math.floor((repFootTop()-a4p(10)-y)/lh)),shown=Math.min(DATA.length,nr*5),ai,ar;
+for(ai=0;ai<shown;ai++){
+ar=DATA[ai];
+x.fillText(pad(ai+1,3)+'  '+fmtRec(ar)+(ar.mode==='line'?' L':'  ')+'  '+String(ar.site||'-').slice(0,7),A4M+Math.floor(ai/nr)*colw,y+(ai%nr)*lh);
+}
+y+=Math.min(nr,shown)*lh+a4p(3);
+if(shown<DATA.length){x.font=a4fs(8);x.fillStyle='#6a6a6a';x.fillText('and '+(DATA.length-shown)+' further readings, complete in the CSV and GeoJSON exports.',A4M,Math.min(y,repFootTop()-a4p(10)))}
+}
+repFooter(x,'Methods: pole density by the '+DMETHNAME[DMETH]+' estimator (Schmidt 1925, counting circle of 1 per cent of the hemisphere; Kamb 1959, counting circle for an expected count of 3 sigma; Fisher kernel after Vollmer 1995), contoured at 20, 40, 60 and 80 per cent of the maximum; axial k-means with silhouette selection (Rousseeuw 1987); Fisher (1953) spherical statistics for the mean, k and the 95 per cent cone; Terzaghi (1965) weighting when enabled. Assembled on the device from the computed statistics; the wording describes the results and offers no interpretation.');
+LAYERS.density=keepD;LAYERS.poles=keepP;drawNet();
+return out;
 }
 $('#btnRep').onclick=function(){
  if(!DATA.length){toast('Nothing to report');return}
@@ -2755,68 +2872,62 @@ return p;
 }
 /* ---------- one page A4 report, same idiom as the stereonet report ---------- */
 function ptA4(){
-var W=1240,HT=1754,M=64;
 ptCompute();
-var s1=document.createElement('canvas');s1.width=Math.round(1112*1);s1.height=Math.round(430*1);
-var s2=document.createElement('canvas');s2.width=Math.round(540*1);s2.height=Math.round(400*1);
-var s3=document.createElement('canvas');s3.width=Math.round(540*1);s3.height=Math.round(200*1);
+var cw1=A4CW,cw2=Math.floor((A4CW-a4p(16))/2);
+var s1=document.createElement('canvas');s1.width=cw1;s1.height=Math.round(cw1*0.33);
+var s2=document.createElement('canvas');s2.width=cw2;s2.height=Math.round(cw2*0.72);
+var s3=document.createElement('canvas');s3.width=cw2;s3.height=Math.round(cw2*0.40);
 var keep=DPR,kt=document.body.getAttribute('data-theme');DPR=1;
 document.body.setAttribute('data-theme','light');
 ptDrawSemi(s1);ptDrawLog(s2);ptDrawRes(s3);
 document.body.setAttribute('data-theme',kt);DPR=keep;
-var out=document.createElement('canvas');out.width=W;out.height=HT;
+var out=document.createElement('canvas');out.width=A4W;out.height=A4H;
 var x=out.getContext('2d');
-x.fillStyle='#fff';x.fillRect(0,0,W,HT);x.textBaseline='top';
-var y=M,C=PTFIT.cj,G=PTFIT.th,rows=(PT&&PT.rows)||[];
-x.fillStyle='#000';x.font='700 30px '+FSANS;x.fillText('Pumping test report',M,y);y+=40;
-x.font='13px '+FSANS;x.fillStyle='#444';
-x.fillText(curProj().name+' | '+(PT.name||'unnamed test')+' | '+new Date().toISOString().slice(0,16).replace('T',' ')+
-' | Q = '+PT.Q+' m3/d | r = '+PT.r+' m | '+rows.length+' readings'+(PT.b>0?' | b = '+PT.b+' m':''),M,y);
-y+=22;x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.moveTo(M,y);x.lineTo(W-M,y);x.stroke();y+=16;
-x.drawImage(s1,M,y,1112,430);
-x.fillStyle='#444';x.font='11px '+FSANS;
-x.fillText('Fig. 1 Semi-logarithmic plot. Points, observations; red, Cooper-Jacob straight line; green, Theis curve.',M,y+436);
-y+=460;
-x.drawImage(s2,M,y,540,400);
-x.fillText('Fig. 2 Logarithmic plot with the fitted Theis curve.',M,y+404);
-x.drawImage(s3,M+572,y+120,540,200);
-x.fillText('Fig. 3 Residuals of the Theis fit.',M+572,y+324);
-/* estimates table on the right of figure 2 */
-var tx=M+572,ty=y;
-x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 1 Estimates',tx,ty);ty+=22;
-x.font='700 12px '+FMONO;
-var cw=[0,150,300,420];
-['method','T m2/d','S','K m/d'].forEach(function(hd,i){x.fillText(hd,tx+cw[i],ty)});
-ty+=15;x.strokeStyle='#999';x.lineWidth=0.8;x.beginPath();x.moveTo(tx,ty);x.lineTo(tx+540,ty);x.stroke();ty+=6;
-x.font='12px '+FMONO;x.fillStyle='#111';
-if(C){[ 'Cooper-Jacob',C.T.toFixed(1),C.S.toExponential(2),ptK(C.T)?ptK(C.T).toFixed(2):'-'].forEach(function(v,i){x.fillText(v,tx+cw[i],ty)});ty+=17}
-if(G){['Theis',G.T.toFixed(1),G.S.toExponential(2),ptK(G.T)?ptK(G.T).toFixed(2):'-'].forEach(function(v,i){x.fillText(v,tx+cw[i],ty)});ty+=17}
-if(C){x.fillText('ds '+C.ds.toFixed(3)+' m per cycle, t0 '+(C.t0<1?C.t0.toFixed(4):C.t0.toFixed(2))+' min',tx,ty);ty+=17}
-if(G){x.fillText('rms residual '+G.rmse.toFixed(4)+' m, R2 '+G.r2.toFixed(4),tx,ty);ty+=17}
-y+=430;
-var foot=HT-M-46;
-x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Summary of results',M,y);y+=22;
-var paras=ptNarr();
-x.font='13px '+FSANS;x.fillStyle='#111';
-for(var pi=0;pi<paras.length&&y<foot-16;pi++){
-var ln=repWrap(x,paras[pi],W-2*M);
-for(var li=0;li<ln.length&&y<foot-16;li++){x.fillText(ln[li],M,y);y+=19}
-y+=8;
+x.fillStyle='#fff';x.fillRect(0,0,A4W,A4H);x.textBaseline='top';
+var C=PTFIT.cj,G=PTFIT.th,rows=(PT&&PT.rows)||[];
+var y=repHeader(x,'Pumping test report','Constant-rate test analysed by Cooper-Jacob and Theis',[
+['Project',curProj().name],
+['Issued',new Date().toISOString().slice(0,16).replace('T',' ')],
+['Test',PT.name||'unnamed test'],
+['Readings',String(rows.length)],
+['Discharge',PT.Q+' m3 per day'],
+['Distance','r = '+PT.r+' m'],
+['Thickness',PT.b>0?'b = '+PT.b+' m':'not given'],
+['Elapsed',rows.length?rows[0].t+' to '+rows[rows.length-1].t+' min':'-']]);
+/* 1. plates */
+y=repSection(x,'1','Graphical analysis',y);
+x.drawImage(s1,A4M,y,s1.width,s1.height);
+y=repCap(x,'Figure 1.   Semi-logarithmic plot: points, observed drawdown; straight line, Cooper-Jacob late-time fit; curve, Theis solution.',A4M,y+s1.height+a4p(4),A4CW)+a4p(8);
+var rx=A4M+cw2+a4p(16),ly,ry,ty,i;
+x.drawImage(s2,A4M,y,s2.width,s2.height);
+ly=repCap(x,'Figure 2.   Logarithmic plot with the fitted Theis curve.',A4M,y+s2.height+a4p(4),cw2);
+x.drawImage(s3,rx,y,s3.width,s3.height);
+ry=repCap(x,'Figure 3.   Residuals of the Theis fit, metres.',rx,y+s3.height+a4p(4),cw2)+a4p(10);
+/* estimates table, under figure 3 and beside figure 2 */
+ty=ry;
+x.fillStyle='#000';x.font=a4fs(9,'700');x.fillText('TABLE 1.   ESTIMATES',rx,ty);ty+=a4p(13);
+var cw=[0,a4p(100),a4p(172),a4p(240)],hd=['Method','T m2/d','S','K m/d'];
+x.font=a4fs(8,'700');x.fillStyle='#6a6a6a';
+for(i=0;i<hd.length;i++)x.fillText(hd[i].toUpperCase(),rx+cw[i],ty);
+ty+=a4p(11);x.strokeStyle='#bcbcbc';x.lineWidth=0.8;x.beginPath();x.moveTo(rx,ty+0.5);x.lineTo(rx+cw2,ty+0.5);x.stroke();ty+=a4p(6);
+x.font=a4fm(9.5);x.fillStyle='#111';
+if(C){['Cooper-Jacob',C.T.toFixed(1),C.S.toExponential(2),ptK(C.T)?ptK(C.T).toFixed(2):'-'].forEach(function(v,j){x.fillText(v,rx+cw[j],ty)});ty+=a4p(12)}
+if(G){['Theis',G.T.toFixed(1),G.S.toExponential(2),ptK(G.T)?ptK(G.T).toFixed(2):'-'].forEach(function(v,j){x.fillText(v,rx+cw[j],ty)});ty+=a4p(12)}
+x.font=a4fs(8);x.fillStyle='#555';
+if(C){x.fillText('Slope '+C.ds.toFixed(3)+' m per log cycle, intercept t0 '+(C.t0<1?C.t0.toFixed(4):C.t0.toFixed(2))+' min',rx,ty);ty+=a4p(10)}
+if(G){x.fillText('Root mean square residual '+G.rmse.toFixed(4)+' m, R2 '+G.r2.toFixed(4),rx,ty);ty+=a4p(10)}
+y=Math.max(ly,ty)+a4p(12);
+/* 2. narrative */
+y=repSection(x,'2','Results',y);
+y=repProse(x,ptNarr(),y,repFootTop()-a4p(14));
+/* 3. appendix, only when the page still has room */
+if(repFootTop()-y>a4p(50)&&rows.length){
+y=repSection(x,'3','Appendix: time and drawdown',y);
+x.font=a4fm(8);x.fillStyle='#111';
+var colw=A4CW/5,lh=a4p(9.6),nr=Math.max(1,Math.floor((repFootTop()-a4p(10)-y)/lh)),shown=Math.min(rows.length,nr*5),ai;
+for(ai=0;ai<shown;ai++)x.fillText(pad(ai+1,2)+'  '+String(rows[ai].t)+' min  '+rows[ai].s.toFixed(3)+' m',A4M+Math.floor(ai/nr)*colw,y+(ai%nr)*lh);
 }
-if(y<foot-70&&rows.length){
-x.fillStyle='#000';x.font='700 15px '+FSANS;x.fillText('Table 2 Time and drawdown',M,y);y+=20;
-x.font='11px '+FMONO;x.fillStyle='#111';
-var colw=(W-2*M)/5,nr=Math.max(1,Math.floor((foot-14-y)/14)),shown=Math.min(rows.length,nr*5),ai;
-for(ai=0;ai<shown;ai++){
-var ac=Math.floor(ai/nr),ar=ai%nr;
-x.fillText(pad(ai+1,2)+'  '+String(rows[ai].t)+' min  '+rows[ai].s.toFixed(3)+' m',M+ac*colw,y+ar*14);
-}
-y+=Math.min(nr,shown)*14;
-}
-x.strokeStyle='#000';x.lineWidth=0.8;x.beginPath();x.moveTo(M,foot);x.lineTo(W-M,foot);x.stroke();
-x.font='10px '+FSANS;x.fillStyle='#555';
-var fl=repWrap(x,'Methods: Theis (1935) non equilibrium well function W(u) fitted by a pattern search in log T and log S; Cooper and Jacob (1946) semi-logarithmic straight line, T = 2.303 Q / (4 pi ds), S = 2.25 T t0 / r squared. Generated on the device by GneissTools; the text is assembled from the computed statistics and contains no interpretation.',W-2*M);
-var fy=foot+8;for(var fi=0;fi<fl.length&&fi<3;fi++){x.fillText(fl[fi],M,fy);fy+=12}
+repFooter(x,'Methods: Theis (1935) non-equilibrium well function W(u) fitted by a pattern search in log T and log S; Cooper and Jacob (1946) semi-logarithmic straight line, T = 2.303 Q / (4 pi ds) and S = 2.25 T t0 / r squared. Both assume a confined, homogeneous and isotropic aquifer of infinite extent, a fully penetrating well of negligible storage and a constant discharge. Assembled on the device from the computed statistics; the wording describes the results and offers no interpretation.');
 return out;
 }
 $('#ptApply').onclick=function(){ptGrab();ptRefresh();setTimeout(sizeCanvases,20);toast((PT.rows||[]).length+' pairs read')};
@@ -3135,6 +3246,97 @@ e.insertAdjacentHTML('beforeend',
 };
 ptLoad();applyPjShape();
 
+/* ================= 27. home: circular project carousel and the credit line =================
+the track is a native horizontal scroller with mandatory centre snapping, so the
+gesture keeps the inertia and the rubber banding of the platform. the disc nearest
+the centre is scaled up, its neighbours sit slightly back, and when the scroll
+settles the centred project becomes the open one. tapping a disc does the same. */
+var PJSIG='',PJTMR=0,PJHOLD=0;
+function pjBuild(){
+var tr=$('#pjTrack');if(!tr)return;
+tr.innerHTML=PROJ.list.map(function(p){
+return '<button class="pjs" data-slide="'+p.id+'" role="tab" aria-label="'+esc(p.name)+'">'+
+'<span class="disc" data-disc="'+p.id+'"><span style="background:'+pjColor(p.id)+'">'+esc(pjInitials(p.name))+'</span></span>'+
+'<em>'+esc(p.name)+'</em></button>';
+}).join('')+
+'<button class="pjs" data-slide="+" role="tab" aria-label="New project">'+
+'<span class="disc"><span style="background:var(--g3)">+</span></span><em>New project</em></button>';
+PROJ.list.forEach(function(p){
+IDB.get('pi'+p.id).then(function(u){
+if(!u)return;
+var e=tr.querySelector('[data-disc="'+p.id+'"]');
+if(e)e.innerHTML='<img alt="" src="'+u+'">';
+});
+});
+$('[data-slide]',tr).forEach(function(b){
+b.onclick=function(){
+var id=b.getAttribute('data-slide');
+pjCentre(b,1);
+if(id==='+'){go('projects');return}
+if(id!==PROJ.cur)pjOpen(id);else pjSheet(id);
+};
+});
+pjActive();
+}
+function pjCentre(el,smooth){
+var tr=$('#pjTrack');if(!tr||!el)return;
+var to=el.offsetLeft+el.offsetWidth/2-tr.clientWidth/2;
+if(Math.abs(to-tr.scrollLeft)<2)return;
+PJHOLD=1;
+if(tr.scrollTo&&smooth)tr.scrollTo({left:to,behavior:'smooth'});else tr.scrollLeft=to;
+setTimeout(function(){PJHOLD=0},smooth?420:60);
+}
+function pjNearest(){
+var tr=$('#pjTrack');if(!tr)return null;
+var mid=tr.scrollLeft+tr.clientWidth/2,best=null,bd=1e9;
+$('.pjs',tr).forEach(function(b){
+var d=Math.abs(b.offsetLeft+b.offsetWidth/2-mid);
+if(d<bd){bd=d;best=b}
+});
+return best;
+}
+function pjDepth(){
+var tr=$('#pjTrack');if(!tr)return;
+var mid=tr.scrollLeft+tr.clientWidth/2;
+$('.pjs',tr).forEach(function(b){
+var d=Math.abs(b.offsetLeft+b.offsetWidth/2-mid)/(b.offsetWidth+16);
+b.classList.toggle('on',d<0.5);
+b.classList.toggle('near',d>=0.5&&d<1.5);
+});
+}
+function pjActive(){
+var tr=$('#pjTrack');if(!tr)return;
+var on=tr.querySelector('[data-slide="'+PROJ.cur+'"]');
+if(on)pjCentre(on,0);
+pjDepth();
+}
+function pjOpen(id){
+useProject(id);pjDepth();drawProjects();toast('Project: '+curProj().name);
+}
+function pjSettle(){
+if(PJHOLD)return;
+var b=pjNearest();if(!b)return;
+var id=b.getAttribute('data-slide');
+pjCentre(b,1);
+if(id!=='+'&&id!==PROJ.cur)pjOpen(id);
+}
+function pjSync(){
+var tr=$('#pjTrack');if(!tr)return;
+var sig=PROJ.list.map(function(p){return p.id+'~'+p.name}).join('|');
+if(sig!==PJSIG){PJSIG=sig;pjBuild();return}
+pjDepth();
+}
+(function(){
+var tr=$('#pjTrack');if(!tr)return;
+tr.addEventListener('scroll',function(){
+pjDepth();
+clearTimeout(PJTMR);PJTMR=setTimeout(pjSettle,160);
+},{passive:true});
+window.addEventListener('resize',function(){setTimeout(pjActive,90)});
+})();
+var _drawHomeBase=drawHome;
+drawHome=function(){_drawHomeBase();pjSync()};
+
 /* ================= 26. boot ================= */
 setMode('plane');
 applyTheme();
@@ -3155,4 +3357,4 @@ var lastPaint=0;
 })(0);
 </script>
 </body>
-</html>
+ </html>
