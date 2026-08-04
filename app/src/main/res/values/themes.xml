@@ -1,7 +1,7 @@
 <resources>
     <!-- Neutral shell theme. The in-app light/dark switch re-colours the system
          bars at runtime through MainActivity.setSystemBars(). -->
-    <style name="Theme.GeoStruct" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.GneissTools" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">#FFFFFF</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
         <item name="android:windowBackground">#FFFFFF</item>
