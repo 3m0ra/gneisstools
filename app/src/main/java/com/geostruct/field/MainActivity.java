@@ -34,7 +34,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 /**
- * GeoTools shell.
+ * GneissTools shell.
  *
  * The whole application is app/src/main/assets/index.html, served from a real
  * secure origin (https://appassets.androidplatform.net/) through
@@ -155,7 +155,7 @@ public class MainActivity extends Activity {
             Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (cam.resolveActivity(getPackageManager()) == null) return null;
             ContentValues cv = new ContentValues();
-            cv.put(MediaStore.Images.Media.DISPLAY_NAME, "geotools_" + System.currentTimeMillis() + ".jpg");
+            cv.put(MediaStore.Images.Media.DISPLAY_NAME, "gneisstools_" + System.currentTimeMillis() + ".jpg");
             cv.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
             captureUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
             if (captureUri == null) return null;
