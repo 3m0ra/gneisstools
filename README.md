@@ -54,10 +54,12 @@ The app opens on a main menu and never buries a function more than two taps deep
 - **Freeze** captures the reading on the rock so you can read the screen comfortably; **Average 2 s** takes a windowed mean and stores the angular spread as a quality figure.
 - Manual entry, per-station site, structure type and note, optional GPS tagging of every reading.
 - Lower-hemisphere plots: equal-area (Schmidt) or equal-angle (Wulff), poles, great circles, mean planes, small circles.
-- **Kamb counting-circle density contours** at 20 / 40 / 60 / 80 per cent of the maximum, with the counting half-angle printed in the caption.
+- **Kamb counting-circle density** (Kamb, 1959): the counting area is set so that the expected count of a uniform distribution equals three standard deviations, cos(alpha) = 1 - 9 / (9 + n). Contours are drawn at 20 / 40 / 60 / 80 per cent of the maximum and the counting half-angle, the sample size and the distance of the maximum from a uniform count are printed in the caption.
+- Density is filled with the **viridis ramp by default**, with a scale bar in per cent of the maximum. One button in General settings switches the whole density rendering back to hairline black and white.
 - Strike rose and dip histogram, both in the same hairline black-and-white idiom.
 - **Set extraction** by axial k-means, number of sets chosen automatically by silhouette score, with Fisher k, the 95 per cent confidence cone and the intersection line of every set pair.
 - One-tap PNG export of the whole plate on white ground.
+- **One-page A4 report**, laid out automatically: header, stereonet with density, strike rose, dip histogram, a table of the extracted sets and a written summary of the results. The text is assembled on the device from the computed statistics; it describes the results only and offers no interpretation.
 
 ### Tool 02 - Field map (swisstopo GeoCover)
 
@@ -77,7 +79,7 @@ The app opens on a main menu and never buries a function more than two taps deep
 | **CSV** | one row per reading: dip, dip direction, strike, trend, plunge, quality, site, coordinates, note |
 | **GeoJSON** | orientations, structural lines and photo points in WGS 84, ready for QGIS |
 | **JSON** | full backup, re-importable |
-| **PNG** | captioned stereonet plate on white ground |
+| **PNG** | captioned stereonet plate on white ground, or the one-page A4 report |
 | **JPEG** | the photo samples themselves |
 
 Exports are written to the phone's **Downloads** folder through a native bridge.
@@ -105,6 +107,15 @@ Pushing to main also triggers the **Build APK** workflow, which republishes the 
 The app is served from https://appassets.androidplatform.net/ through WebViewAssetLoader. That real secure origin is what makes the accelerometer, magnetometer and geolocation available; the same file opened from file:// is rejected with NotAllowedError.
 
 To change the application, edit **index.html**, raise versionCode in app/build.gradle.kts and rebuild.
+
+## Methods and references
+
+Pole density is counted with the Kamb counting circle, the counting area being set for an expected count of three standard deviations. Sets are extracted by axial k-means, the number of sets being chosen by the silhouette score. Mean orientation, the concentration parameter k and the 95 per cent confidence cone follow Fisher statistics for a sphere. Terzaghi weighting is available for scanline surveys. The same statements and the reference list below are reproduced in the About screen of the application and in the footer of the A4 report.
+
+- Kamb, W. B. (1959) Ice petrofabric observations from Blue Glacier, Washington, in relation to theory and experiment. *Journal of Geophysical Research* 64, 1891-1909.
+- Fisher, R. A. (1953) Dispersion on a sphere. *Proceedings of the Royal Society A* 217, 295-305.
+- Terzaghi, R. D. (1965) Sources of error in joint surveys. *Geotechnique* 15, 287-304.
+- Rousseeuw, P. J. (1987) Silhouettes: a graphical aid to the interpretation and validation of cluster analysis. *Journal of Computational and Applied Mathematics* 20, 53-65.
 
 ## Conventions and sources
 
