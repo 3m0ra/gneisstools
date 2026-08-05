@@ -896,7 +896,7 @@ $('#btnGeoTag').onclick=function(){
 };
 function syncGeoBtn(){
  var b=$('#btnGeoTag');b.classList.toggle('on',!!GEOTAG);
- b.textContent='Attach GPS position to new readings: '+(GEOTAG?(FIX?'on, '+FIX.acc.toFixed(0)+' m':'on, waiting'):'off');
+ b.textContent='Attach GPS position to new readings: '+(GEOTAG?('on, '+gpsLabel()):'off');
 }
 
 function updateReadout(){
@@ -1862,12 +1862,12 @@ function drawMapFurniture(x,miss){
  x.strokeStyle=paper;x.lineWidth=3;x.strokeText(lab,bx+wpx/2,by-8);
  x.fillStyle=ink;x.fillText(lab,bx+wpx/2,by-8);
  $('#mapHud').innerHTML=MAP.lat.toFixed(5)+' N<br>'+MAP.lon.toFixed(5)+' E<br>z'+MAP.z.toFixed(1)+
-  (MAP.geo?'<br>GeoCover on':'<br>GeoCover off')+(miss?'<br>loading '+miss:'');
+  (MAP.geo?'<br>GeoCover on':'<br>GeoCover off')+'<br>GPS '+gpsLabel()+(miss?'<br>loading '+miss:'');
 }
 function mapEnter(){
  setTimeout(sizeMap,30);
  syncRail();
- if(!FIX)startGps();
+ startGps(FIX?0:1);
  hint(MAP.tool);
 }
 function mapLeave(){saveView()}
@@ -1899,7 +1899,8 @@ $('#tPhoto').onclick=function(){pickTool('photo')};
 $('#tCentre').onclick=function(){
  startGps();
  if(FIX){MAP.lon=FIX.lon;MAP.lat=FIX.lat;MAP.z=Math.max(MAP.z,16);queueMap();toast('Centred on the current position, accuracy '+FIX.acc.toFixed(0)+' m')}
- else{MAP.centreOnce=1;toast('Waiting for a GPS fix, the view will centre itself')}
+ else if(GPSST==='denied')toast('Location refused. Allow it for GneissTools in the Android settings.');
+ else{MAP.centreOnce=1;toast('Looking for a GPS fix, the view will centre itself as soon as one arrives')}
 };
 $('#tGps').onclick=function(){MAP.follow=MAP.follow?0:1;startGps();if(MAP.follow&&FIX){MAP.lon=FIX.lon;MAP.lat=FIX.lat;MAP.z=Math.max(MAP.z,16)}syncRail();drawMap()};
 $('#tLayers').onclick=function(){layerSheet()};
@@ -1952,17 +1953,65 @@ $('#zOut').onclick=function(){MAP.z=clamp(MAP.z-1,7,19);saveView();drawMap()};
 })();
 
 /* ---------- geolocation ---------- */
-var gpsW=null;
-function startGps(){
- if(gpsW!=null||!navigator.geolocation){syncGeoBtn();return}
- gpsW=navigator.geolocation.watchPosition(function(p){
-  FIX={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy||99,alt:p.coords.altitude};
-  if(MAP.centreOnce){MAP.centreOnce=0;MAP.lon=FIX.lon;MAP.lat=FIX.lat;MAP.z=Math.max(MAP.z,16);toast('Centred on the current position')}
-  if(MAP.follow){MAP.lon=FIX.lon;MAP.lat=FIX.lat}
-  syncGeoBtn();
-  if(cur()==='map')queueMap();
-  if(cur()==='home')drawHome();
- },function(){toast('No position, check GPS permission')},{enableHighAccuracy:true,maximumAge:4000,timeout:20000});
+var gpsW=null,GPSST='idle',GPSTRY=0,GPSTMR=0;
+function gpsLabel(){
+ if(FIX)return Math.round(FIX.acc)+' m';
+ if(GPSST==='denied')return 'permission refused';
+ if(GPSST==='unavailable')return 'no signal';
+ if(GPSST==='searching')return 'searching'+(GPSTRY?' ('+GPSTRY+')':'');
+ return 'off';
+}
+function gpsState(st){
+ if(st)GPSST=st;
+ syncGeoBtn();
+ if(cur()==='map'){try{syncRail()}catch(e){}queueMap()}
+ if(cur()==='home')drawHome();
+}
+function gpsStop(){
+ if(gpsW!=null&&navigator.geolocation){try{navigator.geolocation.clearWatch(gpsW)}catch(e){}}
+ gpsW=null;clearTimeout(GPSTMR);GPSTMR=0;
+}
+function gpsFix(p){
+ FIX={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy||99,alt:p.coords.altitude};
+ GPSTRY=0;
+ if(MAP.centreOnce){MAP.centreOnce=0;MAP.lon=FIX.lon;MAP.lat=FIX.lat;MAP.z=Math.max(MAP.z,16);toast('Centred on the current position, accuracy '+FIX.acc.toFixed(0)+' m')}
+ if(MAP.follow){MAP.lon=FIX.lon;MAP.lat=FIX.lat}
+ gpsState('fix');
+}
+function gpsErr(e){
+ var c=e&&e.code;
+ if(c===1){gpsStop();gpsState('denied');toast('Location refused. Allow it for GneissTools in the Android settings, then tap the position button again.');return}
+ gpsState(c===2?'unavailable':'searching');
+ gpsRetry();
+}
+/* a watch that has failed stays dead, so it is thrown away and started again */
+function gpsRetry(){
+ if(FIX||GPSST==='denied'||GPSTMR||GPSTRY>10)return;
+ GPSTMR=setTimeout(function(){GPSTMR=0;GPSTRY++;gpsStop();startGps(1)},5000);
+}
+function startGps(force){
+ if(!navigator.geolocation){gpsState('unavailable');return}
+ if(GPSST==='denied'&&!force){syncGeoBtn();return}
+ if(gpsW!=null&&!force){syncGeoBtn();return}
+ gpsStop();
+ if(GPSST!=='denied')GPSST=FIX?'fix':'searching';
+ /* a cached coarse position answers in a second and gives the map something
+    to show while the satellites are still being acquired */
+ try{navigator.geolocation.getCurrentPosition(gpsFix,function(){},{enableHighAccuracy:false,timeout:10000,maximumAge:120000})}catch(e){}
+ try{gpsW=navigator.geolocation.watchPosition(gpsFix,gpsErr,{enableHighAccuracy:true,maximumAge:2000,timeout:45000})}
+ catch(e){gpsW=null;gpsState('unavailable');gpsRetry();return}
+ gpsState();
+}
+/* the android host grants the runtime permission after the page is already up */
+window.gpsPermissionGranted=function(){if(FIX&&GPSST!=='denied')return;GPSST='searching';GPSTRY=0;gpsStop();startGps(1)};
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&!FIX)startGps(1)});
+if(navigator.permissions&&navigator.permissions.query){
+ try{navigator.permissions.query({name:'geolocation'}).then(function(st){
+  st.onchange=function(){
+   if(st.state==='granted'){GPSST='searching';GPSTRY=0;startGps(1)}
+   else if(st.state==='denied'){gpsStop();gpsState('denied')}
+  };
+ }).catch(function(){})}catch(e){}
 }
 
 /* ---------- overlay symbology, strictly black and white ---------- */
@@ -4148,7 +4197,7 @@ function pzAddManual(lon,lat){
 $('#pzAdd').onclick=function(){pzAddManual(parseFloat($('#pzLon').value),parseFloat($('#pzLat').value))};
 $('#pzHere').onclick=function(){
   startGps();
-  if(!FIX){toast('No GPS fix yet');return}
+  if(!FIX){toast('No GPS fix yet, GPS '+gpsLabel());return}
   $('#pzLat').value=FIX.lat.toFixed(6);$('#pzLon').value=FIX.lon.toFixed(6);
   toast('Position taken, accuracy '+FIX.acc.toFixed(0)+' m');
 };
