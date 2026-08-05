@@ -60,6 +60,8 @@ public class MainActivity extends Activity {
     private WebView web;
     private ValueCallback<Uri[]> filePicker;
     private Uri captureUri;
+    private GeolocationPermissions.Callback geoCb;
+    private String geoOrigin;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -104,7 +106,18 @@ public class MainActivity extends Activity {
         web.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback cb) {
-                cb.invoke(origin, true, false);
+                if (hasLocation()) {
+                    cb.invoke(origin, true, false);
+                    return;
+                }
+                /* The OS permission is still missing, usually because the page asked
+                   for a position while the system dialog was on screen. Hold the web
+                   callback, ask for the permission and answer once it is decided. */
+                geoCb = cb;
+                geoOrigin = origin;
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOCATION);
             }
 
             @Override
@@ -131,7 +144,7 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new Bridge(), "AndroidExport");
         setContentView(web);
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!hasLocation()) {
             requestPermissions(new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOCATION);
@@ -191,6 +204,41 @@ public class MainActivity extends Activity {
             return;
         }
         super.onActivityResult(req, res, data);
+    }
+
+    private boolean hasLocation() {
+        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** The page starts its watch while the permission dialog is still up, so it
+     *  has to be told when the permission finally arrives. */
+    private void tellWebGpsReady() {
+        if (web == null) return;
+        web.evaluateJavascript("window.gpsPermissionGranted && window.gpsPermissionGranted()", null);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        if (req == REQ_LOCATION) {
+            boolean ok = false;
+            for (int r : res) if (r == PackageManager.PERMISSION_GRANTED) ok = true;
+            if (geoCb != null) {
+                geoCb.invoke(geoOrigin, ok, false);
+                geoCb = null;
+                geoOrigin = null;
+            }
+            if (ok) tellWebGpsReady();
+            else toast("Location refused: the field map cannot show your position");
+            return;
+        }
+        super.onRequestPermissionsResult(req, perms, res);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (hasLocation()) tellWebGpsReady();
     }
 
     /** Hardware back button is routed to the web router first. */
